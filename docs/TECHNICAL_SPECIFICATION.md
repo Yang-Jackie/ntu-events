@@ -3,7 +3,7 @@
 
 **Document status:** Initial technical specification  
 **Primary audience:** Project owner, contributors, reviewers, and AI coding assistants  
-**Related document:** `BUSINESS_REQUIREMENTS.md`
+**Related documents:** `BUSINESS_REQUIREMENTS.md`, `ARCHITECTURE.md`
 
 ---
 
@@ -260,14 +260,19 @@ Every stage should produce an inspectable result or status.
 
 A monorepo is recommended.
 
+The detailed code-ownership and dependency rules are defined in `ARCHITECTURE.md`.
+
 ```text
 ntu-events/
 ├── apps/
 │   ├── web/                     # Next.js public frontend
 │   └── backend/                 # Django, DRF, admin, workers
+├── packages/
+│   └── api-client/              # Generated TypeScript OpenAPI client
 ├── docs/
 │   ├── BUSINESS_REQUIREMENTS.md
-│   └── TECHNICAL_SPECIFICATION.md
+│   ├── TECHNICAL_SPECIFICATION.md
+│   └── ARCHITECTURE.md
 ├── scripts/                     # Development and maintenance scripts
 ├── fixtures/                    # Saved source and parser test fixtures
 ├── compose.yaml                 # Local development services
