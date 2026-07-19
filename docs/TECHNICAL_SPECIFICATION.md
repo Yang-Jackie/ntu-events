@@ -3,7 +3,7 @@
 
 **Document status:** Initial technical specification  
 **Primary audience:** Project owner, contributors, reviewers, and AI coding assistants  
-**Related documents:** `BUSINESS_REQUIREMENTS.md`, `ARCHITECTURE.md`
+**Related documents:** `BUSINESS_REQUIREMENTS.md`, `ARCHITECTURE.md`, `IMPLEMENTATION_PLAN.md`
 
 ---
 

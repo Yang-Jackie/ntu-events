@@ -1,7 +1,7 @@
 # NTU Events Architecture
 
 **Document status:** Initial architecture direction  
-**Related documents:** `TECHNICAL_SPECIFICATION.md`, `HIGH_LEVEL_TECHNICAL_NOTES.md`
+**Related documents:** `TECHNICAL_SPECIFICATION.md`, `IMPLEMENTATION_PLAN.md`, `HIGH_LEVEL_TECHNICAL_NOTES.md`
 
 ## 1. Purpose
 
