@@ -14,7 +14,7 @@ Its purpose is to aggregate fragmented event information from multiple public so
 
 The platform is primarily a discovery and aggregation product. It is not initially an event registration system, organizer-management platform, social network, or recommendation engine.
 
-It will initially be developed independently by a solo developer or small team as a portfolio project with realistic product and engineering standards. The longer-term vision is to release it as a real product for NTU students.
+The project will first run as an owner-only personal product using the complete ingestion and discovery workflow. Public release for NTU students follows only after sustained use shows useful coverage and reliable data. The same architecture should support both phases; public hosting and operations are deferred, not designed away.
 
 The platform will be free, with no immediate commercial model.
 
@@ -44,9 +44,9 @@ The product hypothesis is that displaying events spatially on a campus map will 
 
 ---
 
-## 3. Target Users
+## 3. Target Users and Release Sequence
 
-The initial target users are NTU undergraduate students.
+The initial user and operator is the project owner. The target users for the first public release remain NTU undergraduate students.
 
 The product may later expand to include:
 
@@ -172,15 +172,15 @@ Possible future features include timetable integration, calendar integration, pe
 
 ---
 
-## 8. MVP Scope
+## 8. Personal-Use MVP Scope
 
-The initial version should include:
+The initial usable version is an owner-only product and should include:
 
 - Physical NTU events only
 - Publicly accessible sources only
 - NTU official event sources
 - Selected student organization sources
-- Automated event information extraction
+- LLM-first extraction, including constrained browser exploration when interaction is required
 - Event normalization into a common structure
 - Building-level map display
 - Precise room information in event details where available
@@ -195,10 +195,12 @@ The initial version should include:
 - Links to original sources
 - External registration redirects
 - Storage of past events as a historical archive
-- Guest access without mandatory user accounts
+- Owner access in a local or otherwise non-public environment
 - An internal review capability for maintaining data quality
 
 Student organization sources may include public Instagram pages. Access to social-platform content must be treated as a separate product, legal, and technical concern from extracting event information after content has been obtained.
+
+Public hosting, accounts, multi-user behavior, and production operations are not required yet. Data boundaries, validation, provenance, and the API contract must remain suitable for later release.
 
 ---
 
@@ -338,11 +340,17 @@ Coverage and reliability must be improved together. A large but inaccurate index
 
 ---
 
-## 14. Success Criteria
+## 14. Success Criteria and Public-Release Gate
 
-Initial success should be evaluated through a combination of adoption, engagement, coverage, and data quality.
+The personal-use phase succeeds when repeated real use demonstrates:
 
-Relevant measures include:
+- Useful coverage, accurate dates and locations, and acceptably few duplicates or stale events
+- Safe reruns and a manageable, traceable review workflow
+- Continued use of the map, list, search, and filters across multiple discovery cycles
+
+Public deployment requires owner-approved thresholds for observation time, coverage, extraction and location accuracy, duplicates, stale events, and unresolved reviews.
+
+After public release, success should additionally be evaluated through adoption and engagement measures such as:
 
 - Number of active users
 - Number of returning users
@@ -359,7 +367,7 @@ Relevant measures include:
 - Number of outdated records
 - Number of user-reported corrections when reporting is introduced
 
-Raw event count alone should not be treated as the main success measure.
+Raw event count alone should not be treated as the main success measure in either phase.
 
 ---
 
@@ -387,11 +395,13 @@ The initial product should remain narrowly focused on proving that a comprehensi
 
 ---
 
-## 16. Current Product Decisions
+## 16. Current Direction and Open Calls
+
+### Agreed
 
 The following decisions are considered agreed for the initial direction:
 
-- The primary users are NTU undergraduate students.
+- The first release is owner-only; public release for NTU undergraduates requires an explicit usefulness and reliability gate.
 - The platform is map-first.
 - The platform is a discovery product rather than an organizer platform.
 - The initial scope contains physical events only.
@@ -405,3 +415,10 @@ The following decisions are considered agreed for the initial direction:
 - Exact room information is shown in event details.
 - Historical events remain stored and searchable.
 - The project is a realistic portfolio system with a path toward becoming a real student product.
+
+### Owner calls when they become blocking
+
+- Whether the personal product must remain local-only or be privately reachable from multiple devices.
+- What measurable thresholds and observation period define “good enough” for public deployment.
+- Whether the first public release is an open launch, a small invited pilot, or a staged rollout.
+- Which additional source types are required before the product has sufficient coverage for public use.

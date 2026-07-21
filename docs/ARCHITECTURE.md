@@ -15,7 +15,7 @@ The project uses a monorepo with separate backend, frontend, and shared-package 
 ntu-events/
 ├── apps/
 │   ├── backend/                 # Django domain, API, admin, ingestion and workers
-│   └── web/                     # Next.js public application
+│   └── web/                     # Next.js discovery application; personal first, public later
 ├── packages/
 │   └── api-client/              # Generated TypeScript API client
 ├── fixtures/                    # Shared, version-controlled test datasets
@@ -38,6 +38,8 @@ The repository may add root configuration files for the selected Python and Java
 
 ## 3. Application Boundaries
 
+Personal-first delivery changes access, not architecture: the owner initially runs the complete system privately, and public deployment reuses it after a readiness gate.
+
 ### Backend
 
 The Django backend owns:
@@ -47,7 +49,7 @@ The Django backend owns:
 - Source registration and crawl history
 - Ingestion and canonicalization workflows
 - Publication and manual-review decisions
-- Public API behavior
+- Event API behavior for personal and later public access
 - Internal administration
 
 Background workers run separately when needed but use the backend's application services and models. They are not separate business services.
@@ -56,7 +58,7 @@ Background workers run separately when needed but use the backend's application 
 
 The Next.js application owns:
 
-- Page rendering and public navigation
+- Page rendering and discovery navigation
 - Map, list and detail interfaces
 - Search and filter interaction
 - URL state and browser behavior
@@ -153,14 +155,15 @@ Its expected internal capabilities are:
 
 ```text
 ingestion/
-├── adapters/                   # Source-specific retrieval and document isolation
-├── extraction/                 # Deterministic and model-assisted extraction
+├── adapters/                   # Small source-specific retrieval configuration and support
+├── browser_agent/              # Constrained LLM-directed exploration and action traces
+├── extraction/                 # LLM-first structured event extraction
 ├── validation/                 # Candidate schema and deterministic checks
 ├── matching/                   # Duplicate and venue-match analysis
 └── workflows/                  # End-to-end application orchestration
 ```
 
-Adapters may discover and normalize raw documents but must not directly publish events, resolve canonical identity, or silently correct extracted fields. Workers and management commands should enter through ingestion workflows rather than reproduce the pipeline themselves.
+Adapters and browser agents collect raw documents through allowlisted, read-oriented tools and retain action traces. The LLM owns semantic extraction; deterministic components own permissions, capture, validation, normalization, persistence, matching safeguards, and publication. Agents cannot canonicalize, publish, or silently correct data, and rigid source parsers require measured justification. Workers and commands must invoke shared ingestion workflows.
 
 Whether every capability becomes a folder is left to implementation scale.
 
@@ -175,7 +178,7 @@ Root `fixtures/` contains small, reviewed and version-controlled datasets shared
 
 Adapter-specific fixtures may instead live beside that adapter's tests. Ordinary tests should use saved or mocked model outputs rather than make live language-model calls.
 
-`storage/` is different: it contains runtime raw documents during local development and is ignored by Git. Production raw-content storage will use the same storage interface with an implementation selected later.
+`storage/` is different: it contains runtime raw documents during local personal use and is ignored by Git. A public deployment will use the same storage interface with a production implementation selected during the public-readiness phase.
 
 ## 8. Dependency Direction
 
@@ -186,7 +189,7 @@ Web application
       ↓
 API client package
       ↓
-Backend public API
+Backend event API
       ↓
 Application services and selectors
       ↓
@@ -200,6 +203,7 @@ Within the backend:
 - API views, admin actions, jobs and commands invoke shared application services.
 - Domain code must not depend on API views, worker entry points, or frontend code.
 - Source adapters must not own canonical-event or publication rules.
+- Browser agents must not escape approved domains or perform authentication, submission, registration, purchase, CAPTCHA bypass, or other external state changes.
 - Manual-review decisions must remain distinguishable from automated extraction results.
 - Python and TypeScript do not share domain source files; they share the OpenAPI contract.
 

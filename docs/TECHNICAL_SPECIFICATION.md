@@ -23,7 +23,7 @@ It translates the product requirements into:
 - Validation and publication rules
 - Testing and development standards
 
-Deployment providers, infrastructure pricing, and production hosting decisions are intentionally excluded unless they affect how the software must be designed.
+The first usable release is operated by the project owner for personal use. Deployment providers, infrastructure pricing, and production hosting decisions are intentionally deferred until the public-readiness gate unless they affect how the software must be designed.
 
 ---
 
@@ -38,7 +38,7 @@ The system should:
 5. Detect duplicate representations of the same event.
 6. Maintain one canonical representation of each event.
 7. Support building-level geographic display and location-based queries.
-8. Expose a stable API for the public frontend.
+8. Expose a stable API for the personal-use frontend and later public frontend.
 9. Provide an internal interface for reviewing and correcting data.
 10. Remain maintainable by a solo developer or small team.
 11. Support gradual expansion without premature microservice complexity.
@@ -63,9 +63,9 @@ These processes should share the same domain models and application services whe
 
 ### 3.2 One canonical data model
 
-The normalized database is the canonical source for all public event information.
+The normalized database is the canonical source for all event information displayed by the product, whether used personally or publicly.
 
-Crawlers and language models produce candidates. They do not directly determine the public event state.
+Crawlers and language models produce candidates. They do not directly determine canonical or visible event state.
 
 ### 3.3 Raw data must be preserved
 
@@ -73,9 +73,11 @@ The system must preserve enough source content to explain how a normalized event
 
 Normalized event records must never be the only retained representation of a source.
 
-### 3.4 Deterministic rules around probabilistic extraction
+### 3.4 LLM-first interpretation with deterministic controls
 
-Language models may assist with extraction and classification, but publication decisions must also use deterministic validation rules.
+Language models are the primary mechanism for interpreting source pages and extracting event candidates. The system should avoid making brittle, source-specific field parsers the main extraction path.
+
+Deterministic code still owns browser-tool permissions, raw capture, schema validation, normalization, persistence, duplicate safeguards, and publication rules. The model proposes observations, navigation actions, and structured candidates; it does not directly determine canonical or public state.
 
 ### 3.5 Correctness before extreme scale
 
@@ -113,7 +115,7 @@ These may be reconsidered only when a demonstrated requirement appears.
 
 The initial application consists of the following components:
 
-### 4.1 Public web application
+### 4.1 Web application
 
 A Next.js application is responsible for:
 
@@ -161,7 +163,7 @@ It should support:
 - Controlling publication status
 - Managing buildings, venues, aliases, organizers, categories, and sources
 
-The admin interface is not part of the public product.
+The admin interface is separate from the discovery experience in both personal and public modes.
 
 ### 4.4 Background worker processes
 
@@ -274,7 +276,7 @@ ntu-events/
 │   ├── TECHNICAL_SPECIFICATION.md
 │   └── ARCHITECTURE.md
 ├── scripts/                     # Development and maintenance scripts
-├── fixtures/                    # Saved source and parser test fixtures
+├── fixtures/                    # Saved source, agent-trace and extraction test fixtures
 ├── compose.yaml                 # Local development services
 ├── .env.example
 └── README.md
@@ -660,15 +662,28 @@ It is not responsible for:
 - Resolving duplicates
 - Silently correcting extracted information
 
-Adapter implementations may include:
+Retrieval implementations may include:
 
 - Static HTML adapters
 - Structured feed adapters
-- Browser automation adapters
+- LLM-directed browser agents
 - Source-specific page adapters
 - Future authenticated connectors
 
-Each adapter should have saved fixtures and parser tests.
+Prefer small source configuration around a shared LLM-first workflow. Add a dedicated parser only when measured reliability or cost justifies it.
+
+### 9.1 Agentic browser retrieval
+
+When direct fetch is insufficient, an LLM may open allowlisted URLs, inspect text, controls, DOM/accessibility summaries and screenshots, click navigation or content-reveal controls, scroll, wait, go back, and capture content.
+
+Every run must:
+
+- Restrict domains, actions, steps, time, tokens, retries, and depth.
+- Prohibit authentication, registration, submissions, uploads, purchases, CAPTCHA bypass, and other external state changes.
+- Treat page content as untrusted; retain URLs, observations, actions, timestamps, model/prompt versions, outputs, and failures.
+- On ambiguity, stop for review. The agent may collect documents but never canonicalize, deduplicate, correct, or publish events.
+
+Test each workflow with saved fixtures, traces, or controlled browser scenarios.
 
 ---
 
@@ -696,7 +711,7 @@ The LLM should receive focused event-relevant content rather than an entire unfi
 
 ## 11. Language-Model Extraction
 
-The extraction layer should produce structured output validated against a strict schema.
+The extraction layer interprets preserved observations and returns strict structured output. Stable source metadata may supplement it; replacing it with source-specific parsing requires measured justification.
 
 Conceptual output:
 
@@ -1442,7 +1457,7 @@ Recommended practices:
 - Keep serializers focused on API representation and validation.
 - Version extraction prompts.
 - Preserve reproducible fixtures for bugs.
-- Add tests when fixing parser or extraction failures.
+- Add tests when fixing retrieval-agent or extraction failures.
 - Use feature flags or configuration for incomplete sources.
 
 Example application service:
@@ -1479,13 +1494,14 @@ This service may coordinate:
 
 - Implement one NTU official source adapter
 - Store raw documents
-- Add deterministic extraction where possible
-- Add language-model extraction
+- Add LLM-first structured extraction
+- Add constrained agentic browser exploration when the source requires interaction
+- Preserve browser action traces and model inputs and outputs
 - Validate candidates
 - Create canonical events
 - Review results through admin
 
-### Phase 3: Public event API
+### Phase 3: Event API
 
 - Implement event list and detail endpoints
 - Add date, category, audience, and building filters
@@ -1493,7 +1509,7 @@ This service may coordinate:
 - Add map-bound queries
 - Document API through OpenAPI
 
-### Phase 4: Map-first frontend
+### Phase 4: Personal map-first frontend
 
 - Build campus map
 - Add synchronized event list
@@ -1514,9 +1530,15 @@ This service may coordinate:
 ### Phase 6: Additional sources
 
 - Add selected faculty and student organization sources
-- Expand parser fixtures
+- Expand retrieval-agent and extraction fixtures
 - Improve extraction evaluation
 - Refine publication thresholds
+
+### Phase 7: Public readiness and deployment
+
+- Approve evidence thresholds and an invited, staged, or open rollout
+- Verify security, privacy, accessibility, backups, recovery, monitoring, rate limits, and operational runbooks
+- Configure hosting and secrets, then deploy only after owner approval
 
 ---
 
@@ -1550,7 +1572,8 @@ The following should not block the MVP:
 The following remain intentionally undecided:
 
 - Exact map renderer and basemap provider
-- Exact language-model provider
+- LLM provider, browser-agent runtime, and model/tool APIs
+- Acceptable extraction accuracy, navigation success, latency, and cost
 - Exact task queue implementation
 - Exact scheduler implementation
 - Raw-content storage implementation beyond the storage abstraction
@@ -1561,6 +1584,9 @@ The following remain intentionally undecided:
 - Social-platform access strategy
 - Whether poster OCR is required in the first source set
 - Exact public event identifier format
+- Whether personal access is local-only or privately reachable from multiple devices
+- Public-release evidence thresholds, observation period, and rollout type
+- Exact production hosting and deployment topology
 
 These should be decided using working prototypes and real source samples rather than abstract preference.
 
@@ -1576,11 +1602,11 @@ The first complete vertical slice is done when:
 4. Invalid candidates are rejected or held for review.
 5. Valid candidates become canonical events.
 6. A venue is resolved at building level.
-7. The event appears through the public API.
-8. The Next.js frontend displays it on the map and in the synchronized list.
+7. The event appears through the versioned event API.
+8. The local Next.js frontend displays it to the owner on the map and in the synchronized list.
 9. The event detail page shows the precise source-provided room text.
 10. The user can open the original source or registration page.
 11. The internal admin can inspect and correct the event.
 12. Automated tests cover the critical ingestion and retrieval path.
 
-This vertical slice should be completed before expanding to many source types.
+This vertical slice should be completed before expanding to many source types. It completes the first personal-use path; it does not by itself satisfy the public-readiness gate.
