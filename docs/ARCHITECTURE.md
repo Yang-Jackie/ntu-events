@@ -155,15 +155,15 @@ Its expected internal capabilities are:
 
 ```text
 ingestion/
-├── adapters/                   # Small source-specific retrieval configuration and support
+├── adapters/                   # Source-specific retrieval and provider integration
 ├── browser_agent/              # Constrained LLM-directed exploration and action traces
-├── extraction/                 # LLM-first structured event extraction
+├── extraction/                 # Deterministic mapping and LLM-first unstructured extraction
 ├── validation/                 # Candidate schema and deterministic checks
 ├── matching/                   # Duplicate and venue-match analysis
 └── workflows/                  # End-to-end application orchestration
 ```
 
-Adapters and browser agents collect raw documents through allowlisted, read-oriented tools and retain action traces. The LLM owns semantic extraction; deterministic components own permissions, capture, validation, normalization, persistence, matching safeguards, and publication. Agents cannot canonicalize, publish, or silently correct data, and rigid source parsers require measured justification. Workers and commands must invoke shared ingestion workflows.
+Adapters collect raw source material through official APIs, feeds, direct fetches, approved managed retrieval providers, or allowlisted read-oriented browser tools. They retain provider metadata and action traces where applicable. Reliable structured inputs may be mapped deterministically; the LLM owns semantic interpretation of unstructured content. Deterministic components own permissions, capture, schema validation, normalization, persistence, matching safeguards, and publication. Providers and agents cannot canonicalize, publish, or silently correct data, and rigid page parsers require measured justification. Workers and commands must invoke shared ingestion workflows.
 
 Whether every capability becomes a folder is left to implementation scale.
 
@@ -202,7 +202,7 @@ Within the backend:
 
 - API views, admin actions, jobs and commands invoke shared application services.
 - Domain code must not depend on API views, worker entry points, or frontend code.
-- Source adapters must not own canonical-event or publication rules.
+- Source and retrieval-provider adapters must not own canonical-event or publication rules.
 - Browser agents must not escape approved domains or perform authentication, submission, registration, purchase, CAPTCHA bypass, or other external state changes.
 - Manual-review decisions must remain distinguishable from automated extraction results.
 - Python and TypeScript do not share domain source files; they share the OpenAPI contract.

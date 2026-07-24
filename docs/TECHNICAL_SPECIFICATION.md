@@ -33,7 +33,7 @@ The system should:
 
 1. Aggregate physical NTU event information from heterogeneous public sources.
 2. Preserve raw source material for auditing and reprocessing.
-3. Extract structured event data from unstructured content.
+3. Convert structured and unstructured source material into a common event-candidate contract.
 4. Normalize dates, organizers, categories, and NTU locations.
 5. Detect duplicate representations of the same event.
 6. Maintain one canonical representation of each event.
@@ -65,7 +65,7 @@ These processes should share the same domain models and application services whe
 
 The normalized database is the canonical source for all event information displayed by the product, whether used personally or publicly.
 
-Crawlers and language models produce candidates. They do not directly determine canonical or visible event state.
+Retrieval providers, adapters, deterministic mappers, and language models produce candidates. They do not directly determine canonical or visible event state.
 
 ### 3.3 Raw data must be preserved
 
@@ -73,11 +73,11 @@ The system must preserve enough source content to explain how a normalized event
 
 Normalized event records must never be the only retained representation of a source.
 
-### 3.4 LLM-first interpretation with deterministic controls
+### 3.4 Source-appropriate interpretation with deterministic controls
 
-Language models are the primary mechanism for interpreting source pages and extracting event candidates. The system should avoid making brittle, source-specific field parsers the main extraction path.
+Use the least complex reliable interpretation path for each source. Prefer structured APIs, feeds, exports, embedded metadata, or managed structured results when they provide the required facts reliably. Use language models as the primary interpretation mechanism for genuinely unstructured pages, documents, images, and mixed content. The system should avoid making brittle, source-specific field parsers the default for unstructured content.
 
-Deterministic code still owns browser-tool permissions, raw capture, schema validation, normalization, persistence, duplicate safeguards, and publication rules. The model proposes observations, navigation actions, and structured candidates; it does not directly determine canonical or public state.
+Deterministic code owns retrieval permissions, raw capture, schema validation, normalization, persistence, duplicate safeguards, and publication rules. Retrieval providers and models may return observations, action traces, structured records, or candidates; neither directly determines canonical or public state.
 
 ### 3.5 Correctness before extreme scale
 
@@ -666,11 +666,15 @@ Retrieval implementations may include:
 
 - Static HTML adapters
 - Structured feed adapters
+- Official API and export adapters
+- Managed scraping or browser-automation provider adapters
 - LLM-directed browser agents
 - Source-specific page adapters
 - Future authenticated connectors
 
-Prefer small source configuration around a shared LLM-first workflow. Add a dedicated parser only when measured reliability or cost justifies it.
+Prefer small source configuration around shared retrieval and candidate-processing workflows. Use deterministic mapping for reliable structured inputs and LLM-first interpretation for unstructured inputs. Add dedicated page parsers only when measured reliability or cost justifies them.
+
+Third-party retrieval services are replaceable infrastructure behind adapter interfaces. For each run, preserve enough provider response data and metadata to audit and reprocess it, including the source URL, retrieval method, provider and tool identifier, run identifier where available, timestamps, configuration or version, and failures. Treat provider output as untrusted input. Provider credentials remain outside source records, and providers must not own canonicalization, deduplication, manual-review, or publication decisions.
 
 ### 9.1 Agentic browser retrieval
 
@@ -687,9 +691,9 @@ Test each workflow with saved fixtures, traces, or controlled browser scenarios.
 
 ---
 
-## 10. Raw Content Processing
+## 10. Raw Source Processing
 
-Before language-model extraction, raw content may need preprocessing.
+Before deterministic mapping or language-model extraction, raw source material may need preprocessing.
 
 Possible steps include:
 
@@ -705,13 +709,13 @@ Possible steps include:
 
 Preprocessing should be deterministic where possible.
 
-The LLM should receive focused event-relevant content rather than an entire unfiltered webpage.
+When an LLM is used, it should receive focused event-relevant content rather than an entire unfiltered payload or webpage.
 
 ---
 
-## 11. Language-Model Extraction
+## 11. Candidate Interpretation and Extraction
 
-The extraction layer interprets preserved observations and returns strict structured output. Stable source metadata may supplement it; replacing it with source-specific parsing requires measured justification.
+The interpretation layer converts preserved source observations into strict structured output. Reliable structured fields may be mapped deterministically. Unstructured or ambiguous content should use LLM-first extraction, with stable source metadata supplied as supporting evidence. Dedicated page parsing requires measured justification.
 
 Conceptual output:
 
@@ -753,7 +757,7 @@ Requirements:
 - Retry limits
 - Cost and token tracking where available
 
-The exact model provider should remain replaceable.
+The exact model and retrieval providers should remain replaceable.
 
 ---
 
@@ -1404,7 +1408,7 @@ Development should include:
 - Example organizers
 - Example categories
 - Representative event records
-- Saved source HTML fixtures
+- Saved source fixtures in representative formats such as HTML, JSON, feed records, text, or provider results
 - Example extraction outputs
 - Duplicate-event test cases
 
@@ -1494,9 +1498,9 @@ This service may coordinate:
 
 - Implement one NTU official source adapter
 - Store raw documents
-- Add LLM-first structured extraction
-- Add constrained agentic browser exploration when the source requires interaction
-- Preserve browser action traces and model inputs and outputs
+- Add source-appropriate deterministic mapping or LLM-first unstructured extraction
+- Add direct, managed-provider, or constrained agentic browser retrieval as the source requires
+- Preserve retrieval provenance and, where applicable, provider metadata, browser action traces, and model inputs and outputs
 - Validate candidates
 - Create canonical events
 - Review results through admin
@@ -1572,7 +1576,7 @@ The following should not block the MVP:
 The following remain intentionally undecided:
 
 - Exact map renderer and basemap provider
-- LLM provider, browser-agent runtime, and model/tool APIs
+- LLM provider, retrieval providers, browser-agent runtime, and model/tool APIs
 - Acceptable extraction accuracy, navigation success, latency, and cost
 - Exact task queue implementation
 - Exact scheduler implementation

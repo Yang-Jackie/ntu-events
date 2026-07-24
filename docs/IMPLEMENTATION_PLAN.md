@@ -19,7 +19,7 @@ Re-running must not create duplicates or overwrite manual corrections. This is t
 | 0. Foundation decisions | First source, representative samples, initial identity/time/taxonomy/venue rules | Blocking domain assumptions are documented well enough to scaffold | In progress |
 | 1. Repository scaffold | Backend, web, API-client package, local database and basic checks | Both applications start and automated checks run | Not started |
 | 2. Domain foundation | Sources, raw documents, candidates, events, occurrences, venues and taxonomy | Initial migrations work and records are reviewable in Django Admin | Not started |
-| 3. First-source ingestion | One LLM-first source workflow, constrained browser exploration where needed, raw storage, traces, fixtures and extraction contract | The source can be explored and processed repeatedly and its raw content and agent trace are retained | Not started |
+| 3. First-source ingestion | One source-appropriate workflow using structured mapping or LLM-first unstructured extraction, constrained browser exploration where needed, raw storage, provenance, fixtures and a candidate contract | The source can be retrieved and processed repeatedly, and its raw material plus applicable provider metadata or action traces are retained | Not started |
 | 4. Processing workflow | Extraction, validation, venue resolution, canonicalization and review | A valid candidate becomes one canonical event without duplication | Not started |
 | 5. API contract | Event endpoints, core filters, OpenAPI schema and generated client | The web application retrieves typed event data through `packages/api-client` | Not started |
 | 6. Personal discovery interface | Basic event list, map synchronization and event detail | The owner can discover the ingested event through the complete local product path | Not started |
@@ -32,12 +32,13 @@ Re-running must not create duplicates or overwrite manual corrections. This is t
 
 ### Goal A — Select and understand the first source
 
-- [ ] Select one accessible, approved NTU event source.
-- [ ] Record why it is representative and how it may be accessed.
-- [ ] Save an initial set of representative source items and grow it toward 50–100 samples.
+- [x] Select one accessible, approved NTU event source: the public NTU CCDS events listing.
+- [x] Record why it is representative and how it may be accessed in `docs/sources/ntu_ccds_events.md`.
+- [ ] Grow the initial JSON observation fixture toward 50–100 preserved source samples.
 - [ ] Include missing-field, changed, cancelled, multi-event and unusual-time cases where available.
-- [ ] Identify the observations the LLM needs, any interactive exploration steps, and any stable metadata that can supplement LLM extraction.
-- [ ] Define the approved domains and safe read-only browser actions for the source.
+- [ ] Identify whether the source offers an official API, feed, export, embedded structured data, direct-fetch content, or requires managed retrieval or browser exploration.
+- [ ] Define the deterministic mappings or LLM observations needed, any interactive exploration steps, and any stable metadata that can support interpretation.
+- [ ] Define approved domains, retrieval providers, credentials boundary, and safe read-only browser actions for the source.
 
 **Done when:** The source can drive concrete schema and extraction decisions without relying on imagined examples.
 
@@ -61,7 +62,7 @@ Re-running must not create duplicates or overwrite manual corrections. This is t
 - [ ] Select the initial OpenAPI schema and TypeScript-client generation workflow.
 - [ ] Define the minimum linting, formatting and test commands for both applications.
 - [ ] Confirm environment-variable and local raw-storage conventions.
-- [ ] Define provider-neutral interfaces for LLM extraction and constrained browser tools; defer the exact model provider until source evaluation.
+- [ ] Define provider-neutral interfaces for direct retrieval, managed retrieval services, LLM extraction, and constrained browser tools; defer exact providers until source evaluation.
 
 **Done when:** Milestone 1 can be implemented without changing the agreed repository boundaries.
 

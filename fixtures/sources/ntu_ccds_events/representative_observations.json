@@ -1,0 +1,147 @@
+{
+  "fixture_version": 1,
+  "source_id": "ntu_ccds_events",
+  "listing_url": "https://www.ntu.edu.sg/computing/news-events/events",
+  "observed_at": "2026-07-22T00:00:00+08:00",
+  "purpose": "Initial source-shape and domain-edge-case observations; not canonical event data.",
+  "format_policy": "JSON only; do not convert this fixture to JSONL.",
+  "listing_summary": {
+    "observed_event_count": 213,
+    "observed_missing_location_count": 66,
+    "observed_all_day_count": 6,
+    "category_counts": {
+      "Conferences & Seminars": 192,
+      "Workshops & Classes": 15,
+      "Competitions": 4,
+      "Networking": 1,
+      "Student Activities": 1
+    }
+  },
+  "observations": [
+    {
+      "case": "timed_missing_location_with_detail_json_ld",
+      "source_url": "https://www.ntu.edu.sg/computing/news-events/events/detail/2026/08/11/default-calendar/feeding-the-beast--power-delivery-and-runtime-control-for-next-gen-ai-accelerators-by-dr.-jawad-haj-yahya",
+      "source_category": "Conferences & Seminars",
+      "title": "Feeding the Beast: Power Delivery and Runtime Control for Next-Gen AI Accelerators by Dr. Jawad Haj-Yahya",
+      "raw_location": "",
+      "all_day": false,
+      "raw_start": "20260811T150000",
+      "raw_end": "20260811T160000",
+      "expected_disposition": "review_missing_location"
+    },
+    {
+      "case": "multi_day_all_day_exclusive_end",
+      "source_url": "https://www.ntu.edu.sg/computing/news-events/events/detail/2026/08/05/default-calendar/international-conference-on-embodied-intelligence-and-robotics-(eir-2026",
+      "source_category": "Conferences & Seminars",
+      "title": "International Conference on Embodied Intelligence and Robotics (EIR 2026)",
+      "raw_location": "",
+      "all_day": true,
+      "raw_start": "2026-08-05",
+      "raw_end": "2026-08-08",
+      "displayed_date_range": "05 Aug 2026 - 07 Aug 2026",
+      "expected_disposition": "review_missing_location"
+    },
+    {
+      "case": "precise_physical_venue",
+      "source_url": "https://www.ntu.edu.sg/computing/news-events/events/detail/2026/07/22/default-calendar/native-video-action-pretraining-for-generalizable-robot-control-by-prof-yinghao-xu",
+      "source_category": "Conferences & Seminars",
+      "title": "Native Video-Action Pretraining for Generalizable Robot Control by Prof Yinghao Xu",
+      "raw_location": "North Spine, LT 10 (NS-04-41)",
+      "all_day": false,
+      "raw_start": "20260722T130000",
+      "raw_end": "20260722T140000",
+      "expected_disposition": "eligible_after_validation"
+    },
+    {
+      "case": "off_campus_physical_event",
+      "source_url": "https://www.ntu.edu.sg/computing/news-events/events/detail/2026/07/02/default-calendar/ai-and-the-future-of-education",
+      "source_category": "Workshops & Classes",
+      "title": "AI and the Future of Education",
+      "raw_location": "Level 16, The Pod, National Library, 100 Victoria St, Singapore 188064",
+      "all_day": false,
+      "raw_start": "20260702T190000",
+      "raw_end": "20260702T213000",
+      "expected_disposition": "withhold_outside_ntu_campus"
+    },
+    {
+      "case": "probable_duplicate_a",
+      "source_url": "https://www.ntu.edu.sg/computing/news-events/events/detail/2026/06/25/default-calendar/seminar--flexibility-as-an-essential-requirement-for-real-time-embedded-systems",
+      "source_category": "Conferences & Seminars",
+      "title": "Seminar: Flexibility as an Essential Requirement for Real-Time Embedded Systems",
+      "raw_location": "ABN Conference Room 1-1 (ABN-01a-CF3)",
+      "all_day": false,
+      "raw_start": "20260625T133000",
+      "raw_end": "20260625T143000",
+      "expected_disposition": "duplicate_review"
+    },
+    {
+      "case": "probable_duplicate_b_with_unicode_punctuation",
+      "source_url": "https://www.ntu.edu.sg/computing/news-events/events/detail/2026/06/25/default-calendar/flexibility-as-an-essential-requirement-for-real-time-embedded-systems-by-prof-luis-almeida",
+      "source_category": "Conferences & Seminars",
+      "title": "Flexibility as an Essential Requirement for Real-Time Embedded Systems by Prof Luis Almeida",
+      "raw_location": "ABN Conference Room 1‑1 (ABN‑01a‑CF3)",
+      "all_day": false,
+      "raw_start": "20260625T133000",
+      "raw_end": "20260625T143000",
+      "expected_disposition": "duplicate_review"
+    },
+    {
+      "case": "online_only_zoom_virtual_meeting",
+      "source_url": "https://www.ntu.edu.sg/computing/news-events/events/detail/2026/05/20/default-calendar/situated-and-sustainable-interactive-systems--fabricating-sensing--actuation-and-intelligence-into-everyday-materials-by-dr-narges-pourjafarian",
+      "source_category": "Conferences & Seminars",
+      "title": "Situated and Sustainable Interactive Systems: Fabricating Sensing, Actuation and Intelligence into Everyday Materials by Dr Narges Pourjafarian",
+      "raw_location": "Zoom Virtual Meeting",
+      "all_day": false,
+      "raw_start": "20260520T100000",
+      "raw_end": "20260520T110000",
+      "expected_disposition": "withhold_online_only"
+    },
+    {
+      "case": "online_only_zoom_meeting",
+      "source_url": "https://www.ntu.edu.sg/computing/news-events/events/detail/2026/05/08/default-calendar/towards-understanding-interactive-learning-by-dr-zeyu-jia",
+      "source_category": "Conferences & Seminars",
+      "title": "Towards Understanding Interactive Learning by Dr Zeyu Jia",
+      "raw_location": "Zoom Meeting",
+      "all_day": false,
+      "raw_start": "20260508T120000",
+      "raw_end": "20260508T130000",
+      "expected_disposition": "withhold_online_only"
+    },
+    {
+      "case": "single_day_all_day_exclusive_end",
+      "source_url": "https://www.ntu.edu.sg/computing/news-events/events/detail/2026/02/28/default-calendar/ntu-open-house-2026",
+      "source_category": "Student Activities",
+      "title": "NTU Open House 2026",
+      "raw_location": "",
+      "all_day": true,
+      "raw_start": "2026-02-28",
+      "raw_end": "2026-03-01",
+      "displayed_date_range": "28 Feb 2026",
+      "expected_disposition": "review_missing_location"
+    },
+    {
+      "case": "two_day_all_day_exclusive_end",
+      "source_url": "https://www.ntu.edu.sg/computing/news-events/events/detail/2026/02/26/default-calendar/research-fest-2026",
+      "source_category": "Conferences & Seminars",
+      "title": "Research Fest 2026",
+      "raw_location": "",
+      "all_day": true,
+      "raw_start": "2026-02-26",
+      "raw_end": "2026-02-28",
+      "displayed_date_range": "26 Feb 2026 - 27 Feb 2026",
+      "expected_disposition": "review_missing_location"
+    },
+    {
+      "case": "long_running_timed_range",
+      "source_url": "https://www.ntu.edu.sg/computing/news-events/events/detail/2026/01/12/default-calendar/pathways-in-python-2026--your-first-step-into-computing",
+      "source_category": "Competitions",
+      "title": "Pathways in Python 2026: Your First Step into Computing",
+      "raw_location": "",
+      "all_day": false,
+      "raw_start": "20260112T120000",
+      "raw_end": "20260228T235959",
+      "expected_disposition": "review_event_definition_and_location"
+    }
+  ]
+}
+

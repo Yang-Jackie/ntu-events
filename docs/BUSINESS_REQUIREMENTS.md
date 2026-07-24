@@ -180,7 +180,7 @@ The initial usable version is an owner-only product and should include:
 - Publicly accessible sources only
 - NTU official event sources
 - Selected student organization sources
-- LLM-first extraction, including constrained browser exploration when interaction is required
+- Source-appropriate retrieval and interpretation: prefer reliable structured APIs, feeds, exports, or managed retrieval outputs when available; use LLM-first extraction for unstructured content, including constrained browser exploration when interaction is required
 - Event normalization into a common structure
 - Building-level map display
 - Precise room information in event details where available
@@ -199,6 +199,8 @@ The initial usable version is an owner-only product and should include:
 - An internal review capability for maintaining data quality
 
 Student organization sources may include public Instagram pages. Access to social-platform content must be treated as a separate product, legal, and technical concern from extracting event information after content has been obtained.
+
+Retrieval may be performed directly or through approved third-party services such as managed scraping and browser-automation providers. Provider output remains untrusted source material: the platform must preserve provenance, validate it, and apply its own normalization, deduplication, review, and publication rules. No retrieval provider becomes the canonical source of product data.
 
 Public hosting, accounts, multi-user behavior, and production operations are not required yet. Data boundaries, validation, provenance, and the API contract must remain suitable for later release.
 
