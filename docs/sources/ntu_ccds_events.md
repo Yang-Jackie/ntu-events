@@ -79,7 +79,12 @@ All saved structured fixtures for this source must be JSON files. Do not create 
 - Detail URLs containing punctuation and parentheses
 - Multiple source categories that do not directly equal the product taxonomy
 
-The initial observation fixture is `fixtures/sources/ntu_ccds_events/representative_observations.json`. Grow the reviewed sample set toward 50–100 items before finalizing the schema; preserve each future batch as a JSON array or JSON object, never JSONL.
+The initial 11-case observation fixture is
+`fixtures/sources/ntu_ccds_events/representative_observations.json`. It was
+combined with the broader observed listing and Telegram research to finalize
+the initial core schema. Expand it toward 50–100 reviewed cases during
+Milestone 3 adapter and regression work; preserve each future batch as a JSON
+array or JSON object, never JSONL.
 
 ## Domain Questions This Source Must Resolve
 
@@ -100,4 +105,3 @@ The initial observation fixture is `fixtures/sources/ntu_ccds_events/representat
 - Do not authenticate, submit forms, bypass access controls or CAPTCHAs, or follow registration links as part of ingestion.
 - Treat HTML, JSON-LD, calendar attributes, URLs, and descriptions as untrusted input.
 - Reconfirm applicable access rules before enabling scheduled retrieval or public operation.
-

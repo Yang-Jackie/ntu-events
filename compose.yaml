@@ -1,0 +1,24 @@
+services:
+  database:
+    image: postgis/postgis:18-3.6
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ntu_events}
+      POSTGRES_USER: ${POSTGRES_USER:-ntu_events}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ntu_events}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - ntu_events_postgres_data:/var/lib/postgresql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-ntu_events} -d ${POSTGRES_DB:-ntu_events}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  ntu_events_postgres_data:

@@ -45,7 +45,7 @@ Personal-first delivery changes access, not architecture: the owner initially ru
 The Django backend owns:
 
 - Canonical event and occurrence data
-- Organizers, categories, audiences, buildings and venues
+- Organizers, classification facets, buildings and venues
 - Source registration and crawl history
 - Ingestion and canonicalization workflows
 - Publication and manual-review decisions
@@ -68,7 +68,10 @@ It must not duplicate canonical event rules, venue resolution, deduplication, or
 
 ### API client package
 
-`packages/api-client` is retained as a separate workspace package from the beginning. It contains generated TypeScript types and request functions based on the backend's versioned OpenAPI schema.
+`packages/api-client` is retained as a separate workspace package from the
+beginning. It contains an `openapi-typescript` generated contract and a small
+handwritten `openapi-fetch` client factory based on the backend's versioned,
+committed OpenAPI schema.
 
 ```text
 packages/api-client/
@@ -79,7 +82,9 @@ packages/api-client/
 └── README.md
 ```
 
-The package provides the contract boundary between Python and TypeScript. It must not contain copied backend business logic. The exact OpenAPI generator and publication/versioning process can be chosen during project setup.
+The package provides the contract boundary between Python and TypeScript. It
+must not contain copied backend business logic, read application environment
+variables directly, or grow handwritten wrappers for every endpoint.
 
 ## 4. Backend Organization
 
@@ -90,7 +95,7 @@ apps/backend/
 ├── manage.py
 ├── config/                     # Settings, root routing and runtime configuration
 ├── common/                     # Small, domain-neutral shared infrastructure
-├── events/                     # Events, occurrences, categories and audiences
+├── events/                     # Events, occurrences and classification facets
 ├── venues/                     # Buildings, venues, aliases and resolution
 ├── organizers/                 # Organizer records and relationships
 ├── sources/                    # Sources, crawl runs and raw-document metadata
@@ -155,15 +160,24 @@ Its expected internal capabilities are:
 
 ```text
 ingestion/
-├── adapters/                   # Source-specific retrieval and provider integration
-├── browser_agent/              # Constrained LLM-directed exploration and action traces
+├── adapters/                   # Source-specific discovery and raw-document mapping
+├── retrieval/                  # Direct, managed-provider and browser implementations
 ├── extraction/                 # Deterministic mapping and LLM-first unstructured extraction
 ├── validation/                 # Candidate schema and deterministic checks
 ├── matching/                   # Duplicate and venue-match analysis
 └── workflows/                  # End-to-end application orchestration
 ```
 
-Adapters collect raw source material through official APIs, feeds, direct fetches, approved managed retrieval providers, or allowlisted read-oriented browser tools. They retain provider metadata and action traces where applicable. Reliable structured inputs may be mapped deterministically; the LLM owns semantic interpretation of unstructured content. Deterministic components own permissions, capture, schema validation, normalization, persistence, matching safeguards, and publication. Providers and agents cannot canonicalize, publish, or silently correct data, and rigid page parsers require measured justification. Workers and commands must invoke shared ingestion workflows.
+Source adapters use separate direct-retrieval, managed-job, or constrained
+browser ports and convert their results into shared raw-document inputs. LLM
+extraction is another provider-neutral port. Provider SDK objects do not cross
+these boundaries. Reliable structured inputs may be mapped deterministically;
+the LLM owns semantic interpretation of unstructured content. Deterministic
+workflows own permissions, retries, concurrency, capture, schema validation,
+normalization, persistence, idempotency, matching safeguards, and publication.
+Providers and agents cannot canonicalize, publish, or silently correct data,
+and rigid page parsers require measured justification. Workers and commands
+must invoke shared ingestion workflows.
 
 Whether every capability becomes a folder is left to implementation scale.
 
@@ -211,12 +225,13 @@ Within the backend:
 
 This architecture does not yet fix:
 
-- Exact Python and JavaScript package-management tools
 - Exact task queue and scheduler
-- Exact OpenAPI client generator
 - File-versus-folder layout inside small Django domains
-- Raw-content storage provider beyond its interface
+- Production raw-content storage provider beyond its interface
 - Deployment topology
-- Final event, occurrence, recurrence and taxonomy schemas
+- Exact maintained venue seed fixture and non-core field refinements
 
-These choices should be made as the first source adapter and vertical slice reveal concrete requirements.
+The core source-representation, series, event, occurrence, registration,
+provenance, classification, venue-source, and create-only canonicalization
+boundaries are defined in `TECHNICAL_SPECIFICATION.md`. Remaining choices
+should be made as the first vertical slice reveals concrete requirements.

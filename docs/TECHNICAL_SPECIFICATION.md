@@ -34,7 +34,7 @@ The system should:
 1. Aggregate physical NTU event information from heterogeneous public sources.
 2. Preserve raw source material for auditing and reprocessing.
 3. Convert structured and unstructured source material into a common event-candidate contract.
-4. Normalize dates, organizers, categories, and NTU locations.
+4. Normalize dates, organizers, classification facets, and NTU locations.
 5. Detect duplicate representations of the same event.
 6. Maintain one canonical representation of each event.
 7. Support building-level geographic display and location-based queries.
@@ -115,6 +115,21 @@ These may be reconsidered only when a demonstrated requirement appears.
 
 The initial application consists of the following components:
 
+### 4.0 Runtime and package-management baseline
+
+- Python 3.13
+- Django 5.2 LTS
+- `uv` with a committed `uv.lock`
+- Node.js 24 LTS, currently pinned to 24.18.0
+- Next.js 16 with TypeScript and the App Router
+- `pnpm` 11, currently pinned to 11.17.0, with a root workspace and committed
+  `pnpm-lock.yaml`
+
+Feature dependencies should use compatible ranges in project manifests while
+lockfiles record exact resolved versions. Runtime major/minor versions are
+recorded in repository version files and updated deliberately rather than
+following `latest` implicitly.
+
 ### 4.1 Web application
 
 A Next.js application is responsible for:
@@ -161,7 +176,7 @@ It should support:
 - Merging duplicates
 - Reviewing crawl failures
 - Controlling publication status
-- Managing buildings, venues, aliases, organizers, categories, and sources
+- Managing buildings, venues, aliases, organizers, classifications, and sources
 
 The admin interface is separate from the discovery experience in both personal and public modes.
 
@@ -183,7 +198,16 @@ Workers should invoke shared Django application services or domain workflows rat
 
 ### 4.5 Primary database
 
-PostgreSQL with PostGIS is the primary database.
+PostgreSQL 18 with PostGIS 3.6 is the primary database. Local development runs
+the database as a Docker Compose service with a named volume; Django and
+Next.js run directly on the host initially. Django migrations enable and verify
+the PostGIS extension.
+
+The Milestone 1 Windows-host scaffold uses Django's standard PostgreSQL backend
+so it does not require a host GDAL installation before spatial domain fields
+exist. The GeoDjango backend and its native-library requirements must be
+re-evaluated in Milestone 2 when the first spatial model is implemented; this
+does not change PostgreSQL/PostGIS as the authoritative datastore.
 
 It stores:
 
@@ -196,7 +220,7 @@ It stores:
 - Buildings
 - Venues
 - Venue aliases
-- Categories
+- Classification reference values and associations
 - Publication decisions
 - Revisions
 - Crawl and processing state
@@ -204,9 +228,14 @@ It stores:
 
 ### 4.6 Raw-content storage
 
-Raw source content should be stored separately from normalized relational data.
+Raw source content is stored separately from normalized relational data.
 
-During development, this may use a local filesystem abstraction. The code should use a storage interface so the implementation can later change without rewriting ingestion logic.
+During development, an ignored `var/raw/` directory implements the raw-content
+storage interface. PostgreSQL stores retrieval metadata and the opaque storage
+key, not the content itself. Stored evidence is immutable: another retrieval or
+retry creates another retrieval record and object instead of overwriting prior
+evidence. The interface must permit a later object-storage implementation
+without rewriting ingestion workflows.
 
 Raw content may include:
 
@@ -220,6 +249,14 @@ Raw content may include:
 - Language-model inputs
 - Language-model outputs
 
+### 4.7 Local environment configuration
+
+Ignored `.env` files contain local secrets and machine-specific values.
+`.env.example` documents every required setting without containing secrets.
+Applications validate required configuration at startup. Repository defaults
+may cover non-sensitive local values; source authorization sessions, raw
+content, model credentials, and database credentials must remain ignored.
+
 ---
 
 ## 5. High-Level System Flow
@@ -231,7 +268,7 @@ Scheduled crawl job
       ↓
 Source-specific adapter
       ↓
-Raw source document
+Source representation and raw source document
       ↓
 Preprocessing
       ↓
@@ -243,11 +280,11 @@ Normalization
       ↓
 Venue resolution
       ↓
-Duplicate matching
+Create-only canonicalization with candidate idempotency
       ↓
-Canonical event create/update decision
+Draft or review-required canonical event
       ↓
-Publication decision
+Internal review
       ↓
 Public API
       ↓
@@ -360,36 +397,66 @@ Possible fields:
 
 A crawl run may produce zero or more raw source documents.
 
-### 7.3 RawSourceDocument
+### 7.3 SourceRepresentation
 
-Represents a fetched page, post, item, or source payload before event extraction.
+Represents one logical published item from a source, such as one Telegram post,
+one API item, or one event-listing entry. A source representation is not an
+event: one representation may describe several events, and one real event may
+eventually be supported by several representations.
 
-Possible fields:
+Initial fields:
 
 - `id`
 - `source_id`
-- `crawl_run_id`
 - `external_identifier`
 - `source_url`
 - `published_at`
-- `fetched_at`
 - `content_type`
+- `first_seen_at`
+- `last_seen_at`
+- `metadata`
+
+`(source_id, external_identifier)` is the initial logical identity. For
+Telegram, `external_identifier` is the message ID and the source identifies the
+channel. Provider-specific identities must be preserved rather than derived
+from titles or extracted event fields.
+
+Source representation and representation revision are conceptually distinct.
+A representation retains its identity when its content changes, while each
+materially different content state would be an immutable revision. Revision
+management, content-change detection, and canonical updates are deferred from
+the first pipeline.
+
+### 7.4 RawSourceDocument
+
+Represents one preserved retrieval observation of a source representation
+before extraction.
+
+Initial fields:
+
+- `id`
+- `source_representation_id`
+- `crawl_run_id`
+- `fetched_at`
 - `storage_key`
 - `content_hash`
 - `language`
 - `processing_status`
 - `metadata`
 
-A content hash should help avoid unnecessary reprocessing when content has not changed.
+The first pipeline processes the preserved observation selected for a
+representation but does not yet interpret changed content as a new revision. A
+content hash avoids unnecessary reprocessing while raw observations remain
+available for audit and later revision support.
 
-### 7.4 ExtractionRun
+### 7.5 ExtractionRun
 
 Represents one attempt to convert a raw document into structured event candidates.
 
 Possible fields:
 
 - `id`
-- `raw_document_id`
+- `raw_source_document_id`
 - `extractor_type`
 - `extractor_version`
 - `model_name`
@@ -398,40 +465,46 @@ Possible fields:
 - `completed_at`
 - `status`
 - `input_storage_key`
-- `output_storage_key`
+- `raw_output_storage_key`
+- `token_usage`
 - `error_message`
 
-Extraction history should be retained so prompt or model changes can be evaluated.
+Every model attempt must be retained before candidate validation, including raw
+output, response identifier where available, usage, and validation failure.
+Extraction history must remain available when a prompt, model, or candidate
+schema changes.
 
-### 7.5 EventCandidate
+### 7.6 EventCandidate
 
-Represents structured information extracted from one source item before canonicalization.
+Represents one provisional event extracted from one source representation
+before canonicalization. An extraction may produce zero, one, or several
+candidates.
 
-Possible fields:
+Initial fields:
 
 - `id`
-- `raw_document_id`
 - `extraction_run_id`
+- `source_representation_id`
+- `candidate_index`
+- `schema_version`
+- `payload`
 - `title`
-- `description`
-- `start_datetime`
-- `end_datetime`
-- `registration_deadline`
-- `raw_location`
-- `raw_organizer`
-- `registration_url`
-- `image_url`
-- `category_predictions`
-- `audience_predictions`
-- `field_confidences`
 - `overall_confidence`
 - `validation_status`
 - `validation_errors`
 - `created_at`
 
-Candidates are not automatically equivalent to public events.
+`payload` retains the complete schema-validated candidate, including proposed
+occurrences, organizers, registrations, locations, classifications, evidence,
+and ambiguities. Key fields may be duplicated into indexed columns only when a
+demonstrated query or review need exists.
 
-### 7.6 Organizer
+A candidate is not a public event. It may create at most one canonical event;
+the unique candidate link in `EventProvenance` provides initial
+canonicalization idempotency. Reprocessing an already accepted candidate must
+not create another event.
+
+### 7.7 Organizer
 
 Represents an organization associated with an event.
 
@@ -450,7 +523,23 @@ Possible fields:
 
 Organizer aliases may be introduced if naming inconsistency becomes significant.
 
-### 7.7 Event
+`organization_type` uses this initial editable vocabulary:
+
+- `NTU_CENTRAL_UNIT`
+- `NTU_SCHOOL_COLLEGE`
+- `NTU_RESEARCH_CENTRE_INSTITUTE`
+- `NTU_STUDENT_ORGANISATION`
+- `NTU_RESIDENTIAL_HALL`
+- `EXTERNAL_COMPANY`
+- `GOVERNMENT_PUBLIC_AGENCY`
+- `NONPROFIT_COMMUNITY`
+- `INDIVIDUAL_INFORMAL`
+- `OTHER`
+
+This facet describes what the organizer is, not the event's topic, format, or
+purpose. Unknown values remain null or require review rather than being guessed.
+
+### 7.8 Event
 
 Represents the canonical conceptual event.
 
@@ -461,61 +550,137 @@ Possible fields:
 - `title`
 - `normalized_title`
 - `description`
-- `organizer_id`
+- `series_id`
 - `publication_status`
 - `verification_status`
-- `primary_category_id`
-- `intended_audience`
-- `registration_url`
-- `registration_deadline`
 - `image_reference`
 - `created_at`
 - `updated_at`
 - `last_verified_at`
 - `archived_at`
 
-The `Event` should not contain all timing and location details directly when an event may have multiple occurrences.
+An event is the canonical conceptual activity. It does not own occurrence
+times, occurrence venues, or copied registration fields. Organizers,
+formats, topics, purposes, audiences, organizers, and sources are plural
+relationships implemented through association tables rather than singular
+foreign keys. Every initially created event is non-public and begins in `draft`
+or `review_required`.
 
-### 7.8 EventOccurrence
+### 7.9 EventSeries
 
-Represents one physical occurrence of an event.
+Groups related events. A series never directly groups occurrences.
 
-Possible fields:
+Initial fields:
+
+- `id`
+- `title`
+- `description`
+- `created_at`
+- `updated_at`
+
+Series membership is optional. A repeated activity that can be attended or
+registered for independently should normally be represented as separate events
+in a series. A single event with several required or continuous attendance
+blocks instead has several occurrences.
+
+### 7.10 EventOccurrence
+
+Represents one continuous, independently meaningful physical attendance block
+within an event.
+
+Initial fields:
 
 - `id`
 - `event_id`
-- `start_datetime`
-- `end_datetime`
-- `venue_id`
+- `label`
+- `sequence`
+- `start_date`
+- `start_time`
+- `end_date`
+- `end_time`
+- `time_precision`
+- `is_all_day`
 - `raw_location_text`
 - `occurrence_status`
 - `capacity_status`
 - `created_at`
 - `updated_at`
 
-Most MVP events may have exactly one occurrence, but separating the model avoids future migration problems for multi-session or recurring events.
+All dates and times are interpreted as Singapore local time. The initial domain
+does not store a per-occurrence timezone or perform general timezone
+conversion. Explicit non-Singapore times are unsupported or held for review
+rather than silently reinterpreted.
 
-### 7.9 EventSourceRecord
+Midnight and calendar-date changes do not split an occurrence. A continuous
+overnight activity remains one occurrence with different start and end dates.
+Create separate occurrences when the source identifies separate days,
+sessions, slots, or stages; when attendance resumes after a meaningful break;
+when blocks are independently attendable; or when registration is separate.
+Separate registration is sufficient but not necessary for a split.
 
-Links a canonical event to one source representation.
+Short breaks, meals, check-in, ordinary program transitions, or continuous
+movement between venues do not by themselves create new occurrences. The
+domain has no agenda-item concept. Source details that do not qualify as
+occurrences remain in descriptions or raw source material.
 
-Possible fields:
+A date range without evidence of internal separation remains one approximate
+occurrence spanning that range. Daily opening hours create separate
+occurrences. Parallel, independently useful sessions may be separate
+occurrences. An occurrence may resolve to multiple venues through an
+`OccurrenceVenue` association, with at most one marked primary.
+
+### 7.11 Registration
+
+Represents one registration option owned by exactly one series, event, or
+occurrence.
+
+Initial fields:
+
+- `id`
+- exactly one of `series_id`, `event_id`, or `occurrence_id`
+- `name`
+- `registration_type`
+- `url`
+- `opens_date`
+- `opens_time`
+- `closes_date`
+- `closes_time`
+- `time_precision`
+- `instructions`
+- `status`
+- `created_at`
+- `updated_at`
+
+A database constraint must require exactly one owner. Multiple registration
+objects at the same scope are allowed, such as separate attendee, volunteer,
+and competition registrations.
+
+Effective registration is resolved from the closest scope: occurrence,
+otherwise event, otherwise series. A registration at a closer scope initially
+replaces inherited registrations rather than supplementing them. Child records
+do not copy or point back to an ancestor's registration.
+
+### 7.12 EventProvenance
+
+Links a canonical event to the candidate and source representation that support
+it.
+
+Initial fields:
 
 - `id`
 - `event_id`
 - `event_candidate_id`
-- `source_id`
-- `source_url`
-- `external_identifier`
+- `source_representation_id`
 - `is_primary_source`
-- `first_seen_at`
-- `last_seen_at`
-- `last_changed_at`
-- `source_status`
+- `created_at`
 
-One canonical event may have multiple source records.
+`event_candidate_id` is unique in the initial create-only workflow: one
+candidate creates at most one event. One event may eventually have several
+provenance records after cross-source matching is introduced. Field-level
+provenance may be added when canonical updates and conflict resolution are
+implemented.
 
-### 7.10 Building
+### 7.13 Building
 
 Represents a campus building or outdoor map location.
 
@@ -527,13 +692,24 @@ Possible fields:
 - `normalized_name`
 - `map_point`
 - `address`
+- `postal_code`
 - `campus_area`
-- `indoor_map_url`
+- `official_map_identifier`
+- `official_map_url`
+- `source_url`
+- `verified_at`
 - `is_active`
 
 `map_point` should use a PostGIS point type.
 
-### 7.11 Venue
+The initial mapped scope is NTU's main Yunnan Garden campus, including
+residential halls, plus adjacent NIE. Novena and off-campus locations may be
+retained in source data but are outside the initial map. Seed all official
+buildings and major landmarks at building level. The initial campus-area
+vocabulary is `MAIN`, `NIE`, `NOVENA`, and `OFF_CAMPUS`; only `MAIN` and `NIE`
+are initially map-eligible.
+
+### 7.14 Venue
 
 Represents a room, lecture theatre, area, or physical venue associated with a building.
 
@@ -546,12 +722,20 @@ Possible fields:
 - `floor`
 - `room_code`
 - `venue_type`
+- `capacity`
+- `map_point`
 - `indoor_map_identifier`
+- `source_url`
+- `verified_at`
 - `is_verified`
 
-For the MVP, the map point normally comes from the building.
+For the MVP, a venue normally inherits its building map point. Outdoor or
+otherwise independently mapped venues may have their own point and a null
+`building_id`. Rooms and spaces are added when encountered in production
+sources and validated against authoritative directories rather than importing
+every bookable room in advance.
 
-### 7.12 VenueAlias
+### 7.15 VenueAlias
 
 Maps inconsistent raw location strings to canonical venues.
 
@@ -565,26 +749,124 @@ Possible fields:
 - `confidence`
 - `is_verified`
 
-### 7.13 Category
+Aliases are evidence-backed lookup aids, not replacements for raw location
+text. Common forms include campus abbreviations such as `NS`/North Spine,
+`SS`/South Spine, `ABS`/Gaia, `LHS`/The Hive, and `LHN`/The Arc, plus spacing
+variants such as `LT 7`/`LT7` and `TR + 12`/`TR+12`.
 
-Represents controlled event categories.
+Canonical venue data uses this source priority:
 
-Possible categories include:
+1. current NTU Maps and official campus pages for buildings and landmarks;
+2. NTU Facilities Booking for room codes, names, and capacities;
+3. official school, hall, and sports-facility pages for specialist spaces;
+4. Singapore Land Authority OneMap for addresses and coordinates, subject to
+   its authentication, attribution, and usage requirements;
+5. observed source strings only as alias candidates after validation.
 
-- Academic
-- Technology
-- Career
-- Entrepreneurship
-- Club and society
-- Sports and recreation
-- Arts and culture
-- Volunteering
-- Social
-- Competition
+An extracted `raw_location_text` must never automatically create or modify a
+canonical building, venue, or verified alias. Older campus maps may support
+manual cross-checking but are not authoritative when current sources disagree.
 
-The initial taxonomy should remain small and editable.
+### 7.16 Event classification facets
 
-### 7.14 EventRevision
+Event classification is multi-faceted. Format, topic, purpose, and audience are
+separate plural relationships on `Event`, each implemented through a reference
+model and association table. Multiple values are allowed because one event can,
+for example, combine a fair, workshop, and networking session. Classifications
+remain nullable and reviewable; extraction must preserve supporting source
+evidence and must not invent a value.
+
+#### 7.16.1 Format
+
+Describes how the event is delivered:
+
+- `TALK_SEMINAR`
+- `WORKSHOP_CLASS`
+- `CONFERENCE`
+- `COMPETITION_HACKATHON`
+- `FAIR_EXHIBITION`
+- `NETWORKING_MEETUP`
+- `PERFORMANCE`
+- `CEREMONY`
+- `SOCIAL_GATHERING`
+- `SPORTS_RECREATION`
+- `SERVICE_ACTIVITY`
+- `TOUR_OPEN_HOUSE`
+- `INFORMATION_SESSION`
+- `OTHER`
+
+#### 7.16.2 Topic
+
+Describes what the event is about:
+
+- `COMPUTING_TECHNOLOGY`
+- `SCIENCE_ENGINEERING`
+- `BUSINESS_FINANCE`
+- `ARTS_CULTURE`
+- `SOCIAL_SCIENCES_HUMANITIES`
+- `HEALTH_WELLBEING`
+- `SPORTS_RECREATION`
+- `SUSTAINABILITY_ENVIRONMENT`
+- `COMMUNITY_STUDENT_LIFE`
+- `INTERNATIONAL_EXCHANGE`
+- `OTHER`
+
+Fine-grained concepts such as artificial intelligence or cybersecurity remain
+free tags or keywords until usage demonstrates a stable controlled vocabulary.
+
+#### 7.16.3 Purpose
+
+Describes why a person would attend:
+
+- `LEARNING_RESEARCH`
+- `CAREER_RECRUITMENT`
+- `NETWORKING_COMMUNITY`
+- `COMPETITION_ACHIEVEMENT`
+- `SERVICE_VOLUNTEERING`
+- `SOCIAL_RECREATION`
+- `ORIENTATION_OUTREACH`
+- `SHOWCASE_CELEBRATION`
+- `INFORMATION_SUPPORT`
+- `OTHER`
+
+Career and admissions concepts belong here rather than being conflated with
+topic or format.
+
+#### 7.16.4 Audience
+
+Describes who the event is intended for:
+
+- `ALL_CURRENT_STUDENTS`
+- `UNDERGRADUATES`
+- `POSTGRADUATES`
+- `STAFF_FACULTY`
+- `ALUMNI`
+- `PROSPECTIVE_STUDENTS`
+- `INDUSTRY_ACADEMIC_PARTNERS`
+- `PUBLIC`
+- `RESTRICTED_NTU_COMMUNITY`
+- `OTHER`
+
+Specific hall, school, year, programme, or cohort restrictions remain in
+`audience_notes` and source evidence instead of expanding the controlled
+vocabulary for every local group.
+
+These initial vocabularies are deliberately editable. They are grounded in
+representative Telegram and NTU event samples, NTU's public separation of event
+types, interests, and audiences, comparison with another university event
+directory, and the broader Schema.org event hierarchy. Source taxonomies are
+mapped into these facets rather than copied directly.
+
+Research references:
+
+- [NTU Events](https://www.ntu.edu.sg/events?categories=networking)
+- [NUS Events](https://myaces.nus.edu.sg/CoE/jsp/leftmenu.jsp)
+- [Schema.org Event](https://schema.org/Event)
+- [NTU Facilities Booking locations](https://wis.ntu.edu.sg/pls/webexe88/FBSDOCU.FBSLOCATN)
+- [NTU campus overview and map entry point](https://www.ntu.edu.sg/orientation/explore-our-campus)
+- [Singapore Land Authority OneMap API](https://www.onemap.gov.sg/apidocs/)
+
+### 7.17 EventRevision
 
 Records meaningful changes to canonical event information.
 
@@ -601,7 +883,9 @@ Possible fields:
 - `changed_by_type`
 - `changed_by_identifier`
 
-This provides auditability for event updates, cancellations, and manual corrections.
+This provides auditability for event updates, cancellations, and manual
+corrections. `EventRevision` behavior is deferred until canonical updates are
+introduced; the first pipeline is create-only.
 
 ---
 
@@ -637,30 +921,70 @@ These concepts should not be collapsed into one status field.
 
 ## 9. Source Adapter Architecture
 
-Each source type should implement a common adapter contract.
-
-Conceptual interface:
+Source-specific interpretation and provider-specific retrieval are separate
+boundaries. The initial conceptual ports are:
 
 ```python
 class SourceAdapter(Protocol):
-    def fetch(self, source: Source, context: CrawlContext) -> FetchResult:
+    async def discover(
+        self, source: Source, context: RetrievalContext
+    ) -> list[RetrievalRequest]:
         ...
 
-    def discover_documents(self, result: FetchResult) -> list[DiscoveredDocument]:
+    def to_raw_documents(
+        self, attempt: RetrievalAttempt
+    ) -> list[RawDocumentPayload]:
         ...
 
-    def normalize_document(self, document: DiscoveredDocument) -> RawDocumentPayload:
+
+class DirectRetriever(Protocol):
+    async def retrieve(self, request: RetrievalRequest) -> RetrievalAttempt:
+        ...
+
+
+class ManagedRetriever(Protocol):
+    async def start(self, request: ManagedRetrievalRequest) -> ManagedJobReference:
+        ...
+
+    async def resume(self, job: ManagedJobReference) -> ManagedJobState:
+        ...
+
+    async def collect(self, job: ManagedJobReference) -> RetrievalAttempt:
+        ...
+
+
+class BrowserExplorer(Protocol):
+    async def explore(
+        self, request: BrowserRetrievalRequest, policy: BrowserSafetyPolicy
+    ) -> BrowserRetrievalAttempt:
+        ...
+
+
+class EventExtractor(Protocol):
+    async def extract(self, input: ExtractionInput) -> ExtractionAttempt:
         ...
 ```
 
-An adapter is responsible for obtaining and isolating source items.
+`SourceAdapter` knows a source's discovery and raw-document mapping rules.
+`DirectRetriever` covers ordinary HTTP, APIs, feeds, and file downloads.
+`ManagedRetriever` preserves the asynchronous job lifecycle of services such as
+managed scraping platforms. `BrowserExplorer` performs bounded, read-only
+interactive retrieval and returns captured artifacts plus its action trace.
+`EventExtractor` accepts source-neutral inputs and returns raw provider output,
+validated candidate payloads, model/prompt/schema versions, usage, and
+failures.
 
-It is not responsible for:
+The workflow, not these ports or their provider adapters, owns persistence,
+timeouts, retry policy, concurrency, idempotency, validation sequencing, and
+canonical decisions. Attempt results expose provider identifiers, timestamps,
+status, errors, usage, and trace or artifact references without leaking
+provider SDK objects into domain models.
 
-- Creating canonical events
-- Deciding publication state
-- Resolving duplicates
-- Silently correcting extracted information
+Do not collapse these ports into one universal fetcher: direct requests,
+managed jobs, and interactive browser sessions have meaningfully different
+lifecycles. Conversely, do not create a different core document model for each
+provider. Raw documents can retain text, structured data, bytes or media
+references, screenshots, and traces without assuming HTML.
 
 Retrieval implementations may include:
 
@@ -675,6 +999,10 @@ Retrieval implementations may include:
 Prefer small source configuration around shared retrieval and candidate-processing workflows. Use deterministic mapping for reliable structured inputs and LLM-first interpretation for unstructured inputs. Add dedicated page parsers only when measured reliability or cost justifies them.
 
 Third-party retrieval services are replaceable infrastructure behind adapter interfaces. For each run, preserve enough provider response data and metadata to audit and reprocess it, including the source URL, retrieval method, provider and tool identifier, run identifier where available, timestamps, configuration or version, and failures. Treat provider output as untrusted input. Provider credentials remain outside source records, and providers must not own canonicalization, deduplication, manual-review, or publication decisions.
+
+The existing Telethon and OpenAI research implementations inform future
+adapters but do not define these core contracts and need not be rewritten
+during repository scaffolding.
 
 ### 9.1 Agentic browser retrieval
 
@@ -725,19 +1053,31 @@ Conceptual output:
     {
       "title": "Example Event",
       "description": "Short source-grounded description",
-      "start_datetime": "2026-08-15T14:00:00+08:00",
-      "end_datetime": "2026-08-15T16:00:00+08:00",
-      "raw_location": "LT19A, North Spine",
-      "raw_organizer": "Example NTU Society",
-      "registration_url": "https://example.com/register",
-      "categories": ["Technology"],
-      "audiences": ["Undergraduates"],
-      "field_confidences": {
-        "title": 0.99,
-        "start_datetime": 0.94,
-        "end_datetime": 0.70,
-        "raw_location": 0.88
-      },
+      "occurrences": [
+        {
+          "label": null,
+          "start_date": "2026-08-15",
+          "start_time": "14:00",
+          "end_date": "2026-08-15",
+          "end_time": "16:00",
+          "time_precision": "exact",
+          "raw_location": "LT19A, North Spine"
+        }
+      ],
+      "organizers": ["Example NTU Society"],
+      "registrations": [
+        {
+          "scope": "event",
+          "url": "https://example.com/register",
+          "closes_at": null
+        }
+      ],
+      "formats": ["TALK_SEMINAR"],
+      "topics": ["COMPUTING_TECHNOLOGY"],
+      "purposes": ["LEARNING_RESEARCH"],
+      "audiences": ["UNDERGRADUATES"],
+      "overall_confidence": 0.94,
+      "evidence": ["15 August, 2 PM to 4 PM at LT19A"],
       "ambiguities": []
     }
   ]
@@ -753,7 +1093,7 @@ Requirements:
 - Field-level confidence or uncertainty
 - Explicit ambiguity reporting
 - Versioned prompts and schemas
-- Retained raw model output
+- Retained raw model output for valid and invalid attempts
 - Retry limits
 - Cost and token tracking where available
 
@@ -768,10 +1108,11 @@ After extraction, candidates must pass deterministic checks.
 Examples:
 
 - Title is present and non-empty.
-- Start time is present.
-- Start time is not invalid or impossible.
-- End time is later than start time when provided.
-- Time zone is normalized to Singapore time.
+- At least one occurrence has a usable start date.
+- Supplied dates and times are valid or explicitly approximate.
+- End date and time are later than the start when both are provided.
+- Unqualified times are interpreted as Singapore local time.
+- Explicit non-Singapore times are held for review.
 - The event is physical or hybrid with a physical venue.
 - The venue is present or explicitly unresolved.
 - Registration and source URLs are syntactically valid.
@@ -835,7 +1176,13 @@ An unresolved venue should remain unresolved rather than being assigned to a gue
 
 ## 14. Duplicate Detection
 
-Duplicate detection should combine deterministic and similarity-based signals.
+Cross-source duplicate detection is deferred from the first create-only
+pipeline. Initially, a valid candidate may create at most one canonical event,
+and repeated processing of that accepted candidate reuses its canonical link.
+Candidates from different source representations are not automatically merged.
+
+When introduced, duplicate detection should combine deterministic and
+similarity-based signals.
 
 Relevant signals include:
 
@@ -876,7 +1223,15 @@ Deduplication thresholds should be configurable and tested using labeled example
 
 ## 15. Canonical Event Update Logic
 
-When a previously seen source changes, the system should determine whether the change represents:
+The first canonicalization workflow only creates events. It never changes an
+existing canonical event. A successful create atomically persists the event,
+occurrences, registrations, relationships, and provenance. A partial failure
+must roll back the whole canonicalization transaction.
+
+Content-change processing, corrections, postponements, cancellations,
+conflicting-source resolution, and automatic canonical updates are deferred.
+When update behavior is introduced, the system should determine whether a
+change represents:
 
 - A textual correction
 - A date or time change
@@ -897,27 +1252,24 @@ Conflicting high-value fields should trigger review.
 
 ## 16. Publication Decision
 
-A candidate or canonical event should only become public when minimum conditions are satisfied.
+The first pipeline does not publish automatically. Every newly created
+canonical event begins as `DRAFT` or `PENDING_REVIEW`, even when extraction
+confidence is high. Persistence proves the internal workflow; it does not make
+model output visible to users.
 
-Suggested minimum publication conditions:
+A schema-valid candidate may be retained without creating an event. Initial
+automatic creation requires:
 
-- A valid title exists.
-- A valid start date and time exist.
-- A physical location exists at least at building level.
-- The source is known.
-- The event qualifies under the physical-event definition.
-- No unresolved high-severity conflict exists.
-- Overall confidence exceeds a configurable threshold.
+- A valid, non-empty title.
+- At least one usable occurrence start date.
+- A known source representation and retained provenance.
+- Qualification under the physical-event definition.
+- Successful deterministic candidate validation.
 
-Suggested behavior:
-
-- High-confidence, fully valid event: publish automatically.
-- Valid event with minor missing fields: publish if core details are reliable.
-- Unresolved location or date: pending review.
-- Conflicting date, venue, or cancellation status: pending review.
-- Invalid or irrelevant content: withhold.
-
-The exact threshold should be adjusted using real extraction results rather than chosen arbitrarily.
+An unresolved venue does not prevent draft creation but requires review. An
+invalid, irrelevant, online-only, or date-less candidate is retained with its
+validation outcome and does not create a canonical event. Public-release and
+automatic-publication rules will be decided using reviewed production evidence.
 
 ---
 
@@ -1067,7 +1419,7 @@ Searchable fields should include:
 - Event title
 - Description
 - Organizer
-- Category
+- Format, topic, and purpose
 - Building
 - Venue aliases
 
@@ -1083,7 +1435,7 @@ The frontend map should request events based on:
 
 - Current visible bounds
 - Date range
-- Active categories
+- Active format, topic, purpose, and audience filters
 - Intended audience
 - Time filters
 - Search query
@@ -1406,7 +1758,7 @@ Development should include:
 - Canonical NTU building fixtures
 - Initial venue aliases
 - Example organizers
-- Example categories
+- Example classification reference values
 - Representative event records
 - Saved source fixtures in representative formats such as HTML, JSON, feed records, text, or provider results
 - Example extraction outputs
@@ -1418,24 +1770,48 @@ Building and venue data should be reviewable and version-controlled where licens
 
 ## 30. Time Handling
 
-All persisted timestamps should be timezone-aware.
+Event scheduling uses separate Singapore-local date and time fields. The
+initial event domain has no configurable timezone and performs no general
+timezone conversion. Operational timestamps such as `created_at`, `fetched_at`,
+and `processed_at` remain timezone-aware audit timestamps.
 
 Rules:
 
-- Event source times are interpreted in Singapore time unless the source explicitly states otherwise.
-- API timestamps use ISO 8601.
-- Database timestamps retain timezone information.
+- Unqualified event-source dates and times are interpreted as Singapore local time.
+- Explicit non-Singapore event times are unsupported or held for review.
+- API schedule values expose ISO dates and local times rather than implying UTC.
+- API and database audit timestamps retain timezone information.
 - Date-only source information should not be silently converted into a precise time.
 - Ambiguous date formats should trigger review.
-- Recurring events should not be expanded until recurrence is explicitly supported.
+- Repeated independently attendable activities are modeled as events in a
+  series rather than expanded from an implicit recurrence rule.
 
 ---
 
 ## 31. API Contract Management
 
-Django REST Framework should expose an OpenAPI schema.
+Django REST Framework uses `drf-spectacular` to generate an OpenAPI 3 schema
+for versioned endpoints under `/api/v1/`. The generated schema is committed at
+`packages/api-client/openapi.json`.
 
-The frontend should consume a generated or strongly typed API client where practical.
+`openapi-typescript` generates the committed
+`packages/api-client/src/generated/schema.d.ts` contract from that schema.
+`openapi-fetch` provides the small runtime Fetch client. Handwritten code
+outside `src/generated/` owns client construction, base-URL selection,
+middleware, and any application-specific error normalization.
+
+The shared package exposes a client factory that accepts its base URL and
+optional Fetch implementation. It must not read a `NEXT_PUBLIC_*` environment
+variable internally because Next.js server and browser callers may require
+different configuration. Endpoint-specific wrappers are added only when they
+provide reusable application behavior; the package must not recreate a
+handwritten SDK around every typed endpoint.
+
+Generated files must never be manually edited. A root generation command
+regenerates both the OpenAPI schema and TypeScript contract. CI runs the
+generator or `openapi-typescript --check`, TypeScript type checking with
+`noUncheckedIndexedAccess`, and a clean-diff check so stale committed artifacts
+fail verification.
 
 API changes should follow:
 
@@ -1446,6 +1822,11 @@ API changes should follow:
 - Integration tests between frontend and backend
 
 Shared TypeScript and Python source files should not be used as a substitute for an API contract.
+
+Focused DRF tests cover endpoint behavior from the first API slice.
+Schema-driven fuzzing with Schemathesis, breaking-change comparison with
+`oasdiff`, generated React Query hooks, and broad handwritten endpoint wrappers
+are deferred until demonstrated API or frontend needs justify them.
 
 ---
 
@@ -1463,6 +1844,30 @@ Recommended practices:
 - Preserve reproducible fixtures for bugs.
 - Add tests when fixing retrieval-agent or extraction failures.
 - Use feature flags or configuration for incomplete sources.
+
+### 32.1 Minimum automated checks
+
+The Python toolchain uses:
+
+- Ruff for formatting and linting;
+- pytest with pytest-django for tests;
+- `manage.py check` for Django system checks; and
+- `makemigrations --check` to detect model changes without migrations.
+
+The TypeScript toolchain uses:
+
+- Prettier for formatting;
+- ESLint for linting;
+- `tsc --noEmit` for type checking, including
+  `noUncheckedIndexedAccess`; and
+- Vitest for unit and component tests.
+
+Root `pnpm` scripts expose consistent `format`, `format:check`, `lint`,
+`typecheck`, `test`, and aggregate `check` commands across the applicable
+workspaces. CI runs the non-mutating checks, Django migration check, tests
+against PostgreSQL/PostGIS where required, and the OpenAPI artifact drift
+check. A Python static type checker and Django typing plugins are deferred
+until demonstrated value justifies their configuration cost.
 
 Example application service:
 
@@ -1582,7 +1987,7 @@ The following remain intentionally undecided:
 - Exact scheduler implementation
 - Raw-content storage implementation beyond the storage abstraction
 - Crawl frequency per source
-- Exact category taxonomy
+- Rules for promoting free tags into new controlled classification values
 - Auto-publication thresholds
 - Duplicate scoring thresholds
 - Social-platform access strategy

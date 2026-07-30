@@ -1,0 +1,55 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "NTU Events API",
+        "version": "1.0.0",
+        "description": "Personal-first event ingestion and discovery API."
+    },
+    "paths": {
+        "/api/v1/health/": {
+            "get": {
+                "operationId": "v1_health_retrieve",
+                "tags": [
+                    "v1"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Health"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Health": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "$ref": "#/components/schemas/StatusEnum"
+                    }
+                },
+                "required": [
+                    "status"
+                ]
+            },
+            "StatusEnum": {
+                "enum": [
+                    "ok"
+                ],
+                "type": "string",
+                "description": "* `ok` - ok"
+            }
+        }
+    }
+}

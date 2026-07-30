@@ -4,15 +4,36 @@
 
 Build privately for the owner first. Public deployment requires sustained evidence of utility, coverage, data quality, manageable review, and rerun safety.
 
-## Resolve first
+## Agreed core rules
+
+- A source representation is distinct from an event and retains its identity
+  across future revisions; revision processing is deferred.
+- A representation may produce several candidates, and an event may eventually
+  have several source representations.
+- A series groups events only. An occurrence is a continuous, independently
+  meaningful attendance block; midnight alone never splits it.
+- The domain has no agenda-item model.
+- Registration is owned by exactly one series, event, or occurrence, with
+  closest-scope inheritance.
+- All scheduling uses Singapore local date and time without a general timezone model.
+- Initial canonicalization is idempotent and create-only. It creates non-public
+  draft or review-required events and never updates existing canonical records.
+- Cross-source matching, source conflicts, content changes, corrections,
+  postponements, cancellations, and automatic publication are deferred.
+- Event format, topic, purpose, audience, and organizer type are separate,
+  editable classification facets. The first four are plural event
+  relationships.
+- The initial venue map covers the main campus and adjacent NIE. Buildings and
+  landmarks are seeded from current official sources; rooms are added as
+  production inputs require them, and raw extracted locations never create
+  canonical venue records automatically.
+
+See `TECHNICAL_SPECIFICATION.md` section 7 for the authoritative model.
+
+## Resolve before scaffolding
 
 - **Start with real data:** Select one accessible source and save 50–100 representative samples before finalizing the schema.
 - **Use source-appropriate ingestion:** Prefer reliable APIs, feeds, exports, embedded metadata, or managed structured results when available. Use the model to interpret unstructured content and explore approved pages through bounded, traced, read-only browser tools; prohibit authentication, submissions, purchases, CAPTCHA bypass, and other external state changes.
-- **Define identity:** Distinguish an event, recurring series, occurrence, source representation, and source update.
-- **Model time precisely:** Support exact, date-only, all-day, multi-day, multi-session, recurring, postponed, and cancelled occurrences.
-- **Fix cardinalities:** Decide which fields belong to events versus occurrences; allow multiple organizers, categories, audiences, venues, sources, and registration options where needed.
-- **Separate category dimensions:** Model topic, format, purpose, audience, and organizer type as distinct facets.
-- **Establish venue data:** Validate canonical buildings, coordinates, aliases, outdoor locations, room mappings, and usage rights.
 - **Define pipeline states:** Make crawling, extraction, validation, canonicalization, review, and publication inspectable and safely repeatable.
 - **Protect manual decisions:** Automated reprocessing must not silently overwrite corrections or merge decisions.
 - **Define query semantics:** Specify ongoing/upcoming behavior, time overlap, recurrence expansion, map grouping, pagination, and ordering.

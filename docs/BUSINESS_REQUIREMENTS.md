@@ -129,7 +129,7 @@ Selecting an event should display information such as:
 - Building
 - Precise room or venue, where available
 - Organizer
-- Category
+- Format, topic, purpose, and intended audience
 - Intended audience
 - Registration link
 - Original source
@@ -187,7 +187,7 @@ The initial usable version is an owner-only product and should include:
 - Interactive map and synchronized event list
 - Date filtering
 - Time filtering
-- Category filtering
+- Format, topic, purpose, and intended-audience filtering
 - Intended-audience filtering
 - Location filtering
 - Keyword search

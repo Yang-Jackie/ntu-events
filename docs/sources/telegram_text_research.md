@@ -1,0 +1,48 @@
+# Telegram Text Ingestion Research Harness
+
+This local harness collects public broadcast-channel text visible to the
+owner's Telegram account and produces provisional event candidates. It tests
+source-neutral shapes against unstructured club announcements; it is not the
+production ingestion service and does not canonicalize or publish events.
+
+## Setup and guided run
+
+1. Create a Telegram API application at `my.telegram.org/apps`.
+2. Copy `.env.example` to `.env` and fill in `TELEGRAM_API_ID`,
+   `TELEGRAM_API_HASH`, and `OPENAI_API_KEY`. Never commit or share them.
+3. Install with `python -m pip install -e ".[dev]"`.
+4. Run `python scripts/telegram_ingestion.py`.
+
+The first run prompts for Telegram login and saves authorization under ignored
+`storage/telegram/sessions/`. Later runs reuse it. The guided entry point lists
+up to 20 recent broadcast channels, accepts multiple comma-separated choices,
+asks for message count, preserves raw text, confirms the maximum OpenAI calls,
+extracts candidates, and reports the output directory.
+
+Useful alternatives:
+
+```powershell
+python scripts/telegram_ingestion.py login
+python scripts/telegram_ingestion.py channels
+python scripts/telegram_ingestion.py run --messages 30 --max-calls 200
+python scripts/telegram_ingestion.py run --force
+```
+
+`gpt-5-nano` is the low-cost default. Up to 200 new requests are allowed per
+run, with up to 10 processed concurrently. One message is processed per request
+with minimal reasoning effort, low output verbosity and one retry. A cache keyed
+by content, model, prompt and schema versions avoids repeat calls; `--force`
+bypasses it. Override concurrency with `--concurrency`.
+
+## Output and limits
+
+Each run writes standard JSON—not JSONL—under
+`storage/telegram/runs/<UTC timestamp>/`: `raw_messages.json`,
+`extraction_results.json`, `event_candidates.json`, `failures.json`, and, after
+model processing, `run_manifest.json`.
+
+Text and media captions are retained. Media-only posts are skipped and media is
+not downloaded. Only broadcast channels are listed; groups and private chats
+are excluded. Access is limited to what Telegram shows the authorized account.
+Runtime content and sessions are ignored by Git. Candidate fields remain
+provisional until results from Telegram and other sources are compared.

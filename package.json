@@ -1,0 +1,33 @@
+{
+  "name": "ntu-events",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.17.0",
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "24.18.0",
+      "onFail": "download"
+    }
+  },
+  "scripts": {
+    "dev:backend": "uv run python apps/backend/manage.py runserver",
+    "dev:web": "corepack pnpm --filter @ntu-events/web dev",
+    "api:schema": "uv run python apps/backend/manage.py spectacular --file packages/api-client/openapi.json --format openapi-json --validate --fail-on-warn",
+    "api:types": "corepack pnpm --filter @ntu-events/api-client generate",
+    "api:generate": "corepack pnpm api:schema && corepack pnpm api:types",
+    "api:check": "uv run python scripts/check_openapi.py && corepack pnpm --filter @ntu-events/api-client generated:check",
+    "format": "uv run ruff format apps/backend src scripts tests && corepack pnpm exec prettier --write apps/web packages/api-client package.json pnpm-workspace.yaml .prettierrc.json",
+    "format:check": "uv run ruff format --check apps/backend src scripts tests && corepack pnpm exec prettier --check apps/web packages/api-client package.json pnpm-workspace.yaml .prettierrc.json",
+    "lint": "uv run ruff check apps/backend src scripts tests && corepack pnpm -r --if-present lint",
+    "typecheck": "corepack pnpm -r --if-present typecheck",
+    "test": "uv run pytest && corepack pnpm -r --if-present test",
+    "django:check": "uv run python apps/backend/manage.py check",
+    "migrations:check": "uv run python apps/backend/manage.py makemigrations --check --dry-run",
+    "build": "corepack pnpm -r --if-present build",
+    "check": "corepack pnpm format:check && corepack pnpm lint && corepack pnpm typecheck && corepack pnpm django:check && corepack pnpm migrations:check && corepack pnpm api:check && corepack pnpm test"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
+  }
+}
