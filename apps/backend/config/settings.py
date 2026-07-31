@@ -28,12 +28,18 @@ INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
+    "django.contrib.gis",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
     "drf_spectacular",
     "common",
+    "organizers",
+    "sources",
+    "venues",
+    "ingestion",
+    "events",
 ]
 
 MIDDLEWARE = [
@@ -68,7 +74,7 @@ ASGI_APPLICATION = "config.asgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
         "NAME": os.getenv("POSTGRES_DB", "ntu_events"),
         "USER": os.getenv("POSTGRES_USER", "ntu_events"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD", "ntu_events"),

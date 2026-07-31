@@ -199,15 +199,12 @@ Workers should invoke shared Django application services or domain workflows rat
 ### 4.5 Primary database
 
 PostgreSQL 18 with PostGIS 3.6 is the primary database. Local development runs
-the database as a Docker Compose service with a named volume; Django and
-Next.js run directly on the host initially. Django migrations enable and verify
-the PostGIS extension.
-
-The Milestone 1 Windows-host scaffold uses Django's standard PostgreSQL backend
-so it does not require a host GDAL installation before spatial domain fields
-exist. The GeoDjango backend and its native-library requirements must be
-re-evaluated in Milestone 2 when the first spatial model is implemented; this
-does not change PostgreSQL/PostGIS as the authoritative datastore.
+the database and Django backend as Docker Compose services; the database uses a
+named volume, and Next.js runs on the host. The backend image supplies GDAL,
+GEOS, and PROJ and uses GeoDjango's PostGIS backend. The repository is
+bind-mounted for development, while Python dependencies remain isolated inside
+the image-managed virtual environment. Django migrations enable and verify the
+PostGIS extension.
 
 It stores:
 
@@ -708,6 +705,12 @@ retained in source data but are outside the initial map. Seed all official
 buildings and major landmarks at building level. The initial campus-area
 vocabulary is `MAIN`, `NIE`, `NOVENA`, and `OFF_CAMPUS`; only `MAIN` and `NIE`
 are initially map-eligible.
+
+The initial data migration seeds a reviewed core list of NTU/NIE buildings,
+halls, and landmarks plus a building-level venue for each. A map point remains
+null until coordinates can be imported from an authoritative source under
+appropriate access and usage terms; coordinates must never be guessed merely
+to satisfy the schema.
 
 ### 7.14 Venue
 

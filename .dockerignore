@@ -1,0 +1,12 @@
+.env
+.git
+.next
+.pnpm-store
+.pytest_cache
+.ruff_cache
+.venv
+**/__pycache__
+**/*.egg-info
+**/node_modules
+storage
+var

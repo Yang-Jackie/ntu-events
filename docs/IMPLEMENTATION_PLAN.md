@@ -1,8 +1,8 @@
 # NTU Events Implementation Plan
 
 **Document status:** Active implementation plan  
-**Current milestone:** 2 — Domain foundation
-**Next delivery goal:** Implement the core domain models, migrations, and Django Admin review surfaces
+**Current milestone:** 3 — First-source ingestion
+**Next delivery goal:** Implement one approved source adapter through persisted raw-document capture and candidate production
 
 ## 1. Guiding Delivery Target
 
@@ -18,8 +18,8 @@ Re-running must not create duplicates or overwrite manual corrections. This is t
 | --- | --- | --- | --- |
 | 0. Foundation decisions | First source, representative samples, initial identity/time/taxonomy/venue rules | Blocking domain assumptions are documented well enough to scaffold | Complete |
 | 1. Repository scaffold | Backend, web, API-client package, local database and basic checks | Both applications start and automated checks run | Complete |
-| 2. Domain foundation | Sources, raw documents, candidates, events, occurrences, venues and taxonomy | Initial migrations work and records are reviewable in Django Admin | In progress |
-| 3. First-source ingestion | One source-appropriate workflow using structured mapping or LLM-first unstructured extraction, constrained browser exploration where needed, raw storage, provenance, fixtures and a candidate contract | The source can be retrieved and processed repeatedly, and its raw material plus applicable provider metadata or action traces are retained | Not started |
+| 2. Domain foundation | Sources, raw documents, candidates, events, occurrences, venues and taxonomy | Initial migrations work and records are reviewable in Django Admin | Complete |
+| 3. First-source ingestion | One source-appropriate workflow using structured mapping or LLM-first unstructured extraction, constrained browser exploration where needed, raw storage, provenance, fixtures and a candidate contract | The source can be retrieved and processed repeatedly, and its raw material plus applicable provider metadata or action traces are retained | In progress |
 | 4. Processing workflow | Extraction, validation, venue resolution, canonicalization and review | A valid candidate becomes one canonical event without duplication | Not started |
 | 5. API contract | Event endpoints, core filters, OpenAPI schema and generated client | The web application retrieves typed event data through `packages/api-client` | Not started |
 | 6. Personal discovery interface | Basic event list, map synchronization and event detail | The owner can discover the ingested event through the complete local product path | Not started |
@@ -95,8 +95,8 @@ relative-time and missing-field cases to refine the source-neutral core model.
 - [x] Select Python 3.13, Django 5.2 LTS, Node.js 24 LTS and Next.js 16.
 - [x] Select `uv` with `uv.lock` and `pnpm` 11 with a root workspace and
   `pnpm-lock.yaml`.
-- [x] Select PostgreSQL 18 with PostGIS 3.6 in Docker Compose with a named
-  volume, while Django and Next.js initially run on the host.
+- [x] Select PostgreSQL 18 with PostGIS 3.6 and GeoDjango in Docker Compose with
+  a named database volume, while Next.js runs on the host.
 - [x] Select `drf-spectacular`, a committed OpenAPI schema,
   `openapi-typescript`, and an `openapi-fetch` client factory with generated
   contract drift checks.
@@ -123,7 +123,31 @@ Milestone 1 completed with both applications starting successfully, the PostGIS
 extension verified through the database integration test, and all documented
 automated checks passing.
 
-## 5. Progress Rules
+## 5. Milestone 2 Result
+
+- [x] Added domain applications for events, organizers, venues, sources, and ingestion.
+- [x] Implemented source representations, immutable raw-document metadata,
+  extraction attempts, candidates, canonical events, series, occurrences,
+  registrations, provenance, organizers, classifications, buildings, venues,
+  aliases, and explicit association models.
+- [x] Enforced candidate idempotency, exact-one registration ownership,
+  occurrence time consistency, and single-primary organizer, venue, and source
+  rules with database constraints.
+- [x] Added real PostGIS geography points through GeoDjango in a reproducible
+  Docker backend containing GDAL, GEOS, and PROJ.
+- [x] Seeded editable format, topic, purpose, and audience vocabularies.
+- [x] Seeded 51 reviewed core NTU/NIE buildings, halls, and landmarks,
+  building-level venues, and evidence-backed aliases.
+- [x] Registered all core records in Django Admin and verified representative
+  change-list access.
+- [x] Added model, constraint, PostGIS, migration, seed, and Admin regression tests.
+
+Milestone 2 completed with all migrations applied successfully and 35 backend
+and ingestion tests passing against PostgreSQL/PostGIS. Seeded locations remain
+without map coordinates until a reviewed authoritative coordinate import is
+available; coordinates were not guessed.
+
+## 6. Progress Rules
 
 - Keep one milestone active at a time.
 - Complete the current vertical path before broadening source coverage or polishing the interface.
@@ -132,7 +156,7 @@ automated checks passing.
 - Update this document when a milestone starts, completes or changes scope.
 - Introduce abstractions only when the active vertical slice demonstrates the need.
 
-## 6. Task Completion Standard
+## 7. Task Completion Standard
 
 An implementation task is complete when:
 

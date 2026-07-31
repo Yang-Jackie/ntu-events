@@ -26,7 +26,8 @@ Build privately for the owner first. Public deployment requires sustained eviden
 - The initial venue map covers the main campus and adjacent NIE. Buildings and
   landmarks are seeded from current official sources; rooms are added as
   production inputs require them, and raw extracted locations never create
-  canonical venue records automatically.
+  canonical venue records automatically. Seeded map points remain null until a
+  reviewed authoritative coordinate import is available.
 
 See `TECHNICAL_SPECIFICATION.md` section 7 for the authoritative model.
 

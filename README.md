@@ -6,47 +6,42 @@ TypeScript API contract, and the existing Telegram ingestion research harness.
 
 ## Prerequisites
 
-- Python 3.13
-- `uv`
 - Node.js 24 LTS, provisioned from the repository declaration by pnpm 11
 - Corepack with pnpm 11
-- Docker with Docker Compose
+- Docker Desktop with Docker Compose
+- Python 3.13 and `uv` only when running the Telegram research harness on the host
 
 ## Initial setup
 
 1. Copy `.env.example` to `.env` and replace local secrets.
-2. Install Python dependencies:
+2. Install JavaScript dependencies through Corepack:
 
    ```powershell
-   uv sync
+   corepack pnpm install
    ```
 
-3. Enable pnpm through Corepack and install JavaScript dependencies:
+3. Build the GeoDjango backend image:
 
    ```powershell
-   corepack enable
-   pnpm install
+   corepack pnpm backend:build
    ```
 
-   If enabling the global Corepack shims requires administrator access, commands
-   can be run as `corepack pnpm <command>`.
-
-4. Start PostgreSQL/PostGIS:
+4. Apply migrations. Docker Compose starts PostgreSQL/PostGIS automatically:
 
    ```powershell
-   docker compose up -d database
+   corepack pnpm db:migrate
    ```
 
-5. Apply migrations:
+5. Create a local Django Admin account:
 
    ```powershell
-   uv run python apps/backend/manage.py migrate
+   docker compose run --rm backend python apps/backend/manage.py createsuperuser
    ```
 
-6. Generate the OpenAPI schema and TypeScript contract:
+6. Verify the generated OpenAPI schema and TypeScript contract:
 
    ```powershell
-   pnpm api:generate
+   corepack pnpm api:check
    ```
 
 ## Development
@@ -54,10 +49,11 @@ TypeScript API contract, and the existing Telegram ingestion research harness.
 Run the applications in separate terminals:
 
 ```powershell
-pnpm dev:backend
-pnpm dev:web
+corepack pnpm dev:backend
+corepack pnpm dev:web
 ```
 
+- Django Admin: `http://localhost:8000/admin/`
 - Django health: `http://localhost:8000/api/v1/health/`
 - OpenAPI schema: `http://localhost:8000/api/schema/`
 - Next.js: `http://localhost:3000/`
@@ -66,10 +62,24 @@ pnpm dev:web
 Run all non-mutating checks with:
 
 ```powershell
-pnpm check
+corepack pnpm check
 ```
 
-The Telegram research entry point remains:
+Run Django management commands inside the backend container:
+
+```powershell
+docker compose run --rm backend python apps/backend/manage.py <command>
+```
+
+The Telegram research entry point remains host-operated. Install its Python
+environment when needed:
+
+```powershell
+python -m uv sync
+python -m uv run telegram-ingestion
+```
+
+If `uv` is available directly on `PATH`, the shorter equivalent is:
 
 ```powershell
 uv run telegram-ingestion
