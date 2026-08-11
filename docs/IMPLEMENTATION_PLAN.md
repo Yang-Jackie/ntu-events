@@ -147,7 +147,55 @@ and ingestion tests passing against PostgreSQL/PostGIS. Seeded locations remain
 without map coordinates until a reviewed authoritative coordinate import is
 available; coordinates were not guessed.
 
-## 6. Progress Rules
+## 6. Milestone 3 Progress
+
+- [x] Added the strict, source-neutral `event-candidate-v1` contract with
+  occurrence, registration, organizer, classification, evidence, and ambiguity
+  fields.
+- [x] Selected public Telegram broadcast channels as the first production
+  ingestion source; one registered source is one channel and one queued job
+  processes one source.
+- [x] Added `IngestionRequest` grouping for Admin, command, and scheduled
+  triggers plus durable single-source `IngestionJob` records, atomic PostgreSQL
+  claiming, heartbeats, periodic stale-job recovery, retry state, and per-source
+  active-job deduplication.
+- [x] Added the polling Django worker command and a dedicated Docker Compose
+  worker service without introducing Redis, Celery, or a general task framework.
+- [x] Added Telethon channel discovery/registration, one-time terminal login,
+  saved ignored sessions, incremental message checkpoints, bounded backfill,
+  and text/caption-only public-channel retrieval.
+- [x] Added high-recall `gpt-5-nano` screening in fixed batches of 20 followed
+  by `gpt-5-mini` candidate extraction in fixed batches of five, with up to ten
+  concurrent OpenAI requests and structured Pydantic outputs.
+- [x] Added batch-level `ModelInvocation`, per-message `MessageScreening`, and
+  links to per-message extraction runs so one provider response can be audited
+  across every affected message.
+- [x] Added selective immutable local raw-content storage under ignored
+  `var/raw/`: relevant, uncertain, and failed messages are retained; confirmed
+  non-event bodies are discarded while identity, hash, decision, and versions
+  remain inspectable.
+- [x] Added deterministic candidate validation for missing locations,
+  structured ambiguities, long timed ranges, online-only events, and explicit
+  off-campus cases.
+- [x] Added source Admin ingestion actions, queue and inline management commands,
+  external-scheduler enqueue support, worker inspection, and candidate review
+  through Django Admin.
+- [x] Added JSON—not JSONL—Telegram regression fixtures and focused tests for
+  request/job grouping, fixed batch sizes, selective raw retention, and unchanged
+  rerun candidate idempotency.
+- [x] Applied both migrations and passed the complete repository verification
+  suite against PostgreSQL/PostGIS: formatting, lint, type, Django, migration,
+  OpenAPI drift, 54 backend/ingestion tests, and one web test.
+- [ ] Perform one authenticated production-path Telegram run, inspect screening,
+  invocation, failure, and candidate records in Django Admin, and confirm an
+  unchanged rerun creates no duplicate candidates or OpenAI calls.
+- [ ] Expand the reviewed labelled Telegram evaluation set toward 50–100 real,
+  production-intent messages before relying on screening quality.
+
+Milestone 3 remains in progress. Canonical event creation, venue resolution,
+duplicate matching, and publication remain Milestone 4 work.
+
+## 7. Progress Rules
 
 - Keep one milestone active at a time.
 - Complete the current vertical path before broadening source coverage or polishing the interface.
@@ -156,7 +204,7 @@ available; coordinates were not guessed.
 - Update this document when a milestone starts, completes or changes scope.
 - Introduce abstractions only when the active vertical slice demonstrates the need.
 
-## 7. Task Completion Standard
+## 8. Task Completion Standard
 
 An implementation task is complete when:
 

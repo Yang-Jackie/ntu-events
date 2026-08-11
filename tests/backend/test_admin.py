@@ -3,7 +3,14 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from events.models import Event, EventOccurrence, EventSeries
-from ingestion.models import EventCandidate, ExtractionRun
+from ingestion.models import (
+    EventCandidate,
+    ExtractionRun,
+    IngestionJob,
+    IngestionRequest,
+    MessageScreening,
+    ModelInvocation,
+)
 from organizers.models import Organizer
 from sources.models import RawSourceDocument, Source, SourceRepresentation
 from venues.models import Building, Venue, VenueAlias
@@ -17,6 +24,10 @@ pytestmark = pytest.mark.django_db
         Source,
         SourceRepresentation,
         RawSourceDocument,
+        IngestionRequest,
+        IngestionJob,
+        ModelInvocation,
+        MessageScreening,
         ExtractionRun,
         EventCandidate,
         Organizer,

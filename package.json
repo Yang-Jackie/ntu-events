@@ -13,8 +13,13 @@
   "scripts": {
     "backend:build": "docker compose build backend",
     "dev:backend": "docker compose up backend",
+    "dev:worker": "docker compose up telegram-worker",
     "dev:web": "corepack pnpm --filter @ntu-events/web dev",
     "db:migrate": "docker compose run --rm backend python apps/backend/manage.py migrate",
+    "telegram:login": "docker compose run --rm backend python apps/backend/manage.py telegram_login",
+    "telegram:channels": "docker compose run --rm backend python apps/backend/manage.py telegram_channels",
+    "ingest:telegram": "docker compose run --rm backend python apps/backend/manage.py ingest_telegram",
+    "ingest:schedule": "docker compose run --rm backend python apps/backend/manage.py enqueue_scheduled_ingestion",
     "api:schema": "docker compose run --rm backend python apps/backend/manage.py spectacular --file packages/api-client/openapi.json --format openapi-json --validate --fail-on-warn",
     "api:types": "corepack pnpm --filter @ntu-events/api-client generate",
     "api:generate": "corepack pnpm api:schema && corepack pnpm api:types",

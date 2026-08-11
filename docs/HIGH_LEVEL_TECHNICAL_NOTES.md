@@ -50,4 +50,5 @@ Decide personal access mode, minimum source coverage, evidence thresholds and ob
 
 ## Can wait
 
-Map provider, task queue, scheduler, OCR, exact language-model provider, advanced deduplication, a polished frontend, production hosting, and public-launch operations.
+Map provider, scheduler, OCR, advanced deduplication, a polished frontend,
+production hosting, and public-launch operations.

@@ -71,6 +71,13 @@ class Source(TimestampedModel):
 
 
 class CrawlRun(models.Model):
+    ingestion_job = models.ForeignKey(
+        "ingestion.IngestionJob",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="crawl_runs",
+    )
     source = models.ForeignKey(Source, on_delete=models.PROTECT, related_name="crawl_runs")
     started_at = models.DateTimeField()
     completed_at = models.DateTimeField(null=True, blank=True)

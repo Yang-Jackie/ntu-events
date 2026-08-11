@@ -1,4 +1,6 @@
-from django.contrib import admin
+from django.contrib import admin, messages
+from ingestion.jobs import enqueue_sources
+from ingestion.models import IngestionTrigger
 
 from .models import CrawlRun, RawSourceDocument, Source, SourceRepresentation
 
@@ -8,6 +10,21 @@ class SourceAdmin(admin.ModelAdmin):
     list_display = ("name", "source_type", "adapter_key", "is_active", "updated_at")
     list_filter = ("source_type", "is_active")
     search_fields = ("name", "base_url", "adapter_key")
+    actions = ("ingest_selected_sources",)
+
+    @admin.action(description="Ingest selected Telegram sources")
+    def ingest_selected_sources(self, request, queryset) -> None:
+        result = enqueue_sources(
+            queryset,
+            trigger=IngestionTrigger.ADMIN,
+            requested_by=request.user,
+        )
+        self.message_user(
+            request,
+            f"Queued {len(result.jobs)} job(s); skipped {len(result.skipped_sources)} "
+            "inactive, incompatible, or already-active source(s).",
+            level=messages.SUCCESS if result.jobs else messages.WARNING,
+        )
 
 
 @admin.register(CrawlRun)

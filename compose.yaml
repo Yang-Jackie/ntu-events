@@ -34,6 +34,12 @@ services:
       POSTGRES_HOST: database
       POSTGRES_PORT: 5432
       RAW_STORAGE_ROOT: /workspace/var/raw
+      TELEGRAM_API_ID: ${TELEGRAM_API_ID:-}
+      TELEGRAM_API_HASH: ${TELEGRAM_API_HASH:-}
+      TELEGRAM_SESSION_PATH: ${TELEGRAM_SESSION_PATH:-storage/telegram/sessions/ingestion}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_SCREENING_MODEL: ${OPENAI_SCREENING_MODEL:-gpt-5-nano}
+      OPENAI_EXTRACTION_MODEL: ${OPENAI_EXTRACTION_MODEL:-gpt-5-mini}
     ports:
       - "8000:8000"
     volumes:
@@ -53,6 +59,40 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
+
+  telegram-worker:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    command:
+      [
+        "python",
+        "apps/backend/manage.py",
+        "run_ingestion_worker",
+        "--poll-interval",
+        "2",
+      ]
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-local-development-only-secret}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-true}
+      POSTGRES_DB: ${POSTGRES_DB:-ntu_events}
+      POSTGRES_USER: ${POSTGRES_USER:-ntu_events}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ntu_events}
+      POSTGRES_HOST: database
+      POSTGRES_PORT: 5432
+      RAW_STORAGE_ROOT: /workspace/var/raw
+      TELEGRAM_API_ID: ${TELEGRAM_API_ID:-}
+      TELEGRAM_API_HASH: ${TELEGRAM_API_HASH:-}
+      TELEGRAM_SESSION_PATH: ${TELEGRAM_SESSION_PATH:-storage/telegram/sessions/ingestion}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_SCREENING_MODEL: ${OPENAI_SCREENING_MODEL:-gpt-5-nano}
+      OPENAI_EXTRACTION_MODEL: ${OPENAI_EXTRACTION_MODEL:-gpt-5-mini}
+    volumes:
+      - .:/workspace
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   ntu_events_postgres_data:

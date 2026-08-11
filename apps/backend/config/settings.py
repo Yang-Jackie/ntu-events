@@ -116,3 +116,24 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
+
+raw_storage_root = Path(os.getenv("RAW_STORAGE_ROOT", "var/raw"))
+RAW_STORAGE_ROOT = (
+    raw_storage_root
+    if raw_storage_root.is_absolute()
+    else (REPOSITORY_ROOT / raw_storage_root).resolve()
+)
+
+TELEGRAM_API_ID = os.getenv("TELEGRAM_API_ID", "")
+TELEGRAM_API_HASH = os.getenv("TELEGRAM_API_HASH", "")
+telegram_session_path = Path(
+    os.getenv("TELEGRAM_SESSION_PATH", "storage/telegram/sessions/ingestion")
+)
+TELEGRAM_SESSION_PATH = (
+    telegram_session_path
+    if telegram_session_path.is_absolute()
+    else (REPOSITORY_ROOT / telegram_session_path).resolve()
+)
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENAI_SCREENING_MODEL = os.getenv("OPENAI_SCREENING_MODEL", "gpt-5-nano")
+OPENAI_EXTRACTION_MODEL = os.getenv("OPENAI_EXTRACTION_MODEL", "gpt-5-mini")

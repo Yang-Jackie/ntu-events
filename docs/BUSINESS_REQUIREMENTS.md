@@ -229,7 +229,8 @@ The following are deliberately postponed:
 - Full room-level map rendering
 - Events outside NTU
 - Private email ingestion
-- Authenticated-source ingestion
+- Private or authenticated-only source ingestion; an owner-authenticated client
+  may retrieve content that is independently public
 - Automatic discovery of new source accounts
 - Advertising or monetization
 
@@ -282,10 +283,10 @@ The first source categories are:
 1. NTU central event websites
 2. NTU school and faculty websites
 3. Selected student organization webpages or public accounts
+4. Selected public Telegram broadcast channels
 
 Potential later sources include:
 
-- Telegram channels
 - LinkedIn
 - Email newsletters
 - Nearby external event platforms

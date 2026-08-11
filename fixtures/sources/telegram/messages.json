@@ -1,0 +1,28 @@
+{
+  "description": "Synthetic Telegram text cases for deterministic production-pipeline tests.",
+  "messages": [
+    {"id": 1, "text": "Workshop on 18 August, 2 PM at The Arc TR+1. Register now."},
+    {"id": 2, "text": "Join our networking night at Gaia on 20 August from 6 PM."},
+    {"id": 3, "text": "Reminder: tomorrow's physical club orientation starts at 10 AM in LT1."},
+    {"id": 4, "text": "Day 1 and Day 2 of the camp require separate registrations."},
+    {"id": 5, "text": "The overnight hackathon runs 9 PM–8 AM at North Spine."},
+    {"id": 6, "text": "Venue update for our upcoming event: Innovation Centre."},
+    {"id": 7, "text": "Possible gathering next week; time and room to be confirmed."},
+    {"id": 8, "text": "Career fair: morning networking and separately registered afternoon workshops."},
+    {"id": 9, "text": "This event has been postponed; retain the announced details for review."},
+    {"id": 10, "text": "The seminar scheduled at LT19A has been cancelled."},
+    {"id": 11, "text": "Physical exhibition at ADM Gallery from 21–24 August."},
+    {"id": 12, "text": "Sports try-out, SRC Court 1, Saturday at 4 PM."},
+    {"id": 13, "text": "Congratulations to everyone who completed the semester."},
+    {"id": 14, "text": "Committee recruitment applications are open."},
+    {"id": 15, "text": "Here are photographs from last year's dinner."},
+    {"id": 16, "text": "Please update your club profile by Friday."},
+    {"id": 17, "text": "Online-only webinar recording is now available."},
+    {"id": 18, "text": "Merchandise preorder closes tonight."},
+    {"id": 19, "text": "Weekly motivational quote."},
+    {"id": 20, "text": "Thanks to our sponsors."},
+    {"id": 21, "text": "No meeting this week."},
+    {"id": 22, "text": "Follow our Instagram account."},
+    {"id": 23, "text": "The office will be closed for maintenance."}
+  ]
+}

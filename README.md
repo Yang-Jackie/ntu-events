@@ -50,6 +50,7 @@ Run the applications in separate terminals:
 
 ```powershell
 corepack pnpm dev:backend
+corepack pnpm dev:worker
 corepack pnpm dev:web
 ```
 
@@ -71,6 +72,51 @@ Run Django management commands inside the backend container:
 docker compose run --rm backend python apps/backend/manage.py <command>
 ```
 
+## Telegram production ingestion
+
+Set `TELEGRAM_API_ID`, `TELEGRAM_API_HASH`, and `OPENAI_API_KEY` in the ignored
+`.env`. Authenticate once in an interactive terminal; the reusable Telethon
+session is saved under ignored `storage/telegram/sessions/`:
+
+```powershell
+corepack pnpm telegram:login
+```
+
+List accessible public broadcast channels and register selected list indexes as
+independent sources:
+
+```powershell
+corepack pnpm telegram:channels --limit 20 --register 1 3
+```
+
+Queue all active Telegram sources. The sustained worker processes each source as
+an independent job:
+
+```powershell
+corepack pnpm ingest:telegram --all-active
+corepack pnpm dev:worker
+```
+
+Use `--source <database-id>` repeatedly to select specific channels. For direct
+development troubleshooting without the polling worker, add `--inline`. A
+hosting scheduler, cron, or Windows Task Scheduler can invoke:
+
+```powershell
+corepack pnpm ingest:schedule
+```
+
+Django Admin exposes the same enqueue operation as “Ingest selected Telegram
+sources”. Screening sends up to 20 messages per `gpt-5-nano` request; extraction
+sends up to five relevant or uncertain messages per `gpt-5-mini` request. Up to
+ten OpenAI calls run concurrently inside the single worker process.
+
+Relevant, uncertain, and failed message content is preserved under ignored
+`var/raw/`. Confirmed non-event bodies are discarded after their identity, hash,
+decision, and model versions are recorded. The pipeline creates reviewable event
+candidates but does not canonicalize or publish them.
+
+## Telegram research harness
+
 The Telegram research entry point remains host-operated. Install its Python
 environment when needed:
 
@@ -85,5 +131,5 @@ If `uv` is available directly on `PATH`, the shorter equivalent is:
 uv run telegram-ingestion
 ```
 
-Runtime Telegram content remains under ignored `storage/`. Future application
-raw content uses ignored `var/raw/`.
+Research-run content remains under ignored `storage/`; application raw content
+uses ignored `var/raw/`.

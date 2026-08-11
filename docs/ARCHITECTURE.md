@@ -186,6 +186,13 @@ must invoke shared ingestion workflows.
 
 Whether every capability becomes a folder is left to implementation scale.
 
+The first production ingestion slice uses a Telegram adapter, provider-neutral
+candidate contracts, selective immutable raw storage, deterministic validation,
+and a shared workflow invoked by Admin, commands, and a database-backed worker.
+Each queued job owns one registered source. OpenAI and Telethon provider objects
+remain behind ingestion adapters; entry points contain no ingestion business
+logic.
+
 ## 7. Fixtures and Runtime Data
 
 Root `fixtures/` contains small, reviewed and version-controlled datasets shared by adapters or evaluation tooling:
@@ -230,7 +237,7 @@ Within the backend:
 
 This architecture does not yet fix:
 
-- Exact task queue and scheduler
+- Exact scheduler
 - File-versus-folder layout inside small Django domains
 - Production raw-content storage provider beyond its interface
 - Deployment topology

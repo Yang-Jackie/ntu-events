@@ -46,3 +46,43 @@ not downloaded. Only broadcast channels are listed; groups and private chats
 are excluded. Access is limited to what Telegram shows the authorized account.
 Runtime content and sessions are ignored by Git. Candidate fields remain
 provisional until results from Telegram and other sources are compared.
+
+## Production-path ingestion
+
+The Django production path is separate from the research harness but reuses its
+validated source assumptions. One registered `Source` represents one public
+broadcast channel and one `SourceRepresentation` represents one channel message.
+Groups, private chats, media-only posts, and media downloads remain excluded.
+
+Configure and authenticate once:
+
+```powershell
+corepack pnpm telegram:login
+corepack pnpm telegram:channels -- --limit 20 --register 1 3
+corepack pnpm db:migrate
+```
+
+Queue registered channels and run the worker in another terminal:
+
+```powershell
+corepack pnpm ingest:telegram -- --all-active
+corepack pnpm dev:worker
+```
+
+For direct troubleshooting without the sustained worker:
+
+```powershell
+corepack pnpm ingest:telegram -- --source 1 --inline
+```
+
+The source Admin action, commands, and external scheduled invocation all create
+the same durable request/job records. Each job processes one channel. Screening
+uses `gpt-5-nano` in batches of 20; `EVENT` and `UNCERTAIN` messages proceed to
+`gpt-5-mini` extraction in batches of five. At most ten OpenAI requests run
+concurrently. The worker reuses one OpenAI client for connection pooling.
+
+Full content is retained under ignored `var/raw/` only for relevant, uncertain,
+or failed messages. Confirmed non-event bodies are discarded after screening,
+while their Telegram identity, content hash, screening result, prompt/schema
+versions, and model invocation remain in PostgreSQL. Extraction produces
+reviewable candidates only; it does not canonicalize or publish events.

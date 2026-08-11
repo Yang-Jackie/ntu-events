@@ -1007,6 +1007,27 @@ The existing Telethon and OpenAI research implementations inform future
 adapters but do not define these core contracts and need not be rewritten
 during repository scaffolding.
 
+The first production-path implementation ingests public Telegram broadcast
+channels through the owner's saved, ignored Telethon session. One registered
+`Source` represents one channel and one `SourceRepresentation` represents one
+message. `gpt-5-nano` screens up to 20 messages per request for high-recall
+`EVENT`, `UNCERTAIN`, or `NOT_EVENT` decisions. `EVENT` and `UNCERTAIN` messages
+are passed to `gpt-5-mini` in batches of up to five for strict candidate
+extraction. Both stages share a limit of ten concurrent OpenAI requests and use
+minimal reasoning effort and low output verbosity.
+
+Provider-facing structured-output schemas must stay within OpenAI's supported
+JSON Schema subset. Candidate URL fields are exposed to the model as plain
+strings because the `uri` string format is unsupported; deterministic Pydantic
+validation still requires valid HTTP(S) URLs before a candidate is accepted.
+
+Full message content is retained immutably for relevant, uncertain, and failed
+processing cases. Confirmed non-event content is discarded after screening;
+its source/message identity, content hash, model/prompt/schema version, decision,
+confidence, and short reason remain in PostgreSQL. Representative rejected
+messages remain in versioned evaluation fixtures so screening false negatives
+can be reviewed without permanently archiving every fetched message.
+
 ### 9.1 Agentic browser retrieval
 
 When direct fetch is insufficient, an LLM may open allowlisted URLs, inspect text, controls, DOM/accessibility summaries and screenshots, click navigation or content-reveal controls, scroll, wait, go back, and capture content.
@@ -1485,6 +1506,24 @@ Archived source records and raw documents should remain linked to their canonica
 ---
 
 ## 22. Background Jobs
+
+The initial executor is a single Django worker process polling indexed queued-job
+rows in PostgreSQL every two seconds. This is a project-specific ingestion queue,
+not a general task framework. An `IngestionRequest` records one Admin, command,
+or scheduled trigger and may group several jobs. Each `IngestionJob` belongs to
+exactly one registered `Source`; selecting several Telegram channels therefore
+creates several independently retryable jobs under one request. For Telegram,
+the worker is intentionally deployed as one process so only one process owns the
+saved Telethon session. Up to ten concurrent model calls are tasks inside that
+worker, not additional queue workers.
+
+Jobs are claimed with a short row-locking transaction, record a worker identity
+and heartbeat, and persist stage results incrementally. Abandoned running jobs
+are returned to the queue after a stale-heartbeat threshold; the idle polling
+loop checks for newly stale jobs at least once per minute. The Admin action,
+queued command, inline troubleshooting command, and external scheduler command
+all invoke the same enqueue and workflow services. The scheduler remains an
+external concern; it only needs to invoke the scheduled-enqueue command.
 
 Initial background job types include:
 
@@ -1986,7 +2025,6 @@ The following remain intentionally undecided:
 - Exact map renderer and basemap provider
 - LLM provider, retrieval providers, browser-agent runtime, and model/tool APIs
 - Acceptable extraction accuracy, navigation success, latency, and cost
-- Exact task queue implementation
 - Exact scheduler implementation
 - Raw-content storage implementation beyond the storage abstraction
 - Crawl frequency per source
