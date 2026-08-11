@@ -57,27 +57,3 @@ class WorkerRuntime:
 
 def make_worker_id() -> str:
     return f"{socket.gethostname()}:{os.getpid()}:{uuid4().hex[:8]}"
-
-
-def run_next_job(worker_id: str) -> IngestionJob | None:
-    runtime = WorkerRuntime(worker_id)
-    try:
-        return runtime.run_next_job()
-    finally:
-        runtime.close()
-
-
-def run_specific_job(job_id: int, worker_id: str) -> IngestionJob | None:
-    runtime = WorkerRuntime(worker_id)
-    try:
-        return runtime.run_specific_job(job_id)
-    finally:
-        runtime.close()
-
-
-def run_claimed_job(job: IngestionJob) -> None:
-    runtime = WorkerRuntime(job.worker_id or make_worker_id())
-    try:
-        runtime.run_claimed_job(job)
-    finally:
-        runtime.close()

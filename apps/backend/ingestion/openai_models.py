@@ -85,9 +85,20 @@ class OpenAITelegramModels:
         self.client.close()
 
 
-def batch_input_hash(messages: list[TelegramMessage], *, model: str, prompt_version: str) -> str:
+def batch_input_hash(
+    messages: list[TelegramMessage],
+    *,
+    model: str,
+    prompt_version: str,
+    schema_version: str,
+) -> str:
     payload = "|".join(
-        [model, prompt_version, *(f"{item.identity}:{item.content_hash}" for item in messages)]
+        [
+            model,
+            prompt_version,
+            schema_version,
+            *(f"{item.identity}:{item.content_hash}" for item in messages),
+        ]
     )
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
@@ -121,5 +132,5 @@ def _model_result[ParsedT: BaseModel](response, parsed: ParsedT) -> ModelResult[
         parsed=parsed,
         response_identifier=response.id,
         token_usage=usage,
-        raw_response=response.model_dump_json().encode("utf-8"),
+        raw_response=response.model_dump_json(warnings=False).encode("utf-8"),
     )

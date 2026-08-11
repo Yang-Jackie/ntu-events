@@ -219,6 +219,15 @@ class EventOccurrence(TimestampedModel):
                 name="all_day_occurrence_has_no_times",
             ),
             models.CheckConstraint(
+                condition=~Q(time_precision=TimePrecision.EXACT) | Q(start_time__isnull=False),
+                name="exact_occurrence_requires_start_time",
+            ),
+            models.CheckConstraint(
+                condition=~Q(time_precision=TimePrecision.DATE_ONLY)
+                | (Q(start_time__isnull=True) & Q(end_time__isnull=True)),
+                name="date_only_occurrence_has_no_times",
+            ),
+            models.CheckConstraint(
                 condition=Q(end_date__isnull=True)
                 | Q(end_date__gt=F("start_date"))
                 | Q(end_time__isnull=True)

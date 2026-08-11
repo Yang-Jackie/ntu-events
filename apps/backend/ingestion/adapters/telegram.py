@@ -3,12 +3,14 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import asdict, dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
 from telethon import TelegramClient
-from telethon.errors import FloodWaitError
+from telethon.errors import FloodWaitError, ServerError, TimedOutError
+
+SINGAPORE_TIMEZONE = timezone(timedelta(hours=8), "Asia/Singapore")
 
 
 class TelegramConfigurationError(RuntimeError):
@@ -49,7 +51,7 @@ class TelegramMessage:
             "message_identity": self.identity,
             "channel_title": self.channel_title,
             "channel_username": self.channel_username,
-            "published_at": self.published_at.isoformat(),
+            "published_at": self.published_at.astimezone(SINGAPORE_TIMEZONE).isoformat(),
             "source_url": self.source_url,
             "text": self.text,
         }
@@ -60,6 +62,12 @@ class TelegramMessage:
             value = payload[key]
             payload[key] = value.isoformat() if value else None
         return json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")
+
+
+@dataclass(frozen=True)
+class TelegramFetchResult:
+    messages: list[TelegramMessage]
+    latest_message_id: int | None
 
 
 @dataclass(frozen=True)
@@ -81,7 +89,7 @@ class TelegramFetcher:
         source_configuration: dict[str, Any],
         message_limit: int,
         overlap: int,
-    ) -> list[TelegramMessage]:
+    ) -> TelegramFetchResult:
         reference = source_configuration.get("username") or source_configuration.get("channel_id")
         if not reference:
             raise TelegramConfigurationError(
@@ -134,13 +142,16 @@ class TelegramFetcher:
                 for message in raw_messages.values()
                 if message.raw_text
             ]
-            return sorted(normalized, key=lambda item: item.message_id)
+            return TelegramFetchResult(
+                messages=sorted(normalized, key=lambda item: item.message_id),
+                latest_message_id=max(raw_messages, default=None),
+            )
         except FloodWaitError as exc:
             raise TelegramRetryableError(
                 f"Telegram requested a flood wait of {exc.seconds} seconds",
                 retry_after_seconds=exc.seconds,
             ) from exc
-        except (OSError, TimeoutError) as exc:
+        except (OSError, TimeoutError, ServerError, TimedOutError) as exc:
             raise TelegramRetryableError(str(exc)) from exc
         finally:
             await client.disconnect()

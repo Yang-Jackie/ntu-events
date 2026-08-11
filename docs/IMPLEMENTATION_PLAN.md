@@ -2,7 +2,7 @@
 
 **Document status:** Active implementation plan  
 **Current milestone:** 3 — First-source ingestion
-**Next delivery goal:** Implement one approved source adapter through persisted raw-document capture and candidate production
+**Next delivery goal:** Complete production-path verification and the labelled Telegram evaluation set
 
 ## 1. Guiding Delivery Target
 
@@ -183,9 +183,9 @@ available; coordinates were not guessed.
 - [x] Added JSON—not JSONL—Telegram regression fixtures and focused tests for
   request/job grouping, fixed batch sizes, selective raw retention, and unchanged
   rerun candidate idempotency.
-- [x] Applied both migrations and passed the complete repository verification
+- [x] Applied the required migrations and passed the complete repository verification
   suite against PostgreSQL/PostGIS: formatting, lint, type, Django, migration,
-  OpenAPI drift, 54 backend/ingestion tests, and one web test.
+  OpenAPI drift, 67 backend/ingestion tests, and one web test.
 - [ ] Perform one authenticated production-path Telegram run, inspect screening,
   invocation, failure, and candidate records in Django Admin, and confirm an
   unchanged rerun creates no duplicate candidates or OpenAI calls.
@@ -216,9 +216,3 @@ An implementation task is complete when:
 - Material decisions or limitations are documented.
 
 Time estimates are intentionally omitted until the first source and development environment reveal the actual workload.
-
-# Just my personal note:
-1. Validate core schema & understand the models (make it map cleanly to front-end maps)
-2. Use telegram as the first real ingestion source
-3. Ingestion pipeline: Use nano to filter relevant messages => smarter model to extract event details
-4. Move on to Goal C onwards

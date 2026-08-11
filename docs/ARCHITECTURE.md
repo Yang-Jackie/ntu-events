@@ -57,7 +57,9 @@ Background workers run separately when needed but use the backend's application 
 The Django development runtime runs in Docker Compose so GeoDjango uses a
 reproducible Linux GDAL, GEOS, and PROJ stack. PostgreSQL/PostGIS is a separate
 Compose service with a named data volume. The repository is bind-mounted into
-the backend container for development; Next.js continues to run on the host.
+the backend container for development; the backend and ingestion worker share
+one image definition and dependency configuration. Next.js continues to run on
+the host.
 
 ### Web
 

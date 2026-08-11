@@ -19,6 +19,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options) -> None:
         if not settings.TELEGRAM_API_ID or not settings.TELEGRAM_API_HASH:
             raise CommandError("Set TELEGRAM_API_ID and TELEGRAM_API_HASH in .env first")
+        if not 1 <= options["limit"] <= 1000:
+            raise CommandError("--limit must be between 1 and 1000")
         fetcher = TelegramFetcher(
             api_id=int(settings.TELEGRAM_API_ID),
             api_hash=settings.TELEGRAM_API_HASH,

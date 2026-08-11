@@ -177,6 +177,31 @@ def test_occurrence_allows_crossing_midnight() -> None:
     assert occurrence.pk is not None
 
 
+def test_exact_occurrence_requires_start_time() -> None:
+    event = make_event()
+
+    with pytest.raises(IntegrityError), transaction.atomic():
+        EventOccurrence.objects.create(
+            event=event,
+            sequence=1,
+            start_date=date(2026, 8, 1),
+            time_precision=TimePrecision.EXACT,
+        )
+
+
+def test_date_only_occurrence_rejects_times() -> None:
+    event = make_event()
+
+    with pytest.raises(IntegrityError), transaction.atomic():
+        EventOccurrence.objects.create(
+            event=event,
+            sequence=1,
+            start_date=date(2026, 8, 1),
+            start_time=time(10),
+            time_precision=TimePrecision.DATE_ONLY,
+        )
+
+
 def test_occurrence_allows_only_one_primary_venue() -> None:
     event = make_event()
     occurrence = make_occurrence(event)

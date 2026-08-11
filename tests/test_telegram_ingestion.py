@@ -1,10 +1,13 @@
 import asyncio
+import json
 from datetime import UTC, datetime
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import AsyncMock
 
 import pytest
 
-from ntu_events_ingestion.extractor import extraction_cache_key
+from ntu_events_ingestion.extractor import OpenAIEventExtractor, extraction_cache_key
 from ntu_events_ingestion.models import (
     ExtractedEvent,
     ExtractionRecord,
@@ -87,6 +90,33 @@ def test_multi_channel_selection_is_ordered_and_deduplicated() -> None:
 def test_candidate_contract_rejects_inconsistent_event_flag() -> None:
     with pytest.raises(ValueError):
         MessageExtraction(is_event_related=True)
+
+
+@pytest.mark.asyncio
+async def test_research_extractor_uses_responses_text_verbosity() -> None:
+    parse = AsyncMock(
+        return_value=SimpleNamespace(
+            output_parsed=MessageExtraction(
+                is_event_related=False,
+                rejection_reason="not an event",
+            ),
+            id="response-1",
+            usage=None,
+        )
+    )
+    extractor = object.__new__(OpenAIEventExtractor)
+    extractor.model = "gpt-5-nano"
+    extractor.client = SimpleNamespace(responses=SimpleNamespace(parse=parse))
+
+    message = raw_message().model_copy(
+        update={"published_at": datetime(2026, 8, 10, 18, tzinfo=UTC)}
+    )
+    await extractor.extract(message)
+
+    assert parse.call_args.kwargs["text"] == {"verbosity": "low"}
+    assert "verbosity" not in parse.call_args.kwargs
+    prompt = json.loads(parse.call_args.kwargs["input"][1]["content"])
+    assert prompt["published_at"] == "2026-08-11T02:00:00+08:00"
 
 
 @pytest.mark.asyncio

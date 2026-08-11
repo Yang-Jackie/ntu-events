@@ -6,7 +6,9 @@ import os
 from datetime import UTC, datetime
 from pathlib import Path
 
-from .config import load_dotenv, required_env
+from dotenv import load_dotenv
+
+from .config import required_env
 from .extractor import PROMPT_VERSION, SCHEMA_VERSION, OpenAIEventExtractor
 from .storage import write_json
 from .telegram_source import ChannelChoice, TelegramSource, parse_selection

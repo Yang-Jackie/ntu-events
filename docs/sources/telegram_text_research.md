@@ -10,8 +10,8 @@ production ingestion service and does not canonicalize or publish events.
 1. Create a Telegram API application at `my.telegram.org/apps`.
 2. Copy `.env.example` to `.env` and fill in `TELEGRAM_API_ID`,
    `TELEGRAM_API_HASH`, and `OPENAI_API_KEY`. Never commit or share them.
-3. Install with `python -m pip install -e ".[dev]"`.
-4. Run `python scripts/telegram_ingestion.py`.
+3. Install with `python -m uv sync`.
+4. Run `python -m uv run telegram-ingestion`.
 
 The first run prompts for Telegram login and saves authorization under ignored
 `storage/telegram/sessions/`. Later runs reuse it. The guided entry point lists
@@ -22,10 +22,10 @@ extracts candidates, and reports the output directory.
 Useful alternatives:
 
 ```powershell
-python scripts/telegram_ingestion.py login
-python scripts/telegram_ingestion.py channels
-python scripts/telegram_ingestion.py run --messages 30 --max-calls 200
-python scripts/telegram_ingestion.py run --force
+python -m uv run telegram-ingestion login
+python -m uv run telegram-ingestion channels
+python -m uv run telegram-ingestion run --messages 30 --max-calls 200
+python -m uv run telegram-ingestion run --force
 ```
 
 `gpt-5-nano` is the low-cost default. Up to 200 new requests are allowed per

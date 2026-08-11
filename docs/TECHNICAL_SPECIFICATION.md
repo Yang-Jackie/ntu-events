@@ -608,6 +608,10 @@ does not store a per-occurrence timezone or perform general timezone
 conversion. Explicit non-Singapore times are unsupported or held for review
 rather than silently reinterpreted.
 
+An `exact` occurrence requires a start time. A `date_only` occurrence cannot
+contain start or end times. These rules are enforced both in the candidate
+contract and in canonical database constraints.
+
 Midnight and calendar-date changes do not split an occurrence. A continuous
 overnight activity remains one occurrence with different start and end dates.
 Create separate occurrences when the source identifies separate days,
@@ -1015,6 +1019,13 @@ message. `gpt-5-nano` screens up to 20 messages per request for high-recall
 are passed to `gpt-5-mini` in batches of up to five for strict candidate
 extraction. Both stages share a limit of ten concurrent OpenAI requests and use
 minimal reasoning effort and low output verbosity.
+
+Model-facing publication timestamps are converted to Singapore local time
+before resolving relative expressions such as “today” and “tomorrow”. The
+incremental cursor advances to the newest fetched Telegram message even when
+that message is filtered out as media-only. Cached screening or extraction is
+reused only when the content and applicable model, prompt, schema, and extractor
+versions still match.
 
 Provider-facing structured-output schemas must stay within OpenAI's supported
 JSON Schema subset. Candidate URL fields are exposed to the model as plain

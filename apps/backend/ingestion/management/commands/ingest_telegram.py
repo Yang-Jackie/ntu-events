@@ -31,14 +31,17 @@ class Command(BaseCommand):
             if missing:
                 raise CommandError(f"Unknown Telegram source IDs: {missing}")
 
-        result = enqueue_sources(
-            sources,
-            trigger=IngestionTrigger.COMMAND,
-            options={
-                "message_limit": options["messages"],
-                "overlap": options["overlap"],
-            },
-        )
+        try:
+            result = enqueue_sources(
+                sources,
+                trigger=IngestionTrigger.COMMAND,
+                options={
+                    "message_limit": options["messages"],
+                    "overlap": options["overlap"],
+                },
+            )
+        except ValueError as exc:
+            raise CommandError(str(exc)) from exc
         self.stdout.write(
             f"Request {result.request.pk}: queued {len(result.jobs)} job(s), "
             f"skipped {len(result.skipped_sources)} source(s)."

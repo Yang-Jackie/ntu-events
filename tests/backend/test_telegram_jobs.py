@@ -3,9 +3,16 @@ from __future__ import annotations
 import json
 from datetime import UTC, date, datetime, time
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import AsyncMock, patch
 
 import pytest
-from ingestion.adapters.telegram import TelegramMessage
+from ingestion.adapters.telegram import (
+    TelegramFetcher,
+    TelegramFetchResult,
+    TelegramMessage,
+    TelegramRetryableError,
+)
 from ingestion.contracts import (
     CandidateOccurrence,
     EventCandidatePayload,
@@ -19,6 +26,7 @@ from ingestion.contracts import (
 from ingestion.jobs import claim_job, enqueue_sources
 from ingestion.models import (
     EventCandidate,
+    IngestionRequest,
     IngestionTrigger,
     JobStatus,
     MessageScreening,
@@ -28,6 +36,7 @@ from ingestion.openai_models import ModelResult
 from ingestion.raw_storage import LocalRawContentStorage
 from ingestion.telegram_workflow import execute_telegram_job
 from sources.models import RawSourceDocument, Source, SourceType
+from telethon.errors import ServerError, TimedOutError
 
 pytestmark = pytest.mark.django_db
 
@@ -35,11 +44,24 @@ FIXTURE_PATH = Path(__file__).parents[2] / "fixtures" / "sources" / "telegram" /
 
 
 class FakeFetcher:
-    def __init__(self, messages: list[TelegramMessage]):
+    def __init__(
+        self,
+        messages: list[TelegramMessage],
+        *,
+        latest_message_id: int | None = None,
+    ):
         self.messages = messages
+        self.latest_message_id = (
+            latest_message_id
+            if latest_message_id is not None
+            else max((message.message_id for message in messages), default=None)
+        )
 
-    async def fetch(self, **_kwargs) -> list[TelegramMessage]:
-        return self.messages
+    async def fetch(self, **_kwargs) -> TelegramFetchResult:
+        return TelegramFetchResult(
+            messages=self.messages,
+            latest_message_id=self.latest_message_id,
+        )
 
 
 class FakeModels:
@@ -151,6 +173,36 @@ def fixture_messages() -> list[TelegramMessage]:
     ]
 
 
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "error",
+    [
+        ServerError(request=None, message="server unavailable"),
+        TimedOutError(request=None, message="request timed out"),
+    ],
+)
+async def test_transient_telegram_rpc_errors_are_retryable(tmp_path, error: Exception) -> None:
+    client = SimpleNamespace(
+        connect=AsyncMock(),
+        is_user_authorized=AsyncMock(return_value=True),
+        get_entity=AsyncMock(side_effect=error),
+        disconnect=AsyncMock(),
+    )
+    fetcher = TelegramFetcher(api_id=1, api_hash="hash", session_path=tmp_path / "session")
+
+    with (
+        patch("ingestion.adapters.telegram.TelegramClient", return_value=client),
+        pytest.raises(TelegramRetryableError),
+    ):
+        await fetcher.fetch(
+            source_configuration={"username": "test_channel"},
+            message_limit=100,
+            overlap=20,
+        )
+
+    client.disconnect.assert_awaited_once()
+
+
 def test_one_request_creates_one_job_per_source_and_skips_active_duplicates() -> None:
     first = make_source()
     second = Source.objects.create(
@@ -167,6 +219,44 @@ def test_one_request_creates_one_job_per_source_and_skips_active_duplicates() ->
     assert {job.source_id for job in result.jobs} == {first.pk, second.pk}
     assert duplicate.jobs == []
     assert duplicate.skipped_sources == [first]
+
+
+def test_empty_request_is_complete_instead_of_permanently_queued() -> None:
+    incompatible = Source.objects.create(
+        name="Website",
+        source_type=SourceType.OFFICIAL_WEBSITE,
+        adapter_key="website",
+    )
+
+    result = enqueue_sources([incompatible], trigger=IngestionTrigger.ADMIN)
+
+    assert result.jobs == []
+    assert result.request.status == JobStatus.SUCCEEDED
+
+
+def test_enqueue_rejects_an_unknown_trigger() -> None:
+    with pytest.raises(ValueError, match="Unsupported ingestion trigger"):
+        enqueue_sources([make_source()], trigger="UNKNOWN")
+
+
+@pytest.mark.parametrize(
+    "options",
+    [
+        {"message_limit": 0},
+        {"openai_concurrency": 11},
+        {"message_limit": 1.5},
+        {"unknown": 1},
+    ],
+)
+def test_enqueue_rejects_invalid_options_before_creating_a_request(options: dict) -> None:
+    with pytest.raises(ValueError):
+        enqueue_sources(
+            [make_source()],
+            trigger=IngestionTrigger.COMMAND,
+            options=options,
+        )
+
+    assert IngestionRequest.objects.count() == 0
 
 
 def test_telegram_job_uses_fixed_batches_and_preserves_only_relevant_content(tmp_path) -> None:
@@ -225,6 +315,59 @@ def test_unchanged_messages_do_not_create_duplicate_candidates_or_model_calls(tm
     assert second_models.screening_batch_sizes == []
     assert second_models.extraction_batch_sizes == []
     assert EventCandidate.objects.count() == 12
+
+
+def test_model_version_changes_invalidate_cached_processing(tmp_path) -> None:
+    source = make_source()
+    messages = fixture_messages()
+    first = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
+    first_job = claim_job(first.jobs[0].pk, "test-worker")
+    assert first_job is not None
+    execute_telegram_job(
+        first_job,
+        fetcher=FakeFetcher(messages),
+        models=FakeModels(),
+        storage=LocalRawContentStorage(tmp_path),
+    )
+
+    second = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
+    second_job = claim_job(second.jobs[0].pk, "test-worker")
+    assert second_job is not None
+    changed_models = FakeModels()
+    changed_models.screening_model = "gpt-5-nano-v2"
+    changed_models.extraction_model = "gpt-5-mini-v2"
+    execute_telegram_job(
+        second_job,
+        fetcher=FakeFetcher(messages),
+        models=changed_models,
+        storage=LocalRawContentStorage(tmp_path),
+    )
+
+    assert changed_models.screening_batch_sizes == [20, 3]
+    assert sorted(changed_models.extraction_batch_sizes) == [2, 5, 5]
+    assert EventCandidate.objects.count() == 24
+
+
+def test_media_only_fetch_advances_cursor_without_model_calls(tmp_path) -> None:
+    source = make_source()
+    enqueue = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
+    job = claim_job(enqueue.jobs[0].pk, "test-worker")
+    assert job is not None
+    models = FakeModels()
+
+    execute_telegram_job(
+        job,
+        fetcher=FakeFetcher([], latest_message_id=99),
+        models=models,
+        storage=LocalRawContentStorage(tmp_path),
+    )
+
+    job.refresh_from_db()
+    source.refresh_from_db()
+    assert job.status == JobStatus.SUCCEEDED
+    assert source.configuration["last_message_id"] == 99
+    assert models.screening_batch_sizes == []
+    assert models.extraction_batch_sizes == []
 
 
 def test_partial_job_advances_cursor_and_retries_recorded_failed_messages(tmp_path) -> None:

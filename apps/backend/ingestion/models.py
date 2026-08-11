@@ -61,7 +61,9 @@ class IngestionRequest(models.Model):
     @property
     def status(self) -> str:
         statuses = set(self.jobs.values_list("status", flat=True))
-        if not statuses or statuses == {JobStatus.QUEUED}:
+        if not statuses:
+            return JobStatus.SUCCEEDED
+        if statuses == {JobStatus.QUEUED}:
             return JobStatus.QUEUED
         if JobStatus.RUNNING in statuses or JobStatus.QUEUED in statuses:
             return JobStatus.RUNNING

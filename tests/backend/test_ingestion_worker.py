@@ -16,24 +16,35 @@ from sources.models import Source, SourceType
 def test_recover_stale_jobs_requeues_only_expired_running_jobs() -> None:
     stale_source = _make_source("stale")
     fresh_source = _make_source("fresh")
+    missing_heartbeat_source = _make_source("missing-heartbeat")
     stale_job = _claimed_job(stale_source, "stale-worker")
     fresh_job = _claimed_job(fresh_source, "fresh-worker")
+    missing_heartbeat_job = _claimed_job(missing_heartbeat_source, "missing-worker")
     now = timezone.now()
     stale_job.heartbeat_at = now - timedelta(minutes=11)
     stale_job.save(update_fields=("heartbeat_at",))
     fresh_job.heartbeat_at = now - timedelta(minutes=9)
     fresh_job.save(update_fields=("heartbeat_at",))
+    missing_heartbeat_job.heartbeat_at = None
+    missing_heartbeat_job.save(update_fields=("heartbeat_at",))
 
     recovered = recover_stale_jobs(stale_after=timedelta(minutes=10))
 
     stale_job.refresh_from_db()
     fresh_job.refresh_from_db()
-    assert recovered == 1
+    missing_heartbeat_job.refresh_from_db()
+    assert recovered == 2
     assert stale_job.status == JobStatus.QUEUED
     assert stale_job.worker_id == ""
     assert stale_job.error_type == "WorkerHeartbeatExpired"
     assert fresh_job.status == JobStatus.RUNNING
     assert fresh_job.worker_id == "fresh-worker"
+    assert missing_heartbeat_job.status == JobStatus.QUEUED
+
+    reclaimed = claim_job(missing_heartbeat_job.pk, "replacement-worker")
+    assert reclaimed is not None
+    assert reclaimed.error_type == ""
+    assert reclaimed.error_message == ""
 
 
 def test_periodic_stale_recovery_runs_again_after_the_interval() -> None:

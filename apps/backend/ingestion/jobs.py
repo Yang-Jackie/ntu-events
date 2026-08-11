@@ -6,6 +6,7 @@ from datetime import timedelta
 
 from django.contrib.auth.models import AbstractBaseUser
 from django.db import IntegrityError, transaction
+from django.db.models import Q
 from django.utils import timezone
 from sources.models import Source
 
@@ -24,6 +25,13 @@ DEFAULT_JOB_OPTIONS = {
     "extraction_batch_size": 5,
     "openai_concurrency": 10,
 }
+JOB_OPTION_BOUNDS = {
+    "message_limit": (1, 1000),
+    "overlap": (0, 100),
+    "screening_batch_size": (1, 20),
+    "extraction_batch_size": (1, 5),
+    "openai_concurrency": (1, 10),
+}
 
 
 @dataclass(frozen=True)
@@ -40,11 +48,13 @@ def enqueue_sources(
     requested_by: AbstractBaseUser | None = None,
     options: dict | None = None,
 ) -> EnqueueResult:
+    if trigger not in IngestionTrigger.values:
+        raise ValueError(f"Unsupported ingestion trigger: {trigger}")
+    job_options = validate_job_options(options)
     selected = list(dict.fromkeys(sources))
     request = IngestionRequest.objects.create(trigger=trigger, requested_by=requested_by)
     jobs: list[IngestionJob] = []
     skipped: list[Source] = []
-    job_options = {**DEFAULT_JOB_OPTIONS, **(options or {})}
     for source in selected:
         if not source.is_active or source.adapter_key != TELEGRAM_PIPELINE_KEY:
             skipped.append(source)
@@ -63,6 +73,21 @@ def enqueue_sources(
         else:
             jobs.append(job)
     return EnqueueResult(request=request, jobs=jobs, skipped_sources=skipped)
+
+
+def validate_job_options(options: dict | None) -> dict[str, int]:
+    supplied = options or {}
+    unknown = sorted(set(supplied) - set(DEFAULT_JOB_OPTIONS))
+    if unknown:
+        raise ValueError(f"Unsupported ingestion job options: {unknown}")
+    result = {**DEFAULT_JOB_OPTIONS, **supplied}
+    for key, (minimum, maximum) in JOB_OPTION_BOUNDS.items():
+        value = result[key]
+        if not isinstance(value, int) or isinstance(value, bool):
+            raise ValueError(f"{key} must be an integer")
+        if not minimum <= value <= maximum:
+            raise ValueError(f"{key} must be between {minimum} and {maximum}")
+    return result
 
 
 def claim_next_job(worker_id: str) -> IngestionJob | None:
@@ -114,6 +139,8 @@ def claim_job(job_id: int, worker_id: str) -> IngestionJob | None:
         job.heartbeat_at = now
         job.worker_id = worker_id
         job.attempt_count += 1
+        job.error_type = ""
+        job.error_message = ""
         job.save(
             update_fields=(
                 "status",
@@ -121,6 +148,8 @@ def claim_job(job_id: int, worker_id: str) -> IngestionJob | None:
                 "heartbeat_at",
                 "worker_id",
                 "attempt_count",
+                "error_type",
+                "error_message",
             )
         )
         return job
@@ -128,19 +157,14 @@ def claim_job(job_id: int, worker_id: str) -> IngestionJob | None:
 
 def recover_stale_jobs(*, stale_after: timedelta = timedelta(minutes=10)) -> int:
     threshold = timezone.now() - stale_after
-    return IngestionJob.objects.filter(
-        status=JobStatus.RUNNING,
-        heartbeat_at__lt=threshold,
-    ).update(
-        status=JobStatus.QUEUED,
-        available_at=timezone.now(),
-        worker_id="",
-        error_type="WorkerHeartbeatExpired",
-        error_message="Recovered after the previous worker stopped updating its heartbeat.",
+    return (
+        IngestionJob.objects.filter(status=JobStatus.RUNNING)
+        .filter(Q(heartbeat_at__lt=threshold) | Q(heartbeat_at__isnull=True))
+        .update(
+            status=JobStatus.QUEUED,
+            available_at=timezone.now(),
+            worker_id="",
+            error_type="WorkerHeartbeatExpired",
+            error_message="Recovered after the previous worker stopped updating its heartbeat.",
+        )
     )
-
-
-def default_trigger(value: str) -> str:
-    if value not in IngestionTrigger.values:
-        raise ValueError(f"Unsupported ingestion trigger: {value}")
-    return value

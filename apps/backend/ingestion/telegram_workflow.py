@@ -30,7 +30,7 @@ from ingestion.contracts import (
     ScreeningBatch,
     ScreeningLabel,
 )
-from ingestion.jobs import DEFAULT_JOB_OPTIONS, TELEGRAM_PIPELINE_KEY
+from ingestion.jobs import TELEGRAM_PIPELINE_KEY, validate_job_options
 from ingestion.models import (
     EventCandidate,
     ExtractionRun,
@@ -51,6 +51,9 @@ from ingestion.openai_models import (
 )
 from ingestion.raw_storage import LocalRawContentStorage, RawContentStorage
 from ingestion.validation import validate_candidate
+
+TELEGRAM_EXTRACTOR_TYPE = "telegram-llm"
+TELEGRAM_EXTRACTOR_VERSION = "telegram-m3-v1"
 
 
 @dataclass
@@ -82,7 +85,7 @@ def execute_telegram_job(
     if job.pipeline_key != TELEGRAM_PIPELINE_KEY or job.source.adapter_key != TELEGRAM_PIPELINE_KEY:
         raise ValueError("Ingestion job is not configured for the Telegram text pipeline")
 
-    options = _validated_options(job.options)
+    options = validate_job_options(job.options)
     owns_models = models is None
     fetcher = fetcher or _configured_fetcher()
     models = models or configured_models()
@@ -96,13 +99,14 @@ def execute_telegram_job(
     )
 
     try:
-        messages = asyncio.run(
+        fetch_result = asyncio.run(
             fetcher.fetch(
                 source_configuration=job.source.configuration,
                 message_limit=options["message_limit"],
                 overlap=options["overlap"],
             )
         )
+        messages = fetch_result.messages
         _update_job(job, items_discovered=len(messages))
         work = [_upsert_representation(job, message) for message in messages]
         relevant, screening_failure_ids = _screen_messages(
@@ -160,10 +164,10 @@ def execute_telegram_job(
                 )
             )
             configuration = dict(job.source.configuration)
-            if messages:
+            if fetch_result.latest_message_id is not None:
                 configuration["last_message_id"] = max(
                     int(configuration.get("last_message_id") or 0),
-                    max(message.message_id for message in messages),
+                    fetch_result.latest_message_id,
                 )
             if failure_ids:
                 configuration["pending_message_ids"] = sorted(int(value) for value in failure_ids)
@@ -210,6 +214,9 @@ def _screen_messages(
             MessageScreening.objects.filter(
                 source_representation=item.representation,
                 content_hash=item.message.content_hash,
+                model_invocation__model_name=models.screening_model,
+                model_invocation__prompt_version=SCREENING_PROMPT_VERSION,
+                model_invocation__schema_version=SCREENING_SCHEMA_VERSION,
             )
             .exclude(decision=ScreeningDecision.FAILED)
             .order_by("-created_at")
@@ -228,7 +235,10 @@ def _screen_messages(
     failure_ids: set[str] = set()
 
     def success(outcome: BatchOutcome[ScreeningBatch], invocation: ModelInvocation) -> None:
-        for result in outcome.result.parsed.results:  # type: ignore[union-attr]
+        model_result = outcome.result
+        if model_result is None:
+            raise RuntimeError("Successful screening outcome is missing its model result")
+        for result in model_result.parsed.results:
             item = by_identity[result.message_identity]
             raw_document = None
             if result.decision in (ScreeningLabel.EVENT, ScreeningLabel.UNCERTAIN):
@@ -293,7 +303,11 @@ def _extract_messages(
         for item in relevant
         if not ExtractionRun.objects.filter(
             raw_source_document__source_representation=item.representation,
-            extractor_type="telegram-llm",
+            extractor_type=TELEGRAM_EXTRACTOR_TYPE,
+            extractor_version=TELEGRAM_EXTRACTOR_VERSION,
+            model_name=models.extraction_model,
+            prompt_version=EXTRACTION_PROMPT_VERSION,
+            model_invocation__schema_version=EXTRACTION_SCHEMA_VERSION,
             status=ExtractionStatus.SUCCEEDED,
         ).exists()
     ]
@@ -304,8 +318,11 @@ def _extract_messages(
 
     def success(outcome: BatchOutcome[ExtractionBatch], invocation: ModelInvocation) -> None:
         nonlocal candidates_created, items_extracted
+        model_result = outcome.result
+        if model_result is None:
+            raise RuntimeError("Successful extraction outcome is missing its model result")
         raw_output_key = invocation.raw_output_storage_key
-        for result in outcome.result.parsed.results:  # type: ignore[union-attr]
+        for result in model_result.parsed.results:
             item = by_identity[result.message_identity]
             raw_document = item.raw_document
             if raw_document is None:
@@ -314,8 +331,8 @@ def _extract_messages(
                 extraction = ExtractionRun.objects.create(
                     model_invocation=invocation,
                     raw_source_document=raw_document,
-                    extractor_type="telegram-llm",
-                    extractor_version="telegram-m3-v1",
+                    extractor_type=TELEGRAM_EXTRACTOR_TYPE,
+                    extractor_version=TELEGRAM_EXTRACTOR_VERSION,
                     model_name=models.extraction_model,
                     prompt_version=EXTRACTION_PROMPT_VERSION,
                     started_at=outcome.started_at,
@@ -354,8 +371,8 @@ def _extract_messages(
             ExtractionRun.objects.create(
                 model_invocation=invocation,
                 raw_source_document=raw_document,
-                extractor_type="telegram-llm",
-                extractor_version="telegram-m3-v1",
+                extractor_type=TELEGRAM_EXTRACTOR_TYPE,
+                extractor_version=TELEGRAM_EXTRACTOR_VERSION,
                 model_name=models.extraction_model,
                 prompt_version=EXTRACTION_PROMPT_VERSION,
                 started_at=outcome.started_at,
@@ -483,6 +500,7 @@ def _record_invocation(
             outcome.messages,
             model=model_name,
             prompt_version=prompt_version,
+            schema_version=schema_version,
         ),
         raw_output_storage_key=raw_output_key,
         token_usage=(outcome.result.token_usage if outcome.result else {}),
@@ -557,23 +575,6 @@ def _message_metadata(message: TelegramMessage) -> dict[str, Any]:
         "forwarded_from": message.forwarded_from,
         "content_hash": message.content_hash,
     }
-
-
-def _validated_options(options: dict) -> dict[str, int]:
-    result = {**DEFAULT_JOB_OPTIONS, **options}
-    bounds = {
-        "message_limit": (1, 1000),
-        "overlap": (0, 100),
-        "screening_batch_size": (1, 20),
-        "extraction_batch_size": (1, 5),
-        "openai_concurrency": (1, 10),
-    }
-    for key, (minimum, maximum) in bounds.items():
-        value = int(result[key])
-        if not minimum <= value <= maximum:
-            raise ValueError(f"{key} must be between {minimum} and {maximum}")
-        result[key] = value
-    return result
 
 
 def _configured_fetcher() -> TelegramFetcher:

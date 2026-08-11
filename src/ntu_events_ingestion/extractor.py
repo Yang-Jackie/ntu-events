@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta, timezone
 from typing import Protocol
 
 from .models import ExtractionRecord, MessageExtraction, RawTelegramMessage
@@ -16,6 +16,7 @@ opportunities, advertisements, and standalone deadlines. Never invent facts.
 Resolve relative dates against the supplied publication time in
 Asia/Singapore. Keep event times separate from registration deadlines. Preserve
 raw venue wording, report ambiguities, and quote short exact evidence."""
+SINGAPORE_TIMEZONE = timezone(timedelta(hours=8), "Asia/Singapore")
 
 
 class EventExtractor(Protocol):
@@ -45,7 +46,7 @@ class OpenAIEventExtractor:
             "message_identity": message.identity,
             "channel_title": message.channel_title,
             "channel_username": message.channel_username,
-            "published_at": message.published_at.isoformat(),
+            "published_at": message.published_at.astimezone(SINGAPORE_TIMEZONE).isoformat(),
             "source_url": message.message_url,
             "text": message.text,
         }
@@ -57,7 +58,7 @@ class OpenAIEventExtractor:
             ],
             text_format=MessageExtraction,
             reasoning={"effort": "minimal"},
-            verbosity="low",
+            text={"verbosity": "low"},
         )
         if response.output_parsed is None:
             raise ValueError("OpenAI returned no parsed extraction")
