@@ -188,12 +188,22 @@ must invoke shared ingestion workflows.
 
 Whether every capability becomes a folder is left to implementation scale.
 
-The first production ingestion slice uses a Telegram adapter, provider-neutral
+The first production ingestion slice uses a Telegram pipeline, provider-neutral
 candidate contracts, selective immutable raw storage, deterministic validation,
-and a shared workflow invoked by Admin, commands, and a database-backed worker.
-Each queued job owns one registered source. OpenAI and Telethon provider objects
-remain behind ingestion adapters; entry points contain no ingestion business
-logic.
+and shared job infrastructure invoked by Admin, commands, and a database-backed
+worker. Each queued job owns one registered source. The generic worker resolves
+the job's stable `pipeline_key` through an explicit static catalog of lightweight
+pipeline instances. Pipeline instances validate their own options, initialize
+provider resources lazily inside the executing process, reuse those resources
+across jobs, and release them when the worker stops. OpenAI and Telethon objects
+remain inside the Telegram vertical slice; entry points and the generic worker
+contain no Telegram ingestion rules.
+
+Source-specific code is grouped vertically under `ingestion/pipelines/<key>/`,
+while source-neutral job lifecycle, candidate contracts, validation, storage,
+models, and worker dispatch remain at the ingestion root. A pipeline may use
+structured deterministic mapping, LLM extraction, OCR, or another appropriate
+strategy; screening and LLM use are not mandatory common stages.
 
 ## 7. Fixtures and Runtime Data
 

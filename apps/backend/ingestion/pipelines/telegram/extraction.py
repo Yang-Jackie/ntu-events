@@ -7,8 +7,8 @@ from dataclasses import dataclass
 from openai import OpenAI
 from pydantic import BaseModel
 
-from ingestion.adapters.telegram import TelegramMessage
 from ingestion.contracts import ExtractionBatch, ScreeningBatch
+from ingestion.pipelines.telegram.adapter import TelegramMessage
 
 SCREENING_PROMPT_VERSION = "telegram-screening-v1"
 EXTRACTION_PROMPT_VERSION = "telegram-extraction-v1"

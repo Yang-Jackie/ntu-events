@@ -3,7 +3,6 @@ from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import Mock
 
-from ingestion.adapters.telegram import TelegramMessage
 from ingestion.contracts import (
     ExtractedMessage,
     ExtractionBatch,
@@ -11,7 +10,8 @@ from ingestion.contracts import (
     ScreeningItem,
     ScreeningLabel,
 )
-from ingestion.openai_models import OpenAITelegramModels
+from ingestion.pipelines.telegram.adapter import TelegramMessage
+from ingestion.pipelines.telegram.extraction import OpenAITelegramModels
 
 
 def test_model_calls_send_verbosity_inside_text_configuration() -> None:

@@ -113,7 +113,11 @@ ten OpenAI calls run concurrently inside the single worker process.
 Relevant, uncertain, and failed message content is preserved under ignored
 `var/raw/`. Confirmed non-event bodies are discarded after their identity, hash,
 decision, and model versions are recorded. The pipeline creates reviewable event
-candidates but does not canonicalize or publish them.
+candidates but does not canonicalize or publish them. The sustained process is
+a generic ingestion worker: it resolves each job's stable `pipeline_key`
+through an explicit in-process catalog. The catalog currently contains the
+Telegram text pipeline; future pipelines may use different retrieval and
+interpretation strategies without changing the worker.
 
 ## Telegram research harness
 

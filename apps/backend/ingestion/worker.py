@@ -2,25 +2,29 @@ from __future__ import annotations
 
 import os
 import socket
+from collections.abc import Mapping
 from uuid import uuid4
 
-from ingestion.adapters.telegram import TelegramRetryableError
-from ingestion.jobs import claim_job, claim_next_job
+from ingestion.errors import RetryableIngestionError, UnsupportedPipelineError
+from ingestion.jobs import claim_job, claim_next_job, mark_job_failed, mark_job_for_retry
 from ingestion.models import IngestionJob
-from ingestion.telegram_workflow import (
-    configured_models,
-    execute_telegram_job,
-    mark_job_failed,
-    mark_job_for_retry,
-)
+from ingestion.pipelines.base import IngestionPipeline
 
 MAX_JOB_ATTEMPTS = 3
 
 
 class WorkerRuntime:
-    def __init__(self, worker_id: str | None = None):
+    def __init__(
+        self,
+        worker_id: str | None = None,
+        pipelines: Mapping[str, IngestionPipeline] | None = None,
+    ):
+        if pipelines is None:
+            from ingestion.pipelines.catalog import PIPELINES
+
+            pipelines = PIPELINES
         self.worker_id = worker_id or make_worker_id()
-        self.models = None
+        self.pipelines = pipelines
 
     def run_next_job(self) -> IngestionJob | None:
         job = claim_next_job(self.worker_id)
@@ -38,21 +42,25 @@ class WorkerRuntime:
 
     def run_claimed_job(self, job: IngestionJob) -> None:
         try:
-            if self.models is None:
-                self.models = configured_models()
-            execute_telegram_job(job, models=self.models)
-        except TelegramRetryableError as exc:
+            pipeline = self.pipelines.get(job.pipeline_key)
+            if pipeline is None:
+                raise UnsupportedPipelineError(job.pipeline_key)
+            pipeline.execute(job)
+        except RetryableIngestionError as exc:
             if job.attempt_count < MAX_JOB_ATTEMPTS:
-                mark_job_for_retry(job, exc)
+                mark_job_for_retry(
+                    job,
+                    exc,
+                    retry_after_seconds=exc.retry_after_seconds,
+                )
             else:
                 mark_job_failed(job, exc)
         except Exception as exc:
             mark_job_failed(job, exc)
 
     def close(self) -> None:
-        if self.models is not None:
-            self.models.close()
-            self.models = None
+        for pipeline in self.pipelines.values():
+            pipeline.close()
 
 
 def make_worker_id() -> str:

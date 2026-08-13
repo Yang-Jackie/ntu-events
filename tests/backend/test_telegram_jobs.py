@@ -4,15 +4,9 @@ import json
 from datetime import UTC, date, datetime, time
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from ingestion.adapters.telegram import (
-    TelegramFetcher,
-    TelegramFetchResult,
-    TelegramMessage,
-    TelegramRetryableError,
-)
 from ingestion.contracts import (
     CandidateOccurrence,
     EventCandidatePayload,
@@ -23,6 +17,7 @@ from ingestion.contracts import (
     ScreeningLabel,
     TimePrecision,
 )
+from ingestion.errors import RetryableIngestionError
 from ingestion.jobs import claim_job, enqueue_sources
 from ingestion.models import (
     EventCandidate,
@@ -32,9 +27,14 @@ from ingestion.models import (
     MessageScreening,
     ModelInvocation,
 )
-from ingestion.openai_models import ModelResult
+from ingestion.pipelines.telegram.adapter import (
+    TelegramFetcher,
+    TelegramFetchResult,
+    TelegramMessage,
+)
+from ingestion.pipelines.telegram.extraction import ModelResult
+from ingestion.pipelines.telegram.pipeline import TelegramTextPipeline
 from ingestion.raw_storage import LocalRawContentStorage
-from ingestion.telegram_workflow import execute_telegram_job
 from sources.models import RawSourceDocument, Source, SourceType
 from telethon.errors import ServerError, TimedOutError
 
@@ -191,8 +191,8 @@ async def test_transient_telegram_rpc_errors_are_retryable(tmp_path, error: Exce
     fetcher = TelegramFetcher(api_id=1, api_hash="hash", session_path=tmp_path / "session")
 
     with (
-        patch("ingestion.adapters.telegram.TelegramClient", return_value=client),
-        pytest.raises(TelegramRetryableError),
+        patch("ingestion.pipelines.telegram.adapter.TelegramClient", return_value=client),
+        pytest.raises(RetryableIngestionError),
     ):
         await fetcher.fetch(
             source_configuration={"username": "test_channel"},
@@ -259,6 +259,28 @@ def test_enqueue_rejects_invalid_options_before_creating_a_request(options: dict
     assert IngestionRequest.objects.count() == 0
 
 
+def test_telegram_pipeline_is_lightweight_until_execution() -> None:
+    pipeline = TelegramTextPipeline()
+
+    options = pipeline.normalize_options({"message_limit": 25})
+
+    assert options["message_limit"] == 25
+    assert options["screening_batch_size"] == 20
+    assert pipeline._fetcher is None
+    assert pipeline._models is None
+    assert pipeline._storage is None
+
+
+def test_telegram_pipeline_closes_only_initialized_model_resources() -> None:
+    models = SimpleNamespace(close=Mock())
+    pipeline = TelegramTextPipeline(models=models)
+
+    pipeline.close()
+
+    models.close.assert_called_once_with()
+    assert pipeline._models is None
+
+
 def test_telegram_job_uses_fixed_batches_and_preserves_only_relevant_content(tmp_path) -> None:
     source = make_source()
     enqueue = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
@@ -266,12 +288,11 @@ def test_telegram_job_uses_fixed_batches_and_preserves_only_relevant_content(tmp
     assert job is not None
     models = FakeModels()
 
-    execute_telegram_job(
-        job,
+    TelegramTextPipeline(
         fetcher=FakeFetcher(fixture_messages()),
         models=models,
         storage=LocalRawContentStorage(tmp_path),
-    )
+    ).execute(job)
     job.refresh_from_db()
     source.refresh_from_db()
 
@@ -292,23 +313,21 @@ def test_unchanged_messages_do_not_create_duplicate_candidates_or_model_calls(tm
     assert first_job is not None
     first_models = FakeModels()
     messages = fixture_messages()
-    execute_telegram_job(
-        first_job,
+    TelegramTextPipeline(
         fetcher=FakeFetcher(messages),
         models=first_models,
         storage=LocalRawContentStorage(tmp_path),
-    )
+    ).execute(first_job)
 
     second = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
     second_job = claim_job(second.jobs[0].pk, "test-worker")
     assert second_job is not None
     second_models = FakeModels()
-    execute_telegram_job(
-        second_job,
+    TelegramTextPipeline(
         fetcher=FakeFetcher(messages),
         models=second_models,
         storage=LocalRawContentStorage(tmp_path),
-    )
+    ).execute(second_job)
 
     second_job.refresh_from_db()
     assert second_job.status == JobStatus.SUCCEEDED
@@ -323,12 +342,11 @@ def test_model_version_changes_invalidate_cached_processing(tmp_path) -> None:
     first = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
     first_job = claim_job(first.jobs[0].pk, "test-worker")
     assert first_job is not None
-    execute_telegram_job(
-        first_job,
+    TelegramTextPipeline(
         fetcher=FakeFetcher(messages),
         models=FakeModels(),
         storage=LocalRawContentStorage(tmp_path),
-    )
+    ).execute(first_job)
 
     second = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
     second_job = claim_job(second.jobs[0].pk, "test-worker")
@@ -336,12 +354,11 @@ def test_model_version_changes_invalidate_cached_processing(tmp_path) -> None:
     changed_models = FakeModels()
     changed_models.screening_model = "gpt-5-nano-v2"
     changed_models.extraction_model = "gpt-5-mini-v2"
-    execute_telegram_job(
-        second_job,
+    TelegramTextPipeline(
         fetcher=FakeFetcher(messages),
         models=changed_models,
         storage=LocalRawContentStorage(tmp_path),
-    )
+    ).execute(second_job)
 
     assert changed_models.screening_batch_sizes == [20, 3]
     assert sorted(changed_models.extraction_batch_sizes) == [2, 5, 5]
@@ -355,12 +372,11 @@ def test_media_only_fetch_advances_cursor_without_model_calls(tmp_path) -> None:
     assert job is not None
     models = FakeModels()
 
-    execute_telegram_job(
-        job,
+    TelegramTextPipeline(
         fetcher=FakeFetcher([], latest_message_id=99),
         models=models,
         storage=LocalRawContentStorage(tmp_path),
-    )
+    ).execute(job)
 
     job.refresh_from_db()
     source.refresh_from_db()
@@ -377,12 +393,11 @@ def test_partial_job_advances_cursor_and_retries_recorded_failed_messages(tmp_pa
     first_job = claim_job(first.jobs[0].pk, "test-worker")
     assert first_job is not None
 
-    execute_telegram_job(
-        first_job,
+    TelegramTextPipeline(
         fetcher=FakeFetcher(messages),
         models=FirstExtractionBatchFails(),
         storage=LocalRawContentStorage(tmp_path),
-    )
+    ).execute(first_job)
     first_job.refresh_from_db()
     source.refresh_from_db()
 
@@ -394,12 +409,11 @@ def test_partial_job_advances_cursor_and_retries_recorded_failed_messages(tmp_pa
     second = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
     second_job = claim_job(second.jobs[0].pk, "test-worker")
     assert second_job is not None
-    execute_telegram_job(
-        second_job,
+    TelegramTextPipeline(
         fetcher=FakeFetcher(messages),
         models=FakeModels(),
         storage=LocalRawContentStorage(tmp_path),
-    )
+    ).execute(second_job)
     second_job.refresh_from_db()
     source.refresh_from_db()
 

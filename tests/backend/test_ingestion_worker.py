@@ -3,12 +3,14 @@ from unittest.mock import patch
 
 import pytest
 from django.utils import timezone
+from ingestion.errors import RetryableIngestionError
 from ingestion.jobs import claim_job, enqueue_sources, recover_stale_jobs
 from ingestion.management.commands.run_ingestion_worker import (
     STALE_JOB_RECOVERY_INTERVAL_SECONDS,
     _recover_stale_jobs_if_due,
 )
 from ingestion.models import IngestionTrigger, JobStatus
+from ingestion.worker import WorkerRuntime
 from sources.models import Source, SourceType
 
 
@@ -71,6 +73,103 @@ def test_periodic_stale_recovery_runs_again_after_the_interval() -> None:
     assert recover.call_count == 2
 
 
+@pytest.mark.django_db
+def test_enqueue_and_worker_dispatch_are_pipeline_agnostic() -> None:
+    source = Source.objects.create(
+        name="Structured website",
+        source_type=SourceType.OFFICIAL_WEBSITE,
+        adapter_key="structured_test",
+    )
+    pipeline = FakePipeline("structured_test")
+    pipelines = {pipeline.key: pipeline}
+
+    result = enqueue_sources(
+        [source],
+        trigger=IngestionTrigger.COMMAND,
+        options={"page_limit": 4},
+        pipelines=pipelines,
+    )
+    runtime = WorkerRuntime("test-worker", pipelines=pipelines)
+    job = runtime.run_specific_job(result.jobs[0].pk)
+    runtime.close()
+
+    assert job is not None
+    job.refresh_from_db()
+    assert job.pipeline_key == "structured_test"
+    assert job.options == {"page_limit": 4}
+    assert job.status == JobStatus.SUCCEEDED
+    assert pipeline.executed_job_ids == [job.pk]
+    assert pipeline.closed
+
+
+@pytest.mark.django_db
+def test_enqueue_skips_unsupported_sources_without_validating_their_options() -> None:
+    supported = Source.objects.create(
+        name="Supported source",
+        source_type=SourceType.OFFICIAL_WEBSITE,
+        adapter_key="structured_test",
+    )
+    unsupported = Source.objects.create(
+        name="Unsupported source",
+        source_type=SourceType.OTHER,
+        adapter_key="not_installed",
+    )
+    pipeline = FakePipeline("structured_test")
+
+    result = enqueue_sources(
+        [supported, unsupported],
+        trigger=IngestionTrigger.COMMAND,
+        options={"page_limit": 2},
+        pipelines={pipeline.key: pipeline},
+    )
+
+    assert len(result.jobs) == 1
+    assert result.jobs[0].source == supported
+    assert result.skipped_sources == [unsupported]
+
+
+@pytest.mark.django_db
+def test_unknown_pipeline_fails_one_job_without_raising_from_runtime() -> None:
+    source = _make_source("unsupported-runtime")
+    pipeline = FakePipeline("telegram_text")
+    result = enqueue_sources(
+        [source],
+        trigger=IngestionTrigger.COMMAND,
+        pipelines={pipeline.key: pipeline},
+    )
+    queued = result.jobs[0]
+    queued.pipeline_key = "removed_pipeline"
+    queued.save(update_fields=("pipeline_key",))
+
+    runtime = WorkerRuntime("test-worker", pipelines={})
+    job = runtime.run_specific_job(queued.pk)
+
+    assert job is not None
+    job.refresh_from_db()
+    assert job.status == JobStatus.FAILED
+    assert job.error_type == "UnsupportedPipelineError"
+
+
+@pytest.mark.django_db
+def test_generic_retryable_error_requeues_job() -> None:
+    source = _make_source("retryable")
+    pipeline = FakePipeline("telegram_text", retry=True)
+    result = enqueue_sources(
+        [source],
+        trigger=IngestionTrigger.COMMAND,
+        pipelines={pipeline.key: pipeline},
+    )
+
+    runtime = WorkerRuntime("test-worker", pipelines={pipeline.key: pipeline})
+    job = runtime.run_specific_job(result.jobs[0].pk)
+
+    assert job is not None
+    job.refresh_from_db()
+    assert job.status == JobStatus.QUEUED
+    assert job.error_type == "RetryableIngestionError"
+    assert job.available_at > timezone.now()
+
+
 def _make_source(suffix: str) -> Source:
     return Source.objects.create(
         name=f"Telegram channel {suffix}",
@@ -85,3 +184,25 @@ def _claimed_job(source: Source, worker_id: str):
     job = claim_job(result.jobs[0].pk, worker_id)
     assert job is not None
     return job
+
+
+class FakePipeline:
+    def __init__(self, key: str, *, retry: bool = False):
+        self.key = key
+        self.retry = retry
+        self.executed_job_ids: list[int] = []
+        self.closed = False
+
+    def normalize_options(self, options: dict | None) -> dict:
+        return options or {"page_limit": 1}
+
+    def execute(self, job) -> None:
+        self.executed_job_ids.append(job.pk)
+        if self.retry:
+            raise RetryableIngestionError("try again", retry_after_seconds=30)
+        job.status = JobStatus.SUCCEEDED
+        job.completed_at = timezone.now()
+        job.save(update_fields=("status", "completed_at"))
+
+    def close(self) -> None:
+        self.closed = True

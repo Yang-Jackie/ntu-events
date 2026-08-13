@@ -10,6 +10,8 @@ from typing import Any
 from telethon import TelegramClient
 from telethon.errors import FloodWaitError, ServerError, TimedOutError
 
+from ingestion.errors import RetryableIngestionError
+
 SINGAPORE_TIMEZONE = timezone(timedelta(hours=8), "Asia/Singapore")
 
 
@@ -19,12 +21,6 @@ class TelegramConfigurationError(RuntimeError):
 
 class TelegramAuthenticationRequired(RuntimeError):
     pass
-
-
-class TelegramRetryableError(RuntimeError):
-    def __init__(self, message: str, *, retry_after_seconds: int = 30):
-        super().__init__(message)
-        self.retry_after_seconds = retry_after_seconds
 
 
 @dataclass(frozen=True)
@@ -147,12 +143,12 @@ class TelegramFetcher:
                 latest_message_id=max(raw_messages, default=None),
             )
         except FloodWaitError as exc:
-            raise TelegramRetryableError(
+            raise RetryableIngestionError(
                 f"Telegram requested a flood wait of {exc.seconds} seconds",
                 retry_after_seconds=exc.seconds,
             ) from exc
         except (OSError, TimeoutError, ServerError, TimedOutError) as exc:
-            raise TelegramRetryableError(str(exc)) from exc
+            raise RetryableIngestionError(str(exc)) from exc
         finally:
             await client.disconnect()
 

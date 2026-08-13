@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError, CommandParser
 from sources.models import Source, SourceType
 
-from ingestion.adapters.telegram import TelegramFetcher
+from ingestion.pipelines.telegram.adapter import TelegramFetcher
 
 
 class Command(BaseCommand):

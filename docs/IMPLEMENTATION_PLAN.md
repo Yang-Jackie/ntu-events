@@ -161,6 +161,9 @@ available; coordinates were not guessed.
   active-job deduplication.
 - [x] Added the polling Django worker command and a dedicated Docker Compose
   worker service without introducing Redis, Celery, or a general task framework.
+- [x] Generalized worker dispatch through a static catalog of lightweight,
+  lazily initialized pipeline implementations; pipeline-specific options and
+  provider resources now remain inside source-oriented vertical slices.
 - [x] Added Telethon channel discovery/registration, one-time terminal login,
   saved ignored sessions, incremental message checkpoints, bounded backfill,
   and text/caption-only public-channel retrieval.
@@ -185,7 +188,7 @@ available; coordinates were not guessed.
   rerun candidate idempotency.
 - [x] Applied the required migrations and passed the complete repository verification
   suite against PostgreSQL/PostGIS: formatting, lint, type, Django, migration,
-  OpenAPI drift, 67 backend/ingestion tests, and one web test.
+  OpenAPI drift, 73 backend/ingestion tests, and one web test.
 - [ ] Perform one authenticated production-path Telegram run, inspect screening,
   invocation, failure, and candidate records in Django Admin, and confirm an
   unchanged rerun creates no duplicate candidates or OpenAI calls.

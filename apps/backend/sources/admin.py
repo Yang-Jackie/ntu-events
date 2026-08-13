@@ -12,7 +12,7 @@ class SourceAdmin(admin.ModelAdmin):
     search_fields = ("name", "base_url", "adapter_key")
     actions = ("ingest_selected_sources",)
 
-    @admin.action(description="Ingest selected Telegram sources")
+    @admin.action(description="Ingest selected sources")
     def ingest_selected_sources(self, request, queryset) -> None:
         result = enqueue_sources(
             queryset,

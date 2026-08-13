@@ -64,7 +64,7 @@ services:
       retries: 10
       start_period: 10s
 
-  telegram-worker:
+  ingestion-worker:
     <<: *backend-service
     command:
       [

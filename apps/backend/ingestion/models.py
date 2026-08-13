@@ -88,7 +88,7 @@ class IngestionJob(models.Model):
         on_delete=models.PROTECT,
         related_name="ingestion_jobs",
     )
-    pipeline_key = models.CharField(max_length=100, default="telegram_text")
+    pipeline_key = models.CharField(max_length=100)
     status = models.CharField(
         max_length=20,
         choices=JobStatus.choices,

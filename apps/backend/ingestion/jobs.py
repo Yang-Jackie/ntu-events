@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from datetime import timedelta
 
@@ -16,22 +16,7 @@ from ingestion.models import (
     IngestionTrigger,
     JobStatus,
 )
-
-TELEGRAM_PIPELINE_KEY = "telegram_text"
-DEFAULT_JOB_OPTIONS = {
-    "message_limit": 100,
-    "overlap": 20,
-    "screening_batch_size": 20,
-    "extraction_batch_size": 5,
-    "openai_concurrency": 10,
-}
-JOB_OPTION_BOUNDS = {
-    "message_limit": (1, 1000),
-    "overlap": (0, 100),
-    "screening_batch_size": (1, 20),
-    "extraction_batch_size": (1, 5),
-    "openai_concurrency": (1, 10),
-}
+from ingestion.pipelines.base import IngestionPipeline
 
 
 @dataclass(frozen=True)
@@ -47,16 +32,26 @@ def enqueue_sources(
     trigger: str,
     requested_by: AbstractBaseUser | None = None,
     options: dict | None = None,
+    pipelines: Mapping[str, IngestionPipeline] | None = None,
 ) -> EnqueueResult:
+    if pipelines is None:
+        from ingestion.pipelines.catalog import PIPELINES
+
+        pipelines = PIPELINES
     if trigger not in IngestionTrigger.values:
         raise ValueError(f"Unsupported ingestion trigger: {trigger}")
-    job_options = validate_job_options(options)
     selected = list(dict.fromkeys(sources))
+    normalized_options = {
+        source.pk: pipelines[source.adapter_key].normalize_options(options)
+        for source in selected
+        if source.is_active and source.adapter_key in pipelines
+    }
     request = IngestionRequest.objects.create(trigger=trigger, requested_by=requested_by)
     jobs: list[IngestionJob] = []
     skipped: list[Source] = []
     for source in selected:
-        if not source.is_active or source.adapter_key != TELEGRAM_PIPELINE_KEY:
+        pipeline = pipelines.get(source.adapter_key)
+        if not source.is_active or pipeline is None:
             skipped.append(source)
             continue
         try:
@@ -64,8 +59,8 @@ def enqueue_sources(
                 job = IngestionJob.objects.create(
                     request=request,
                     source=source,
-                    pipeline_key=TELEGRAM_PIPELINE_KEY,
-                    options=job_options,
+                    pipeline_key=pipeline.key,
+                    options=normalized_options[source.pk],
                     available_at=timezone.now(),
                 )
         except IntegrityError:
@@ -73,21 +68,6 @@ def enqueue_sources(
         else:
             jobs.append(job)
     return EnqueueResult(request=request, jobs=jobs, skipped_sources=skipped)
-
-
-def validate_job_options(options: dict | None) -> dict[str, int]:
-    supplied = options or {}
-    unknown = sorted(set(supplied) - set(DEFAULT_JOB_OPTIONS))
-    if unknown:
-        raise ValueError(f"Unsupported ingestion job options: {unknown}")
-    result = {**DEFAULT_JOB_OPTIONS, **supplied}
-    for key, (minimum, maximum) in JOB_OPTION_BOUNDS.items():
-        value = result[key]
-        if not isinstance(value, int) or isinstance(value, bool):
-            raise ValueError(f"{key} must be an integer")
-        if not minimum <= value <= maximum:
-            raise ValueError(f"{key} must be between {minimum} and {maximum}")
-    return result
 
 
 def claim_next_job(worker_id: str) -> IngestionJob | None:
@@ -168,3 +148,43 @@ def recover_stale_jobs(*, stale_after: timedelta = timedelta(minutes=10)) -> int
             error_message="Recovered after the previous worker stopped updating its heartbeat.",
         )
     )
+
+
+def mark_job_for_retry(job: IngestionJob, exc: Exception, *, retry_after_seconds: int) -> None:
+    delay = max(1, int(retry_after_seconds))
+    job.status = JobStatus.QUEUED
+    job.available_at = timezone.now() + timedelta(seconds=delay)
+    job.worker_id = ""
+    job.error_type = type(exc).__name__
+    job.error_message = str(exc)
+    job.save(
+        update_fields=(
+            "status",
+            "available_at",
+            "worker_id",
+            "error_type",
+            "error_message",
+        )
+    )
+
+
+def mark_job_failed(job: IngestionJob, exc: Exception) -> None:
+    now = timezone.now()
+    job.status = JobStatus.FAILED
+    job.completed_at = now
+    job.heartbeat_at = now
+    job.error_type = type(exc).__name__
+    job.error_message = str(exc)
+    job.failures_count = max(1, job.failures_count)
+    job.save(
+        update_fields=(
+            "status",
+            "completed_at",
+            "heartbeat_at",
+            "error_type",
+            "error_message",
+            "failures_count",
+        )
+    )
+    job.source.last_failed_crawl_at = now
+    job.source.save(update_fields=("last_failed_crawl_at", "updated_at"))

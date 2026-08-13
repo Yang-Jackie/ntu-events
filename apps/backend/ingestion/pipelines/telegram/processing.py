@@ -1,14 +1,10 @@
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor, wait
 from dataclasses import dataclass
-from datetime import timedelta
-from pathlib import Path
 from typing import Any
 
-from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 from pydantic import BaseModel, ValidationError
@@ -16,11 +12,9 @@ from sources.models import (
     CrawlRun,
     ProcessingStatus,
     RawSourceDocument,
-    RunStatus,
     SourceRepresentation,
 )
 
-from ingestion.adapters.telegram import TelegramFetcher, TelegramMessage, TelegramRetryableError
 from ingestion.contracts import (
     CANDIDATE_SCHEMA_VERSION,
     EXTRACTION_SCHEMA_VERSION,
@@ -30,7 +24,6 @@ from ingestion.contracts import (
     ScreeningBatch,
     ScreeningLabel,
 )
-from ingestion.jobs import TELEGRAM_PIPELINE_KEY, validate_job_options
 from ingestion.models import (
     EventCandidate,
     ExtractionRun,
@@ -42,14 +35,15 @@ from ingestion.models import (
     ModelInvocationStage,
     ScreeningDecision,
 )
-from ingestion.openai_models import (
+from ingestion.pipelines.telegram.adapter import TelegramMessage
+from ingestion.pipelines.telegram.extraction import (
     EXTRACTION_PROMPT_VERSION,
     SCREENING_PROMPT_VERSION,
     ModelResult,
     OpenAITelegramModels,
     batch_input_hash,
 )
-from ingestion.raw_storage import LocalRawContentStorage, RawContentStorage
+from ingestion.raw_storage import RawContentStorage
 from ingestion.validation import validate_candidate
 
 TELEGRAM_EXTRACTOR_TYPE = "telegram-llm"
@@ -73,128 +67,49 @@ class BatchOutcome[ParsedT: BaseModel]:
     error: Exception | None
 
 
-def execute_telegram_job(
-    job: IngestionJob,
+@dataclass(frozen=True)
+class ProcessingResult:
+    items_screened: int
+    items_relevant: int
+    items_extracted: int
+    candidates_created: int
+    failure_ids: set[str]
+
+
+def process_telegram_messages(
     *,
-    fetcher: TelegramFetcher | None = None,
-    models: OpenAITelegramModels | None = None,
-    storage: RawContentStorage | None = None,
-) -> None:
-    if job.status != JobStatus.RUNNING:
-        raise ValueError("Ingestion job must be claimed before execution")
-    if job.pipeline_key != TELEGRAM_PIPELINE_KEY or job.source.adapter_key != TELEGRAM_PIPELINE_KEY:
-        raise ValueError("Ingestion job is not configured for the Telegram text pipeline")
-
-    options = validate_job_options(job.options)
-    owns_models = models is None
-    fetcher = fetcher or _configured_fetcher()
-    models = models or configured_models()
-    storage = storage or LocalRawContentStorage(Path(settings.RAW_STORAGE_ROOT))
-    crawl = CrawlRun.objects.create(
-        ingestion_job=job,
-        source=job.source,
-        started_at=timezone.now(),
-        status=RunStatus.RUNNING,
-        worker_version="telegram-m3-v1",
+    job: IngestionJob,
+    crawl: CrawlRun,
+    messages: list[TelegramMessage],
+    models: OpenAITelegramModels,
+    storage: RawContentStorage,
+    options: dict[str, int],
+) -> ProcessingResult:
+    work = [_upsert_representation(job, message) for message in messages]
+    relevant, screening_failure_ids = _screen_messages(
+        job=job,
+        crawl=crawl,
+        work=work,
+        models=models,
+        storage=storage,
+        concurrency=options["openai_concurrency"],
+        batch_size=options["screening_batch_size"],
     )
-
-    try:
-        fetch_result = asyncio.run(
-            fetcher.fetch(
-                source_configuration=job.source.configuration,
-                message_limit=options["message_limit"],
-                overlap=options["overlap"],
-            )
-        )
-        messages = fetch_result.messages
-        _update_job(job, items_discovered=len(messages))
-        work = [_upsert_representation(job, message) for message in messages]
-        relevant, screening_failure_ids = _screen_messages(
-            job=job,
-            crawl=crawl,
-            work=work,
-            models=models,
-            storage=storage,
-            concurrency=options["openai_concurrency"],
-            batch_size=options["screening_batch_size"],
-        )
-        extraction_failure_ids, candidates_created, items_extracted = _extract_messages(
-            job=job,
-            relevant=relevant,
-            models=models,
-            storage=storage,
-            concurrency=options["openai_concurrency"],
-            batch_size=options["extraction_batch_size"],
-        )
-        failure_ids = screening_failure_ids | extraction_failure_ids
-        failures = len(failure_ids)
-        final_status = JobStatus.PARTIAL if failures else JobStatus.SUCCEEDED
-        now = timezone.now()
-        with transaction.atomic():
-            job.status = final_status
-            job.completed_at = now
-            job.heartbeat_at = now
-            job.items_screened = len(work)
-            job.items_relevant = len(relevant)
-            job.items_extracted = items_extracted
-            job.candidates_created = candidates_created
-            job.failures_count = failures
-            job.save(
-                update_fields=(
-                    "status",
-                    "completed_at",
-                    "heartbeat_at",
-                    "items_screened",
-                    "items_relevant",
-                    "items_extracted",
-                    "candidates_created",
-                    "failures_count",
-                )
-            )
-            crawl.status = RunStatus.PARTIAL if failures else RunStatus.SUCCEEDED
-            crawl.completed_at = now
-            crawl.items_discovered = len(work)
-            crawl.items_processed = len(work)
-            crawl.save(
-                update_fields=(
-                    "status",
-                    "completed_at",
-                    "items_discovered",
-                    "items_processed",
-                )
-            )
-            configuration = dict(job.source.configuration)
-            if fetch_result.latest_message_id is not None:
-                configuration["last_message_id"] = max(
-                    int(configuration.get("last_message_id") or 0),
-                    fetch_result.latest_message_id,
-                )
-            if failure_ids:
-                configuration["pending_message_ids"] = sorted(int(value) for value in failure_ids)
-            else:
-                configuration.pop("pending_message_ids", None)
-            job.source.configuration = configuration
-            if failures:
-                job.source.last_failed_crawl_at = now
-                job.source.save(
-                    update_fields=("configuration", "last_failed_crawl_at", "updated_at")
-                )
-            else:
-                job.source.last_successful_crawl_at = now
-                job.source.save(
-                    update_fields=("configuration", "last_successful_crawl_at", "updated_at")
-                )
-    except Exception as exc:
-        now = timezone.now()
-        crawl.status = RunStatus.FAILED
-        crawl.completed_at = now
-        crawl.error_type = type(exc).__name__
-        crawl.error_message = str(exc)
-        crawl.save(update_fields=("status", "completed_at", "error_type", "error_message"))
-        raise
-    finally:
-        if owns_models:
-            models.close()
+    extraction_failure_ids, candidates_created, items_extracted = _extract_messages(
+        job=job,
+        relevant=relevant,
+        models=models,
+        storage=storage,
+        concurrency=options["openai_concurrency"],
+        batch_size=options["extraction_batch_size"],
+    )
+    return ProcessingResult(
+        items_screened=len(work),
+        items_relevant=len(relevant),
+        items_extracted=items_extracted,
+        candidates_created=candidates_created,
+        failure_ids=screening_failure_ids | extraction_failure_ids,
+    )
 
 
 def _screen_messages(
@@ -577,79 +492,11 @@ def _message_metadata(message: TelegramMessage) -> dict[str, Any]:
     }
 
 
-def _configured_fetcher() -> TelegramFetcher:
-    api_id = getattr(settings, "TELEGRAM_API_ID", None)
-    api_hash = getattr(settings, "TELEGRAM_API_HASH", "")
-    if not api_id or not api_hash:
-        raise RuntimeError("TELEGRAM_API_ID and TELEGRAM_API_HASH are required")
-    return TelegramFetcher(
-        api_id=int(api_id),
-        api_hash=api_hash,
-        session_path=Path(settings.TELEGRAM_SESSION_PATH),
-    )
-
-
-def configured_models() -> OpenAITelegramModels:
-    if not getattr(settings, "OPENAI_API_KEY", ""):
-        raise RuntimeError("OPENAI_API_KEY is required")
-    return OpenAITelegramModels(
-        screening_model=settings.OPENAI_SCREENING_MODEL,
-        extraction_model=settings.OPENAI_EXTRACTION_MODEL,
-    )
-
-
 def _heartbeat(job: IngestionJob) -> None:
     now = timezone.now()
     IngestionJob.objects.filter(pk=job.pk, status=JobStatus.RUNNING).update(heartbeat_at=now)
     job.heartbeat_at = now
 
 
-def _update_job(job: IngestionJob, **fields: Any) -> None:
-    fields["heartbeat_at"] = timezone.now()
-    IngestionJob.objects.filter(pk=job.pk).update(**fields)
-    for key, value in fields.items():
-        setattr(job, key, value)
-
-
 def _should_split(error: Exception | None) -> bool:
     return isinstance(error, (ValueError, ValidationError))
-
-
-def mark_job_for_retry(job: IngestionJob, exc: TelegramRetryableError) -> None:
-    delay = max(1, int(exc.retry_after_seconds))
-    job.status = JobStatus.QUEUED
-    job.available_at = timezone.now() + timedelta(seconds=delay)
-    job.worker_id = ""
-    job.error_type = type(exc).__name__
-    job.error_message = str(exc)
-    job.save(
-        update_fields=(
-            "status",
-            "available_at",
-            "worker_id",
-            "error_type",
-            "error_message",
-        )
-    )
-
-
-def mark_job_failed(job: IngestionJob, exc: Exception) -> None:
-    now = timezone.now()
-    job.status = JobStatus.FAILED
-    job.completed_at = now
-    job.heartbeat_at = now
-    job.error_type = type(exc).__name__
-    job.error_message = str(exc)
-    job.failures_count = max(1, job.failures_count)
-    job.save(
-        update_fields=(
-            "status",
-            "completed_at",
-            "heartbeat_at",
-            "error_type",
-            "error_message",
-            "failures_count",
-        )
-    )
-    job.source.last_failed_crawl_at = now
-    job.source.save(update_fields=("last_failed_crawl_at", "updated_at"))

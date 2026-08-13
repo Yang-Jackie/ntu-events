@@ -1011,6 +1011,16 @@ The existing Telethon and OpenAI research implementations inform future
 adapters but do not define these core contracts and need not be rewritten
 during repository scaffolding.
 
+Production pipeline implementations are selected by a stable `pipeline_key`.
+An explicit static in-process catalog maps those keys to lightweight pipeline
+instances implementing option normalization, execution, and cleanup. Pipeline
+constructors perform no network or authentication work. The executing worker
+initializes provider resources lazily, reuses them across compatible jobs, and
+closes them on shutdown. Enqueueing consults the same catalog only for support
+checks and pipeline-specific option normalization. Unsupported queued keys fail
+that job without terminating the sustained worker. The catalog is not a dynamic
+plugin loader, inheritance hierarchy, or general dependency-injection container.
+
 The first production-path implementation ingests public Telegram broadcast
 channels through the owner's saved, ignored Telethon session. One registered
 `Source` represents one channel and one `SourceRepresentation` represents one
@@ -1522,11 +1532,13 @@ The initial executor is a single Django worker process polling indexed queued-jo
 rows in PostgreSQL every two seconds. This is a project-specific ingestion queue,
 not a general task framework. An `IngestionRequest` records one Admin, command,
 or scheduled trigger and may group several jobs. Each `IngestionJob` belongs to
-exactly one registered `Source`; selecting several Telegram channels therefore
-creates several independently retryable jobs under one request. For Telegram,
-the worker is intentionally deployed as one process so only one process owns the
-saved Telethon session. Up to ten concurrent model calls are tasks inside that
-worker, not additional queue workers.
+exactly one registered `Source` and records the resolved pipeline key; selecting
+several sources therefore creates several independently retryable jobs under one
+request. The source's adapter key selects a supported pipeline when enqueueing,
+while the job retains that execution decision. For Telegram, the worker is
+intentionally deployed as one process so only one process owns the saved
+Telethon session. Up to ten concurrent model calls are tasks inside that worker,
+not additional queue workers.
 
 Jobs are claimed with a short row-locking transaction, record a worker identity
 and heartbeat, and persist stage results incrementally. Abandoned running jobs
