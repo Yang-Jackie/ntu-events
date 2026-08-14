@@ -5,9 +5,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
     UV_PROJECT_ENVIRONMENT=/opt/venv \
     VIRTUAL_ENV=/opt/venv \
-    PATH="/opt/venv/bin:${PATH}" \
-    GDAL_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgdal.so.32 \
-    GEOS_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgeos_c.so.1
+    PATH="/opt/venv/bin:${PATH}"
 
 RUN apt-get update \
     && apt-get install --yes --no-install-recommends \

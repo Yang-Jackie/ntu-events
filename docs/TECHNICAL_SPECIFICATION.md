@@ -206,6 +206,10 @@ bind-mounted for development, while Python dependencies remain isolated inside
 the image-managed virtual environment. Django migrations enable and verify the
 PostGIS extension.
 
+The database service targets `linux/amd64` because the selected PostGIS image
+does not provide an ARM64 variant. Docker Desktop emulates the database on
+Apple Silicon, while AMD64 hosts run it natively.
+
 It stores:
 
 - Canonical event data
