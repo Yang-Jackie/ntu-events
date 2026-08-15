@@ -1,88 +1,61 @@
-# Telegram Text Ingestion Research Harness
+# Telegram Text Source Notes
 
-This local harness collects public broadcast-channel text visible to the
-owner's Telegram account and produces provisional event candidates. It tests
-source-neutral shapes against unstructured club announcements; it is not the
-production ingestion service and does not canonicalize or publish events.
+**Status:** First production ingestion source, with an earlier standalone
+research harness
 
-## Setup and guided run
+## Source boundary
+
+The project processes text and captions from selected public Telegram broadcast
+channels visible to the owner's authenticated account.
+
+One registered source represents one channel, and one source representation
+identifies one message. Groups, private chats, media-only posts, and media
+downloads are outside the current path.
+
+The saved authorization session is sensitive runtime state and remains ignored
+by Git.
+
+## Research harness
+
+The host-operated research harness predates the Django production pipeline. It
+remains useful for isolated source exploration and does not canonicalize or
+publish events.
+
+Setup:
 
 1. Create a Telegram API application at `my.telegram.org/apps`.
-2. Copy `.env.example` to `.env` and fill in `TELEGRAM_API_ID`,
-   `TELEGRAM_API_HASH`, and `OPENAI_API_KEY`. Never commit or share them.
+2. Add `TELEGRAM_API_ID`, `TELEGRAM_API_HASH`, and `OPENAI_API_KEY` to the
+   ignored `.env`.
 3. Install with `python -m uv sync`.
 4. Run `python -m uv run telegram-ingestion`.
 
-The first run prompts for Telegram login and saves authorization under ignored
-`storage/telegram/sessions/`. Later runs reuse it. The guided entry point lists
-up to 20 recent broadcast channels, accepts multiple comma-separated choices,
-asks for message count, preserves raw text, confirms the maximum OpenAI calls,
-extracts candidates, and reports the output directory.
+Authorization is stored under ignored `storage/telegram/sessions/`. Research
+runs write JSON artifacts under ignored `storage/telegram/runs/`.
 
-Useful alternatives:
+The harness retains text and captions, skips media-only posts, and limits access
+to public broadcast channels visible to the authorized account.
 
-```powershell
-python -m uv run telegram-ingestion login
-python -m uv run telegram-ingestion channels
-python -m uv run telegram-ingestion run --messages 30 --max-calls 200
-python -m uv run telegram-ingestion run --force
-```
+## Production path
 
-`gpt-5-nano` is the low-cost default. Up to 200 new requests are allowed per
-run, with up to 10 processed concurrently. One message is processed per request
-with minimal reasoning effort, low output verbosity and one retry. A cache keyed
-by content, model, prompt and schema versions avoids repeat calls; `--force`
-bypasses it. Override concurrency with `--concurrency`.
+The Django pipeline is the implemented first production source. It provides
+durable jobs, incremental retrieval, model-assisted screening and extraction,
+selective raw-content retention, provenance, candidate persistence, and Admin
+inspection.
 
-## Output and limits
+Current setup, commands, provider configuration, and operational limits are
+documented in the root `README.md`. Avoid duplicating those values here because
+they may change with the implementation.
 
-Each run writes standard JSON—not JSONL—under
-`storage/telegram/runs/<UTC timestamp>/`: `raw_messages.json`,
-`extraction_results.json`, `event_candidates.json`, `failures.json`, and, after
-model processing, `run_manifest.json`.
+The production pipeline creates reviewable candidates. Canonicalization and
+publication behavior belong to later milestones.
 
-Text and media captions are retained. Media-only posts are skipped and media is
-not downloaded. Only broadcast channels are listed; groups and private chats
-are excluded. Access is limited to what Telegram shows the authorized account.
-Runtime content and sessions are ignored by Git. Candidate fields remain
-provisional until results from Telegram and other sources are compared.
+## Implementation questions still open
 
-## Production-path ingestion
+- Safe Telethon client and session ownership across worker and command paths
+- Correct resumption after a partially completed or reclaimed job
+- Reprocessing behavior for edited messages
+- Candidate and validation behavior needed for canonicalization
+- Future treatment of media and poster content
 
-The Django production path is separate from the research harness but reuses its
-validated source assumptions. One registered `Source` represents one public
-broadcast channel and one `SourceRepresentation` represents one channel message.
-Groups, private chats, media-only posts, and media downloads remain excluded.
-
-Configure and authenticate once:
-
-```powershell
-corepack pnpm telegram:login
-corepack pnpm telegram:channels -- --limit 20 --register 1 3
-corepack pnpm db:migrate
-```
-
-Queue registered channels and run the worker in another terminal:
-
-```powershell
-corepack pnpm ingest:telegram -- --all-active
-corepack pnpm dev:worker
-```
-
-For direct troubleshooting without the sustained worker:
-
-```powershell
-corepack pnpm ingest:telegram -- --source 1 --inline
-```
-
-The source Admin action, commands, and external scheduled invocation all create
-the same durable request/job records. Each job processes one channel. Screening
-uses `gpt-5-nano` in batches of 20; `EVENT` and `UNCERTAIN` messages proceed to
-`gpt-5-mini` extraction in batches of five. At most ten OpenAI requests run
-concurrently. The worker reuses one OpenAI client for connection pooling.
-
-Full content is retained under ignored `var/raw/` only for relevant, uncertain,
-or failed messages. Confirmed non-event bodies are discarded after screening,
-while their Telegram identity, content hash, screening result, prompt/schema
-versions, and model invocation remain in PostgreSQL. Extraction produces
-reviewable candidates only; it does not canonicalize or publish events.
+These questions should be resolved in the owning implementation milestone and
+covered by focused tests.

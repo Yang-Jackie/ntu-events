@@ -1,54 +1,51 @@
 # High-Level Technical Notes
 
-## Delivery posture
+This file is a short working summary. `TECHNICAL_SPECIFICATION.md` is
+authoritative for durable technical direction, and `IMPLEMENTATION_PLAN.md`
+is authoritative for progress.
 
-Build privately for the owner first. Public deployment requires sustained evidence of utility, coverage, data quality, manageable review, and rerun safety.
+## Current state
 
-## Agreed core rules
+- The product is owner-operated and non-public.
+- Telegram broadcast channels are the first production ingestion source.
+- Source material, processing records, and candidates are inspectable.
+- Core event, occurrence, organizer, classification, building, venue, and
+  provenance data structures exist.
+- Milestone 4 is implementing the path from candidate review to canonical event
+  data.
 
-- A source representation is distinct from an event and retains its identity
-  across future revisions; revision processing is deferred.
-- A representation may produce several candidates, and an event may eventually
-  have several source representations.
-- A series groups events only. An occurrence is a continuous, independently
-  meaningful attendance block; midnight alone never splits it.
-- The domain has no agenda-item model.
-- Registration is owned by exactly one series, event, or occurrence, with
-  closest-scope inheritance.
-- All scheduling uses Singapore local date and time without a general timezone model.
-- Initial canonicalization is idempotent and create-only. It creates non-public
-  draft or review-required events and never updates existing canonical records.
-- Cross-source matching, source conflicts, content changes, corrections,
-  postponements, cancellations, and automatic publication are deferred.
-- Event format, topic, purpose, audience, and organizer type are separate,
-  editable classification facets. The first four are plural event
-  relationships.
-- The initial venue map covers the main campus and adjacent NIE. Buildings and
-  landmarks are seeded from current official sources; rooms are added as
-  production inputs require them, and raw extracted locations never create
-  canonical venue records automatically. Seeded map points remain null until a
-  reviewed authoritative coordinate import is available.
+## Durable guardrails
 
-See `TECHNICAL_SPECIFICATION.md` section 7 for the authoritative model.
+- Keep source observations separate from canonical product data.
+- Preserve provenance and enough evidence to explain automated output.
+- Treat source content and provider output as untrusted.
+- Keep user-visible decisions in backend-owned workflows.
+- Never guess missing event or location facts.
+- Make reruns safe and protect manual decisions.
+- Do not expose the product publicly before the readiness gate.
 
-## Resolve before scaffolding
+## Milestone 4 questions
 
-- **Start with real data:** Select one accessible source and save 50–100 representative samples before finalizing the schema.
-- **Use source-appropriate ingestion:** Prefer reliable APIs, feeds, exports, embedded metadata, or managed structured results when available. Use the model to interpret unstructured content and explore approved pages through bounded, traced, read-only browser tools; prohibit authentication, submissions, purchases, CAPTCHA bypass, and other external state changes.
-- **Define pipeline states:** Make crawling, extraction, validation, canonicalization, review, and publication inspectable and safely repeatable.
-- **Protect manual decisions:** Automated reprocessing must not silently overwrite corrections or merge decisions.
-- **Define query semantics:** Specify ongoing/upcoming behavior, time overlap, recurrence expansion, map grouping, pagination, and ordering.
-- **Validate interpretation:** Evaluate deterministic mappings, provider outputs, LLM extraction, and browser-agent behavior against versioned fixtures, provenance, traces, and labelled expected results before relying on automation.
+Decide these while implementing and testing the processing workflow:
 
-## First personal-use vertical slice
+- What a candidate must contain to be stored, reviewed, or processed
+- How missing, ambiguous, ineligible, and conflicting information is represented
+- How candidate occurrences, registrations, classifications, and modality map
+  into the canonical domain
+- How venue matches and unresolved locations are reviewed
+- How canonicalization avoids accidental duplicates and preserves provenance
+- What limited change or duplicate behavior, if any, is necessary for the first
+  safe vertical path
 
-Build one source-appropriate workflow using deterministic mapping or LLM-first unstructured extraction, with constrained browser exploration where needed, raw storage, provider provenance, review, venue resolution, canonical event creation, API retrieval, and a minimal local map/list for the owner. Re-running it must not create duplicates, and manual corrections must survive reprocessing.
+Record the resulting durable behavior only after it is verified.
 
-## Owner decisions before public release
+## Later questions
 
-Decide personal access mode, minimum source coverage, evidence thresholds and observation period, and rollout type.
-
-## Can wait
-
-Map provider, scheduler, OCR, advanced deduplication, a polished frontend,
-production hosting, and public-launch operations.
+- API resource and filter semantics belong to the API milestone.
+- Map provider and interaction details belong to the discovery-interface
+  milestone.
+- Change handling, source cadence, and operational recovery belong to
+  personal-use hardening.
+- New retrieval methods belong to the source that demonstrates their need.
+- Hosting, monitoring, authentication, and rollout belong to public-readiness
+  work.

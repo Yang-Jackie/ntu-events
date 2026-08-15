@@ -1,261 +1,189 @@
 # NTU Events Architecture
 
-**Document status:** Initial architecture direction  
-**Related documents:** `TECHNICAL_SPECIFICATION.md`, `IMPLEMENTATION_PLAN.md`, `HIGH_LEVEL_TECHNICAL_NOTES.md`
+**Document status:** Active repository boundaries
+**Related documents:** `TECHNICAL_SPECIFICATION.md`, `IMPLEMENTATION_PLAN.md`
 
 ## 1. Purpose
 
-This document defines the intended repository boundaries and code ownership for the initial system. It is specific enough to guide project setup without fixing implementation details that should be decided through the first working source and vertical slice.
+This document defines where responsibilities belong and the dependency
+direction between them. It intentionally leaves internal class structure,
+algorithms, schemas, and provider mechanics to the milestone that implements
+them.
 
-## 2. Repository Shape
+## 2. Repository shape
 
-The project uses a monorepo with separate backend, frontend, and shared-package workspaces.
+The project is a monorepo:
 
 ```text
 ntu-events/
 ├── apps/
-│   ├── backend/                 # Django domain, API, admin, ingestion and workers
-│   └── web/                     # Next.js discovery application; personal first, public later
+│   ├── backend/                 # Django domain, API, admin, and workers
+│   └── web/                     # Next.js discovery application
 ├── packages/
-│   └── api-client/              # Generated TypeScript API client
-├── fixtures/                    # Shared, version-controlled test datasets
-│   ├── sources/
-│   ├── extraction/
-│   ├── duplicates/
-│   └── venues/
-├── tests/
-│   └── e2e/                     # Cross-application browser tests
+│   └── api-client/              # Generated TypeScript API contract and client
+├── fixtures/                    # Version-controlled source and regression inputs
+├── tests/                       # Backend, ingestion, and cross-cutting tests
+├── src/                         # Host-operated research tooling
 ├── docs/
 ├── scripts/
-├── infra/                       # Local and deployment support
-├── storage/                     # Local runtime raw content; ignored by Git
+├── storage/                     # Ignored research output and source sessions
+├── var/
+│   └── raw/                     # Ignored application raw-content storage
 ├── compose.yaml
 ├── .env.example
 └── README.md
 ```
 
-The repository may add root configuration files for the selected Python and JavaScript tooling. Their exact names and tools remain implementation decisions.
+New top-level directories should be added only when they have a clear owner and
+current use.
 
-## 3. Application Boundaries
-
-Personal-first delivery changes access, not architecture: the owner initially runs the complete system privately, and public deployment reuses it after a readiness gate.
+## 3. Application boundaries
 
 ### Backend
 
 The Django backend owns:
 
 - Canonical event and occurrence data
-- Organizers, classification facets, buildings and venues
-- Source registration and ingestion history
-- Ingestion and canonicalization workflows
-- Publication and manual-review decisions
-- Event API behavior for personal and later public access
+- Sources, ingestion history, and processing workflows
+- Organizers, classifications, buildings, and venues
+- Internal review and publication decisions
+- The event API
 - Internal administration
 
-Background workers run separately when needed but use the backend's application services and models. They are not separate business services.
-
-The Django development runtime runs in Docker Compose so GeoDjango uses a
-reproducible Linux GDAL, GEOS, and PROJ stack. PostgreSQL/PostGIS is a separate
-Compose service with a named data volume. The repository is bind-mounted into
-the backend container for development; the backend and ingestion worker share
-one image definition and dependency configuration. Next.js continues to run on
-the host.
+Background workers are separate runtime processes, not separate business
+services. They invoke backend-owned workflows and use the same domain data.
 
 ### Web
 
 The Next.js application owns:
 
 - Page rendering and discovery navigation
-- Map, list and detail interfaces
-- Search and filter interaction
-- URL state and browser behavior
-- Presentation-specific state
+- Map, list, filter, and detail interactions
+- URL and browser presentation state
 
-It must not duplicate canonical event rules, venue resolution, deduplication, or publication decisions.
+It consumes the backend contract and must not recreate ingestion,
+canonicalization, venue, duplicate, or publication rules.
 
-### API client package
+### API client
 
-`packages/api-client` is retained as a separate workspace package from the
-beginning. It contains an `openapi-typescript` generated contract and a small
-handwritten `openapi-fetch` client factory based on the backend's versioned,
-committed OpenAPI schema.
+`packages/api-client` is the contract boundary between Python and TypeScript.
+It contains generated OpenAPI types and a small runtime client factory.
 
-```text
-packages/api-client/
-├── package.json
-├── src/
-│   ├── generated/              # Generated code; not manually edited
-│   └── index.ts                # Stable exports for consumers
-└── README.md
-```
+Generated artifacts are produced by the documented generation workflow.
+Application-specific business behavior remains in the backend or the consuming
+web feature, not in generated code.
 
-The package provides the contract boundary between Python and TypeScript. It
-must not contain copied backend business logic, read application environment
-variables directly, or grow handwritten wrappers for every endpoint.
+## 4. Backend ownership
 
-## 4. Backend Organization
+The current Django applications are organized by domain or capability:
 
-The backend is organized by domain or capability first, rather than by global `controllers`, `services`, and `repositories` directories.
+- `events`: canonical events, occurrences, registrations, and classification
+  relationships
+- `venues`: buildings, venues, aliases, and future resolution behavior
+- `organizers`: organizer data
+- `sources`: registered sources, source representations, and raw-document
+  metadata
+- `ingestion`: requests, jobs, candidate processing, source pipelines,
+  provider boundaries, and worker execution
+- `common`: small domain-neutral infrastructure shared across applications
 
-```text
-apps/backend/
-├── manage.py
-├── config/                     # Settings, root routing and runtime configuration
-├── common/                     # Small, domain-neutral shared infrastructure
-├── events/                     # Events, occurrences and classification facets
-├── venues/                     # Buildings, venues, aliases and resolution
-├── organizers/                 # Organizer records and relationships
-├── sources/                    # Sources, representations and raw-document metadata
-├── ingestion/                  # Jobs, adapters, extraction and processing workflows
-├── moderation/                 # Review, correction and merge workflows
-└── search/                     # Public search and map-oriented queries
-```
+Add moderation, search, interaction, or other domains when implemented behavior
+needs a distinct owner. Do not create empty layers or applications only to
+match a speculative directory tree.
 
-Each substantial domain may contain its own models, services, query logic, API layer, administration configuration, and tests. These internal folders should be introduced as the domain grows rather than created empty in advance.
+Entry points such as API views, Admin actions, workers, and management commands
+should remain thin. Behavior shared by several entry points belongs to the
+domain or workflow that owns it.
 
-A typical mature domain may resemble:
+Django models, querysets, and managers are the ordinary relational persistence
+boundary. Introduce a separate interface where implementations genuinely vary,
+such as raw-content storage or an external provider.
 
-```text
-events/
-├── models/
-├── services/
-├── selectors/
-├── api/
-├── admin/
-└── tests/
-```
+## 5. Ingestion boundary
 
-The exact split between files and folders should follow module size. Small Django applications may begin with conventional `models.py`, `admin.py`, and `tests.py` files.
+Ingestion coordinates the path from source material to reviewable and canonical
+data.
 
-### Controllers and API views
+Source-specific code may own:
 
-Django REST Framework views and viewsets perform the controller role. They translate HTTP requests and responses, invoke application services or selectors, and remain thin. Business workflows must not be implemented directly in views.
+- How an approved source is accessed
+- How source items are identified
+- How raw provider results become shared source observations
+- Source-specific interpretation support
 
-### Services
+Source-neutral workflow code owns:
 
-Services represent meaningful commands and workflows, especially operations spanning multiple models or domains. Expected examples include processing an event candidate, applying a manual correction, resolving a venue, publishing an event, and merging duplicates.
+- Durable execution and inspection
+- Storage and provenance
+- Candidate contract validation
+- Canonical and publication decisions
+- Protection against unsafe reruns
 
-Simple model-local behavior does not require a service class. The project should avoid creating pass-through services that add no domain meaning.
+External SDK objects and provider response types should stay behind their
+pipeline or infrastructure boundary. Providers and models cannot directly
+publish or modify canonical event data.
 
-### Query logic
+The first production pipeline is Telegram text ingestion. Future pipelines may
+use structured mapping, model-assisted extraction, OCR, managed retrieval, or
+bounded browser interaction without changing the worker's general ownership.
+The detailed pipeline layout and resource lifecycle should follow the
+implementation needs discovered for that source.
 
-Reusable or complex reads belong in custom querysets, managers, or selector functions. This includes public-event visibility, time-window filtering, map queries, and review-queue selection.
+## 6. Data and fixtures
 
-### Repositories
+`fixtures/` contains small version-controlled inputs needed for repeatable
+tests or source research. A fixture should live near its owning adapter when it
+is not meaningfully shared.
 
-A repository layer is not required around ordinary Django ORM models. Django models, querysets and managers already provide the persistence boundary for relational data.
+`var/raw/` contains ignored application evidence during local use.
+`storage/` contains ignored research-harness output and source authorization
+sessions. Neither directory is canonical product data.
 
-Repository-style interfaces are appropriate where the implementation genuinely varies, such as raw-content storage backed by the local filesystem in development and object storage later. They may also be introduced if a domain eventually needs to remain independent of Django persistence, but this is not an initial requirement.
+PostgreSQL/PostGIS owns normalized product state and metadata that links it to
+raw evidence.
 
-## 5. `common` Boundary
-
-`apps/backend/common` is limited to domain-neutral facilities used by several backend applications, such as:
-
-- Timestamped or identifier base models
-- Shared application exceptions
-- Generic storage interfaces
-- Common API error or pagination behavior
-- Generic validation and test utilities
-
-It must not become a general dumping ground. Logic using event, venue, organizer, source, extraction, or publication concepts belongs to the relevant domain or capability.
-
-## 6. Ingestion Boundary
-
-`ingestion` coordinates the conversion of source material into event candidates and canonical decisions.
-
-Its expected internal capabilities are:
-
-```text
-ingestion/
-├── adapters/                   # Source-specific discovery and raw-document mapping
-├── retrieval/                  # Direct, managed-provider and browser implementations
-├── extraction/                 # Deterministic mapping and LLM-first unstructured extraction
-├── validation/                 # Candidate schema and deterministic checks
-├── matching/                   # Duplicate and venue-match analysis
-└── workflows/                  # End-to-end application orchestration
-```
-
-Source adapters use separate direct-retrieval, managed-job, or constrained
-browser ports and convert their results into shared raw-document inputs. LLM
-extraction is another provider-neutral port. Provider SDK objects do not cross
-these boundaries. Reliable structured inputs may be mapped deterministically;
-the LLM owns semantic interpretation of unstructured content. Deterministic
-workflows own permissions, retries, concurrency, capture, schema validation,
-normalization, persistence, idempotency, matching safeguards, and publication.
-Providers and agents cannot canonicalize, publish, or silently correct data,
-and rigid page parsers require measured justification. Workers and commands
-must invoke shared ingestion workflows.
-
-Whether every capability becomes a folder is left to implementation scale.
-
-The first production ingestion slice uses a Telegram pipeline, provider-neutral
-candidate contracts, selective immutable raw storage, deterministic validation,
-and shared job infrastructure invoked by Admin, commands, and a database-backed
-worker. Each queued job owns one registered source. The generic worker resolves
-the job's stable `pipeline_key` through an explicit static catalog of lightweight
-pipeline instances. Pipeline instances validate their own options, initialize
-provider resources lazily inside the executing process, reuse those resources
-across jobs, and release them when the worker stops. OpenAI and Telethon objects
-remain inside the Telegram vertical slice; entry points and the generic worker
-contain no Telegram ingestion rules.
-
-Source-specific code is grouped vertically under `ingestion/pipelines/<key>/`,
-while source-neutral job lifecycle, candidate contracts, validation, storage,
-models, and worker dispatch remain at the ingestion root. A pipeline may use
-structured deterministic mapping, LLM extraction, OCR, or another appropriate
-strategy; screening and LLM use are not mandatory common stages.
-
-## 7. Fixtures and Runtime Data
-
-Root `fixtures/` contains small, reviewed and version-controlled datasets shared by adapters or evaluation tooling:
-
-- `sources/`: representative HTML, JSON, text or poster inputs
-- `extraction/`: expected structured extraction results
-- `duplicates/`: labeled identity and matching cases
-- `venues/`: reviewed building, venue and alias seed data
-
-Adapter-specific fixtures may instead live beside that adapter's tests. Ordinary tests should use saved or mocked model outputs rather than make live language-model calls.
-
-`storage/` is different: it contains runtime raw documents during local personal use and is ignored by Git. A public deployment will use the same storage interface with a production implementation selected during the public-readiness phase.
-
-## 8. Dependency Direction
-
-The intended dependency flow is:
+## 7. Dependency direction
 
 ```text
 Web application
-      ↓
-API client package
-      ↓
-Backend event API
-      ↓
-Application services and selectors
-      ↓
-Domain models, querysets and external interfaces
-      ↓
-Database and storage implementations
+    ↓
+Generated API client
+    ↓
+Backend API
+    ↓
+Application workflows and query logic
+    ↓
+Domain models and external interfaces
+    ↓
+Database, storage, and provider implementations
 ```
 
 Within the backend:
 
-- API views, admin actions, jobs and commands invoke shared application services.
-- Domain code must not depend on API views, worker entry points, or frontend code.
-- Source and retrieval-provider adapters must not own canonical-event or publication rules.
-- Browser agents must not escape approved domains or perform authentication, submission, registration, purchase, CAPTCHA bypass, or other external state changes.
-- Manual-review decisions must remain distinguishable from automated extraction results.
-- Python and TypeScript do not share domain source files; they share the OpenAPI contract.
+- Domain behavior must not depend on API views, commands, workers, or frontend
+  code.
+- Entry points invoke shared owning workflows.
+- Source and provider adapters do not own canonical-event or publication
+  policy.
+- Manual decisions remain distinguishable from automated output.
+- Python and TypeScript share an API contract, not domain source files.
 
-## 9. Deliberately Open Details
+## 8. Runtime boundaries
 
-This architecture does not yet fix:
+Docker Compose provides PostgreSQL/PostGIS, the Django backend, and the
+ingestion worker. The backend and worker share the same image and dependency
+configuration. The web application runs on the host during development.
 
-- Exact scheduler
-- File-versus-folder layout inside small Django domains
-- Production raw-content storage provider beyond its interface
-- Deployment topology
-- Exact maintained venue seed fixture and non-core field refinements
+The current worker uses database-backed jobs. Scheduler, concurrency, provider
+resource lifetime, and future queue infrastructure should be changed only in
+response to measured workflow or operational needs.
 
-The core source-representation, series, event, occurrence, registration,
-provenance, classification, venue-source, and create-only canonicalization
-boundaries are defined in `TECHNICAL_SPECIFICATION.md`. Remaining choices
-should be made as the first vertical slice reveals concrete requirements.
+## 9. Deliberately open architecture details
+
+- Internal file-versus-folder layout as domains grow
+- Detailed processing and canonicalization design
+- Search and map-query organization
+- Production raw-content storage
+- Scheduler and queue evolution
+- Public deployment topology
+- New application boundaries justified by implemented features

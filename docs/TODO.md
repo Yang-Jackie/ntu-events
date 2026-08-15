@@ -1,28 +1,32 @@
-# 1. Telethon client is rebuilt per job
-Fix: Lazy-initialize the Telethon client, and store the client once it is initialized
+# Current Engineering Concerns
 
-# 2. Telethon clients would touch the same session file
+This is a short list of known implementation concerns, not a second roadmap.
+Milestone ownership and completion status belong in `IMPLEMENTATION_PLAN.md`.
 
-# 3. Edited messages are re-screened but never re-extracted
-```MessageScreening``` has ```UniqueConstraint(("job", "source_representation"))```
+## Telegram client and session lifecycle
 
-When a job had already created a row in ```MessageScreening``` but then became stale $\rightarrow$ the job is re-queued. On re-execution of that job, the worker will re-queue a new ```MessageScreening``` with same ```job``` and ```source_representation```, violating ```MessageScreening```'s unique constraint.
+The worker currently rebuilds the underlying Telethon client for each job, and
+separate commands can touch the same saved session file. Decide and test a
+resource-lifetime and mutual-exclusion approach that works for the worker,
+login, channel discovery, and inline troubleshooting paths.
 
-# 4. Edited messages are re-screened but never re-extracted
+## Retried job persistence
 
-# 5. The candidate contract and validator cannot safely drive canonicalization
-Several domain states are either lost or incorrectly accepted:
+A reclaimed job can encounter records written by its earlier attempt. Review
+screening and invocation uniqueness so retrying a partially completed or stale
+job resumes safely instead of violating constraints or duplicating work.
 
-```start_date``` and at least one occurrence are mandatory, although the specification says date-less candidates must be retained for review.
+## Edited-message reprocessing
 
-An occurrence-scoped registration has no occurrence index or other owner reference.
+Screening takes changed message content into account, but extraction reuse can
+still treat an older successful extraction for the same source representation
+as current. Tie reuse to the processed content or otherwise make the changed
+content state explicit.
 
-Classification codes are unrestricted strings.
+## Candidate readiness for canonicalization
 
-Registration ordering and date/time consistency are not validated.
-
-```UNKNOWN``` occurrence status has no canonical-domain equivalent.
-
-Keyword matching marks "Microsoft Teams" as a physical VALID event, while a real hybrid location containing "LT19A and Zoom" would be rejected as online-only.
-
-A focused check accepted an invented format code, a reversed registration window, and Microsoft Teams, then returned VALID. Resolve this before Milestone 4, likely with a versioned candidate schema, explicit modality/eligibility, controlled classification enums, occurrence-owner references, and semantic validators.
+The current candidate contract and validator cannot yet carry every state needed
+by canonical processing. Milestone 4 must decide and cover incomplete dates,
+occurrence-scoped registrations, controlled classifications, registration time
+consistency, occurrence-status mapping, and physical versus hybrid or online
+eligibility before candidates create canonical data.
