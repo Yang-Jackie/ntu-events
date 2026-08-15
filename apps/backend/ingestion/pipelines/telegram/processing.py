@@ -8,12 +8,7 @@ from typing import Any
 from django.db import transaction
 from django.utils import timezone
 from pydantic import BaseModel, ValidationError
-from sources.models import (
-    CrawlRun,
-    ProcessingStatus,
-    RawSourceDocument,
-    SourceRepresentation,
-)
+from sources.models import ProcessingStatus, RawSourceDocument, SourceRepresentation
 
 from ingestion.contracts import (
     CANDIDATE_SCHEMA_VERSION,
@@ -79,7 +74,6 @@ class ProcessingResult:
 def process_telegram_messages(
     *,
     job: IngestionJob,
-    crawl: CrawlRun,
     messages: list[TelegramMessage],
     models: OpenAITelegramModels,
     storage: RawContentStorage,
@@ -88,7 +82,6 @@ def process_telegram_messages(
     work = [_upsert_representation(job, message) for message in messages]
     relevant, screening_failure_ids = _screen_messages(
         job=job,
-        crawl=crawl,
         work=work,
         models=models,
         storage=storage,
@@ -115,7 +108,6 @@ def process_telegram_messages(
 def _screen_messages(
     *,
     job: IngestionJob,
-    crawl: CrawlRun,
     work: list[MessageWork],
     models: OpenAITelegramModels,
     storage: RawContentStorage,
@@ -142,7 +134,7 @@ def _screen_messages(
             continue
         if cached.decision in (ScreeningDecision.EVENT, ScreeningDecision.UNCERTAIN):
             item.raw_document = cached.raw_source_document or _ensure_raw_document(
-                item, crawl, storage
+                item, job, storage
             )
             relevant[item.representation.pk] = item
 
@@ -157,7 +149,7 @@ def _screen_messages(
             item = by_identity[result.message_identity]
             raw_document = None
             if result.decision in (ScreeningLabel.EVENT, ScreeningLabel.UNCERTAIN):
-                raw_document = _ensure_raw_document(item, crawl, storage)
+                raw_document = _ensure_raw_document(item, job, storage)
                 item.raw_document = raw_document
                 relevant[item.representation.pk] = item
             MessageScreening.objects.create(
@@ -174,7 +166,7 @@ def _screen_messages(
     def failed(outcome: BatchOutcome[ScreeningBatch], invocation: ModelInvocation) -> None:
         for message in outcome.messages:
             item = by_identity[message.identity]
-            raw_document = _ensure_raw_document(item, crawl, storage)
+            raw_document = _ensure_raw_document(item, job, storage)
             MessageScreening.objects.create(
                 job=job,
                 model_invocation=invocation,
@@ -450,7 +442,7 @@ def _upsert_representation(job: IngestionJob, message: TelegramMessage) -> Messa
 
 def _ensure_raw_document(
     item: MessageWork,
-    crawl: CrawlRun,
+    job: IngestionJob,
     storage: RawContentStorage,
 ) -> RawSourceDocument:
     existing = RawSourceDocument.objects.filter(
@@ -462,7 +454,7 @@ def _ensure_raw_document(
     stored = storage.save(item.message.raw_bytes(), suffix=".json")
     return RawSourceDocument.objects.create(
         source_representation=item.representation,
-        crawl_run=crawl,
+        ingestion_job=job,
         fetched_at=item.message.retrieved_at,
         storage_key=stored.storage_key,
         content_hash=stored.content_hash,

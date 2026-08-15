@@ -376,27 +376,35 @@ Example source types:
 
 Sensitive source configuration should not be stored in plaintext application records.
 
-### 7.2 CrawlRun
+### 7.2 IngestionRequest and IngestionJob
 
-Represents one attempt to fetch a source.
+An ingestion request records one Admin, command, or scheduled trigger and may
+group several jobs. Each ingestion job is the durable execution record for one
+registered source. It owns queue and worker state, resolved pipeline options,
+retry count, progress counters, and the final outcome.
 
-Possible fields:
+Initial job fields:
 
 - `id`
+- `request_id`
 - `source_id`
-- `started_at`
-- `completed_at`
+- `pipeline_key`
 - `status`
-- `http_status`
-- `items_discovered`
-- `items_processed`
+- `options`
+- `available_at`
+- `claimed_at`
+- `heartbeat_at`
+- `completed_at`
+- `worker_id`
+- `attempt_count`
+- item and failure counters
 - `error_type`
 - `error_message`
-- `retry_count`
-- `content_hash`
-- `worker_version`
+- `created_at`
 
-A crawl run may produce zero or more raw source documents.
+Retries reclaim the same job and increment `attempt_count`; the initial system
+does not retain a separate execution-attempt model. A job may discover zero or
+more source representations and may preserve zero or more raw source documents.
 
 ### 7.3 SourceRepresentation
 
@@ -437,7 +445,7 @@ Initial fields:
 
 - `id`
 - `source_representation_id`
-- `crawl_run_id`
+- `ingestion_job_id`
 - `fetched_at`
 - `storage_key`
 - `content_hash`
@@ -448,7 +456,9 @@ Initial fields:
 The first pipeline processes the preserved observation selected for a
 representation but does not yet interpret changed content as a new revision. A
 content hash avoids unnecessary reprocessing while raw observations remain
-available for audit and later revision support.
+available for audit and later revision support. `ingestion_job_id` identifies
+the job that first preserved the raw observation and may be null for manually
+created or legacy observations.
 
 ### 7.5 ExtractionRun
 
@@ -1606,9 +1616,9 @@ The initial admin interface should support:
 ### Source management
 
 - Enable or disable sources
-- Inspect crawl history
+- Inspect ingestion-job history
 - View failure rates
-- Trigger a manual crawl
+- Trigger a manual ingestion job
 - Update source configuration
 - Review last successful fetch
 
@@ -1705,17 +1715,16 @@ Development should include structured logging from the beginning.
 Logs should include identifiers such as:
 
 - Source ID
-- Crawl run ID
+- Ingestion job ID
 - Raw document ID
 - Extraction run ID
 - Candidate ID
 - Event ID
-- Job ID
 
 Useful metrics include:
 
-- Crawl success rate
-- Crawl duration
+- Ingestion success rate
+- Ingestion duration
 - Documents discovered
 - Extraction success rate
 - Extraction latency

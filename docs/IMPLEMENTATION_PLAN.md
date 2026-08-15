@@ -164,6 +164,9 @@ available; coordinates were not guessed.
 - [x] Generalized worker dispatch through a static catalog of lightweight,
   lazily initialized pipeline implementations; pipeline-specific options and
   provider resources now remain inside source-oriented vertical slices.
+- [x] Consolidated duplicate source-run lifecycle tracking into `IngestionJob`;
+  raw documents now reference the job that first preserved them, with existing
+  provenance retained by a data migration.
 - [x] Added Telethon channel discovery/registration, one-time terminal login,
   saved ignored sessions, incremental message checkpoints, bounded backfill,
   and text/caption-only public-channel retrieval.

@@ -46,7 +46,7 @@ The Django backend owns:
 
 - Canonical event and occurrence data
 - Organizers, classification facets, buildings and venues
-- Source registration and crawl history
+- Source registration and ingestion history
 - Ingestion and canonicalization workflows
 - Publication and manual-review decisions
 - Event API behavior for personal and later public access
@@ -105,8 +105,8 @@ apps/backend/
 ├── events/                     # Events, occurrences and classification facets
 ├── venues/                     # Buildings, venues, aliases and resolution
 ├── organizers/                 # Organizer records and relationships
-├── sources/                    # Sources, crawl runs and raw-document metadata
-├── ingestion/                  # Adapters, extraction and processing workflows
+├── sources/                    # Sources, representations and raw-document metadata
+├── ingestion/                  # Jobs, adapters, extraction and processing workflows
 ├── moderation/                 # Review, correction and merge workflows
 └── search/                     # Public search and map-oriented queries
 ```

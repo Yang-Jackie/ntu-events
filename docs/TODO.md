@@ -3,18 +3,14 @@ Fix: Lazy-initialize the Telethon client, and store the client once it is initia
 
 # 2. Telethon clients would touch the same session file
 
-# 3. IngestionJob vs CrawlRun
-They're basically a 1:1 map
-Fix: Drop CrawlRun cleanly
-
-# 4. Edited messages are re-screened but never re-extracted
+# 3. Edited messages are re-screened but never re-extracted
 ```MessageScreening``` has ```UniqueConstraint(("job", "source_representation"))```
 
 When a job had already created a row in ```MessageScreening``` but then became stale $\rightarrow$ the job is re-queued. On re-execution of that job, the worker will re-queue a new ```MessageScreening``` with same ```job``` and ```source_representation```, violating ```MessageScreening```'s unique constraint.
 
-# 5. Edited messages are re-screened but never re-extracted
+# 4. Edited messages are re-screened but never re-extracted
 
-# 6. The candidate contract and validator cannot safely drive canonicalization
+# 5. The candidate contract and validator cannot safely drive canonicalization
 Several domain states are either lost or incorrectly accepted:
 
 ```start_date``` and at least one occurrence are mandatory, although the specification says date-less candidates must be retained for review.

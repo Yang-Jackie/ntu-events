@@ -16,14 +16,6 @@ class SourceType(models.TextChoices):
     OTHER = "OTHER", "Other"
 
 
-class RunStatus(models.TextChoices):
-    PENDING = "PENDING", "Pending"
-    RUNNING = "RUNNING", "Running"
-    SUCCEEDED = "SUCCEEDED", "Succeeded"
-    FAILED = "FAILED", "Failed"
-    PARTIAL = "PARTIAL", "Partial"
-
-
 class ProcessingStatus(models.TextChoices):
     PENDING = "PENDING", "Pending"
     PROCESSING = "PROCESSING", "Processing"
@@ -70,40 +62,6 @@ class Source(TimestampedModel):
         return self.name
 
 
-class CrawlRun(models.Model):
-    ingestion_job = models.ForeignKey(
-        "ingestion.IngestionJob",
-        on_delete=models.PROTECT,
-        null=True,
-        blank=True,
-        related_name="crawl_runs",
-    )
-    source = models.ForeignKey(Source, on_delete=models.PROTECT, related_name="crawl_runs")
-    started_at = models.DateTimeField()
-    completed_at = models.DateTimeField(null=True, blank=True)
-    status = models.CharField(max_length=20, choices=RunStatus.choices)
-    http_status = models.PositiveSmallIntegerField(null=True, blank=True)
-    items_discovered = models.PositiveIntegerField(default=0)
-    items_processed = models.PositiveIntegerField(default=0)
-    error_type = models.CharField(max_length=100, blank=True)
-    error_message = models.TextField(blank=True)
-    retry_count = models.PositiveSmallIntegerField(default=0)
-    content_hash = models.CharField(max_length=128, blank=True, db_index=True)
-    worker_version = models.CharField(max_length=100, blank=True)
-
-    class Meta:
-        ordering = ("-started_at",)
-        constraints = [
-            models.CheckConstraint(
-                condition=Q(completed_at__isnull=True) | Q(completed_at__gte=F("started_at")),
-                name="crawl_completed_not_before_started",
-            )
-        ]
-
-    def __str__(self) -> str:
-        return f"{self.source} — {self.started_at:%Y-%m-%d %H:%M}"
-
-
 class SourceRepresentation(models.Model):
     source = models.ForeignKey(
         Source,
@@ -141,8 +99,8 @@ class RawSourceDocument(models.Model):
         on_delete=models.PROTECT,
         related_name="raw_documents",
     )
-    crawl_run = models.ForeignKey(
-        CrawlRun,
+    ingestion_job = models.ForeignKey(
+        "ingestion.IngestionJob",
         on_delete=models.PROTECT,
         null=True,
         blank=True,

@@ -301,6 +301,7 @@ def test_telegram_job_uses_fixed_batches_and_preserves_only_relevant_content(tmp
     assert sorted(models.extraction_batch_sizes) == [2, 5, 5]
     assert MessageScreening.objects.count() == 23
     assert RawSourceDocument.objects.count() == 12
+    assert set(RawSourceDocument.objects.values_list("ingestion_job_id", flat=True)) == {job.pk}
     assert EventCandidate.objects.count() == 12
     assert ModelInvocation.objects.count() == 5
     assert source.configuration["last_message_id"] == 23

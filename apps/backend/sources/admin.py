@@ -2,7 +2,7 @@ from django.contrib import admin, messages
 from ingestion.jobs import enqueue_sources
 from ingestion.models import IngestionTrigger
 
-from .models import CrawlRun, RawSourceDocument, Source, SourceRepresentation
+from .models import RawSourceDocument, Source, SourceRepresentation
 
 
 @admin.register(Source)
@@ -27,14 +27,6 @@ class SourceAdmin(admin.ModelAdmin):
         )
 
 
-@admin.register(CrawlRun)
-class CrawlRunAdmin(admin.ModelAdmin):
-    list_display = ("source", "started_at", "status", "items_discovered", "items_processed")
-    list_filter = ("status", "source")
-    search_fields = ("error_type", "error_message", "content_hash")
-    readonly_fields = ("started_at",)
-
-
 @admin.register(SourceRepresentation)
 class SourceRepresentationAdmin(admin.ModelAdmin):
     list_display = ("source", "external_identifier", "published_at", "last_seen_at")
@@ -46,9 +38,10 @@ class SourceRepresentationAdmin(admin.ModelAdmin):
 class RawSourceDocumentAdmin(admin.ModelAdmin):
     list_display = (
         "source_representation",
+        "ingestion_job",
         "fetched_at",
         "processing_status",
         "content_hash",
     )
     list_filter = ("processing_status", "language")
-    search_fields = ("storage_key", "content_hash")
+    search_fields = ("storage_key", "content_hash", "ingestion_job__source__name")

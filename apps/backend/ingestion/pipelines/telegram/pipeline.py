@@ -6,7 +6,6 @@ from pathlib import Path
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
-from sources.models import CrawlRun, RunStatus
 
 from ingestion.models import IngestionJob, JobStatus
 from ingestion.pipelines.telegram.adapter import TelegramFetcher
@@ -15,7 +14,6 @@ from ingestion.pipelines.telegram.processing import process_telegram_messages
 from ingestion.raw_storage import LocalRawContentStorage, RawContentStorage
 
 TELEGRAM_PIPELINE_KEY = "telegram_text"
-TELEGRAM_WORKER_VERSION = "telegram-m3-v1"
 
 DEFAULT_OPTIONS = {
     "message_limit": 100,
@@ -73,41 +71,23 @@ class TelegramTextPipeline:
         fetcher = self._get_fetcher()
         models = self._get_models()
         storage = self._get_storage()
-        crawl = CrawlRun.objects.create(
-            ingestion_job=job,
-            source=job.source,
-            started_at=timezone.now(),
-            status=RunStatus.RUNNING,
-            worker_version=TELEGRAM_WORKER_VERSION,
+        fetch_result = asyncio.run(
+            fetcher.fetch(
+                source_configuration=job.source.configuration,
+                message_limit=options["message_limit"],
+                overlap=options["overlap"],
+            )
         )
-
-        try:
-            fetch_result = asyncio.run(
-                fetcher.fetch(
-                    source_configuration=job.source.configuration,
-                    message_limit=options["message_limit"],
-                    overlap=options["overlap"],
-                )
-            )
-            messages = fetch_result.messages
-            self._update_job(job, items_discovered=len(messages))
-            result = process_telegram_messages(
-                job=job,
-                crawl=crawl,
-                messages=messages,
-                models=models,
-                storage=storage,
-                options=options,
-            )
-            self._complete_job(job, crawl, fetch_result.latest_message_id, result)
-        except Exception as exc:
-            now = timezone.now()
-            crawl.status = RunStatus.FAILED
-            crawl.completed_at = now
-            crawl.error_type = type(exc).__name__
-            crawl.error_message = str(exc)
-            crawl.save(update_fields=("status", "completed_at", "error_type", "error_message"))
-            raise
+        messages = fetch_result.messages
+        self._update_job(job, items_discovered=len(messages))
+        result = process_telegram_messages(
+            job=job,
+            messages=messages,
+            models=models,
+            storage=storage,
+            options=options,
+        )
+        self._complete_job(job, fetch_result.latest_message_id, result)
 
     def close(self) -> None:
         if self._models is not None:
@@ -150,7 +130,7 @@ class TelegramTextPipeline:
             setattr(job, key, value)
 
     @staticmethod
-    def _complete_job(job, crawl, latest_message_id, result) -> None:
+    def _complete_job(job, latest_message_id, result) -> None:
         failures = len(result.failure_ids)
         final_status = JobStatus.PARTIAL if failures else JobStatus.SUCCEEDED
         now = timezone.now()
@@ -173,18 +153,6 @@ class TelegramTextPipeline:
                     "items_extracted",
                     "candidates_created",
                     "failures_count",
-                )
-            )
-            crawl.status = RunStatus.PARTIAL if failures else RunStatus.SUCCEEDED
-            crawl.completed_at = now
-            crawl.items_discovered = result.items_screened
-            crawl.items_processed = result.items_screened
-            crawl.save(
-                update_fields=(
-                    "status",
-                    "completed_at",
-                    "items_discovered",
-                    "items_processed",
                 )
             )
             configuration = dict(job.source.configuration)
