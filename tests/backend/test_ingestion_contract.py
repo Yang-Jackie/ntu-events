@@ -2,7 +2,9 @@ from datetime import date, time
 
 import pytest
 from ingestion.contracts import (
+    AttendanceMode,
     CandidateOccurrence,
+    CandidateRegistration,
     EventCandidatePayload,
     ExtractionBatch,
     TimePrecision,
@@ -10,26 +12,31 @@ from ingestion.contracts import (
 from pydantic import ValidationError
 
 
-def test_exact_occurrence_requires_a_start_time() -> None:
-    with pytest.raises(ValidationError):
-        CandidateOccurrence(
-            start_date=date(2026, 8, 1),
-            time_precision=TimePrecision.EXACT,
-        )
+def test_business_rule_problem_remains_structurally_valid() -> None:
+    occurrence = CandidateOccurrence(
+        local_ref="occurrence-1",
+        start_date=date(2026, 8, 1),
+        time_precision=TimePrecision.EXACT,
+    )
+
+    assert occurrence.start_time is None
 
 
-def test_all_day_occurrence_rejects_times() -> None:
-    with pytest.raises(ValidationError):
-        CandidateOccurrence(
-            start_date=date(2026, 8, 1),
-            start_time=time(9),
-            time_precision=TimePrecision.EXACT,
-            is_all_day=True,
-        )
+def test_source_inconsistency_remains_structurally_valid() -> None:
+    occurrence = CandidateOccurrence(
+        local_ref="occurrence-1",
+        start_date=date(2026, 8, 1),
+        start_time=time(9),
+        time_precision=TimePrecision.EXACT,
+        is_all_day=True,
+    )
+
+    assert occurrence.is_all_day
 
 
 def test_crossing_midnight_occurrence_is_one_valid_occurrence() -> None:
     occurrence = CandidateOccurrence(
+        local_ref="occurrence-1",
         start_date=date(2026, 8, 1),
         start_time=time(23),
         end_date=date(2026, 8, 2),
@@ -64,10 +71,16 @@ def test_candidate_accepts_valid_http_urls() -> None:
     assert candidate.image_url == "https://example.com/poster.png"
 
 
-@pytest.mark.parametrize("source_url", ["not-a-url", "ftp://example.com/event"])
-def test_candidate_rejects_invalid_or_non_http_source_urls(source_url: str) -> None:
+def test_candidate_registration_rejects_removed_series_scope() -> None:
     with pytest.raises(ValidationError):
-        _candidate(source_url=source_url)
+        CandidateRegistration(scope="SERIES", name="Series registration")
+
+
+@pytest.mark.parametrize("source_url", ["not-a-url", "ftp://example.com/event"])
+def test_candidate_keeps_semantically_invalid_url_for_business_validation(source_url: str) -> None:
+    candidate = _candidate(source_url=source_url)
+
+    assert candidate.source_url == source_url
 
 
 def _candidate(**overrides: object) -> EventCandidatePayload:
@@ -75,9 +88,12 @@ def _candidate(**overrides: object) -> EventCandidatePayload:
         "title": "Test event",
         "occurrences": [
             CandidateOccurrence(
+                local_ref="occurrence-1",
                 start_date=date(2026, 8, 1),
                 start_time=time(9),
                 time_precision=TimePrecision.EXACT,
+                attendance_mode=AttendanceMode.ONLINE,
+                meeting_url="https://example.com/meeting",
             )
         ],
         "source_url": "https://t.me/test_channel/1",

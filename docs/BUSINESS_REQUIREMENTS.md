@@ -6,7 +6,8 @@
 ## 1. Product purpose
 
 NTU Events is a map-first discovery product for publicly advertised activities
-that students can attend physically at Nanyang Technological University.
+relevant to Nanyang Technological University students. Events may be attended
+in person, online, or in a hybrid format.
 
 Event information is currently scattered across university sites, student
 organization pages, Telegram channels, social platforms, and newsletters. The
@@ -33,19 +34,21 @@ release.
 
 ## 3. What counts as an event
 
-The initial product covers a time-bounded activity that students can physically
-attend at an NTU venue.
+The initial product covers a time-bounded activity that NTU students can
+attend in person, online, or in a hybrid format.
 
 Examples include talks, workshops, competitions, fairs, club activities,
 exhibitions, volunteering activities, and sports or recreational sessions.
 
+A named lecture, conference, or workshop with multiple advertised sessions
+counts as one event. Its sessions are occurrences of that event, including
+sessions with their own labels, dates, locations, or registration details.
+
 The following boundaries apply:
 
-- Online-only activities are excluded.
-- Hybrid activities may be included when there is a physical NTU attendance
-  option.
+- In-person, online-only, and hybrid activities may be included.
 - General opportunities, promotions, campaigns, and standalone deadlines are
-  excluded unless they clearly describe a physical event occurrence.
+  excluded unless they clearly describe an event occurrence.
 - Long-running activities may be included when they have a meaningful
   attendance period and location.
 - Ambiguous items may be retained internally for review without becoming
@@ -66,9 +69,11 @@ The personal product should provide:
 - Building-level display on an interactive campus map
 - A synchronized event list
 - Date, time, location, interest, format, and audience filtering
+- Attendance-mode filtering
 - Keyword search
 - Event details with precise source-provided venue information where available
 - Links to the original source and external registration page
+- Public meeting links when supplied for an online attendance option
 - Retention of past events as a historical archive
 - Owner access in a local or otherwise non-public environment
 
@@ -83,12 +88,18 @@ The map is the primary organizing view, supported by a list or card view.
 Changing map bounds or filters should update the visible results, and selecting
 a location should reveal the events associated with it.
 
+Online-only occurrences appear in the synchronized list without a map marker.
+They remain visible unless the user explicitly applies a physical-location or
+map-area filter.
+
 An event detail should communicate the useful facts without pretending that
 missing or inferred information is confirmed. Typical information includes:
 
 - Title and description
 - Date and time
 - Building and precise room or venue text
+- In-person, online, or hybrid attendance mode and public meeting access when
+  supplied
 - Organizer
 - Format, topic, purpose, and intended audience
 - Registration and source links
@@ -101,6 +112,9 @@ Registration remains external.
 Events are displayed at building level for the initial map. Exact rooms,
 lecture theatres, floors, or venue names appear in event details when known.
 Outdoor locations may use their own reviewed point.
+
+Online-only occurrences do not require a physical venue or receive a map
+marker. Hybrid occurrences may carry both a physical venue and online access.
 
 The system must keep source-provided location text separate from normalized
 buildings and venues. Common aliases may resolve to the same venue, but

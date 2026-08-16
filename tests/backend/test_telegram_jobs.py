@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from datetime import UTC, date, datetime, time
 from pathlib import Path
 from types import SimpleNamespace
@@ -8,6 +9,7 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from ingestion.contracts import (
+    AttendanceMode,
     CandidateOccurrence,
     EventCandidatePayload,
     ExtractedMessage,
@@ -21,6 +23,7 @@ from ingestion.errors import RetryableIngestionError
 from ingestion.jobs import claim_job, enqueue_sources
 from ingestion.models import (
     EventCandidate,
+    ExtractionRun,
     IngestionRequest,
     IngestionTrigger,
     JobStatus,
@@ -32,7 +35,7 @@ from ingestion.pipelines.telegram.adapter import (
     TelegramFetchResult,
     TelegramMessage,
 )
-from ingestion.pipelines.telegram.extraction import ModelResult
+from ingestion.pipelines.telegram.extraction import ModelOutputError, ModelResult
 from ingestion.pipelines.telegram.pipeline import TelegramTextPipeline
 from ingestion.raw_storage import LocalRawContentStorage
 from sources.models import RawSourceDocument, Source, SourceType
@@ -71,6 +74,7 @@ class FakeModels:
     def __init__(self):
         self.screening_batch_sizes: list[int] = []
         self.extraction_batch_sizes: list[int] = []
+        self.reference_data_snapshots: list[dict] = []
         self.response_count = 0
 
     def screen(self, messages: list[TelegramMessage]) -> ModelResult[ScreeningBatch]:
@@ -93,8 +97,15 @@ class FakeModels:
             )
         )
 
-    def extract(self, messages: list[TelegramMessage]) -> ModelResult[ExtractionBatch]:
+    def extract(
+        self,
+        messages: list[TelegramMessage],
+        *,
+        reference_data: dict,
+    ) -> ModelResult[ExtractionBatch]:
         self.extraction_batch_sizes.append(len(messages))
+        self.reference_data_snapshots.append(reference_data)
+        venue_id = reference_data["venues"][0]["id"]
         return self._result(
             ExtractionBatch(
                 results=[
@@ -105,12 +116,15 @@ class FakeModels:
                                 title=f"Test event {message.message_id}",
                                 occurrences=[
                                     CandidateOccurrence(
+                                        local_ref="occurrence-1",
                                         start_date=date(2026, 8, 18),
                                         start_time=time(14),
                                         end_date=date(2026, 8, 18),
                                         end_time=time(16),
                                         time_precision=TimePrecision.EXACT,
+                                        attendance_mode=AttendanceMode.IN_PERSON,
                                         raw_location="The Arc",
+                                        suggested_venue_ids=[venue_id],
                                     )
                                 ],
                                 source_url=message.source_url,
@@ -134,11 +148,68 @@ class FakeModels:
 
 
 class FirstExtractionBatchFails(FakeModels):
-    def extract(self, messages: list[TelegramMessage]) -> ModelResult[ExtractionBatch]:
+    def extract(
+        self,
+        messages: list[TelegramMessage],
+        *,
+        reference_data: dict,
+    ) -> ModelResult[ExtractionBatch]:
         if messages[0].message_id == 1:
             self.extraction_batch_sizes.append(len(messages))
             raise RuntimeError("temporary provider failure")
-        return super().extract(messages)
+        return super().extract(messages, reference_data=reference_data)
+
+
+class BusinessIssueModels(FakeModels):
+    def extract(
+        self,
+        messages: list[TelegramMessage],
+        *,
+        reference_data: dict,
+    ) -> ModelResult[ExtractionBatch]:
+        message = messages[0]
+        venue_id = reference_data["venues"][0]["id"]
+        return self._result(
+            ExtractionBatch(
+                results=[
+                    ExtractedMessage(
+                        message_identity=message.identity,
+                        events=[
+                            EventCandidatePayload(
+                                title="Contradictory event",
+                                occurrences=[
+                                    CandidateOccurrence(
+                                        local_ref="session-1",
+                                        start_date=date(2026, 8, 19),
+                                        end_date=date(2026, 8, 18),
+                                        time_precision=TimePrecision.DATE_ONLY,
+                                        attendance_mode=AttendanceMode.IN_PERSON,
+                                        raw_location="The Arc",
+                                        suggested_venue_ids=[venue_id],
+                                    )
+                                ],
+                                source_url=message.source_url,
+                            )
+                        ],
+                    )
+                ]
+            )
+        )
+
+
+class StructuralOutputFails(FakeModels):
+    def extract(
+        self,
+        messages: list[TelegramMessage],
+        *,
+        reference_data: dict,
+    ) -> ModelResult[ExtractionBatch]:
+        raise ModelOutputError(
+            "OpenAI response was incomplete: max_output_tokens",
+            raw_response=b'{"status":"incomplete"}',
+            response_identifier="response-incomplete",
+            token_usage={"output_tokens": 20},
+        )
 
 
 def make_source() -> Source:
@@ -304,6 +375,10 @@ def test_telegram_job_uses_fixed_batches_and_preserves_only_relevant_content(tmp
     assert set(RawSourceDocument.objects.values_list("ingestion_job_id", flat=True)) == {job.pk}
     assert EventCandidate.objects.count() == 12
     assert ModelInvocation.objects.count() == 5
+    extraction_invocation = ModelInvocation.objects.filter(stage="EXTRACTION").first()
+    assert extraction_invocation is not None
+    assert extraction_invocation.reference_data_snapshot["venues"]
+    assert extraction_invocation.reference_data_hash
     assert source.configuration["last_message_id"] == 23
 
 
@@ -335,6 +410,46 @@ def test_unchanged_messages_do_not_create_duplicate_candidates_or_model_calls(tm
     assert second_models.screening_batch_sizes == []
     assert second_models.extraction_batch_sizes == []
     assert EventCandidate.objects.count() == 12
+
+
+def test_edited_message_creates_a_new_raw_document_and_candidate_revision(tmp_path) -> None:
+    source = make_source()
+    original = fixture_messages()[0]
+    first = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
+    first_job = claim_job(first.jobs[0].pk, "test-worker")
+    assert first_job is not None
+    first_models = FakeModels()
+    TelegramTextPipeline(
+        fetcher=FakeFetcher([original]),
+        models=first_models,
+        storage=LocalRawContentStorage(tmp_path),
+    ).execute(first_job)
+
+    edited = replace(
+        original,
+        text=f"{original.text}\nUpdated registration details.",
+        edited_at=datetime(2026, 8, 11, 8, tzinfo=UTC),
+        retrieved_at=datetime(2026, 8, 11, 9, tzinfo=UTC),
+        content_hash="f" * 64,
+    )
+    second = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
+    second_job = claim_job(second.jobs[0].pk, "test-worker")
+    assert second_job is not None
+    second_models = FakeModels()
+    TelegramTextPipeline(
+        fetcher=FakeFetcher([edited]),
+        models=second_models,
+        storage=LocalRawContentStorage(tmp_path),
+    ).execute(second_job)
+
+    assert first_models.screening_batch_sizes == [1]
+    assert first_models.extraction_batch_sizes == [1]
+    assert second_models.screening_batch_sizes == [1]
+    assert second_models.extraction_batch_sizes == [1]
+    assert source.representations.count() == 1
+    assert RawSourceDocument.objects.count() == 2
+    assert ExtractionRun.objects.count() == 2
+    assert EventCandidate.objects.count() == 2
 
 
 def test_model_version_changes_invalidate_cached_processing(tmp_path) -> None:
@@ -421,3 +536,43 @@ def test_partial_job_advances_cursor_and_retries_recorded_failed_messages(tmp_pa
     assert second_job.status == JobStatus.SUCCEEDED
     assert "pending_message_ids" not in source.configuration
     assert EventCandidate.objects.count() == 12
+
+
+def test_business_validation_issue_keeps_candidate_for_review(tmp_path) -> None:
+    source = make_source()
+    enqueue = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
+    job = claim_job(enqueue.jobs[0].pk, "test-worker")
+    assert job is not None
+
+    TelegramTextPipeline(
+        fetcher=FakeFetcher(fixture_messages()[:1]),
+        models=BusinessIssueModels(),
+        storage=LocalRawContentStorage(tmp_path),
+    ).execute(job)
+
+    candidate = EventCandidate.objects.get()
+    assert candidate.validation_status == "REVIEW_REQUIRED"
+    assert any(
+        issue["code"] == "OCCURRENCE_END_BEFORE_START" for issue in candidate.validation_issues
+    )
+
+
+def test_structural_output_failure_creates_no_candidate_but_retains_diagnostics(tmp_path) -> None:
+    source = make_source()
+    enqueue = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
+    job = claim_job(enqueue.jobs[0].pk, "test-worker")
+    assert job is not None
+
+    TelegramTextPipeline(
+        fetcher=FakeFetcher(fixture_messages()[:1]),
+        models=StructuralOutputFails(),
+        storage=LocalRawContentStorage(tmp_path),
+    ).execute(job)
+
+    invocation = ModelInvocation.objects.get(stage="EXTRACTION")
+    extraction = ExtractionRun.objects.get()
+    assert EventCandidate.objects.count() == 0
+    assert invocation.status == "FAILED"
+    assert invocation.response_identifier == "response-incomplete"
+    assert (tmp_path / invocation.raw_output_storage_key).read_bytes() == b'{"status":"incomplete"}'
+    assert extraction.raw_output_storage_key == invocation.raw_output_storage_key

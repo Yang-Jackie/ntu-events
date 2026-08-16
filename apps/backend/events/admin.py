@@ -8,7 +8,6 @@ from .models import (
     EventOrganizer,
     EventProvenance,
     EventPurpose,
-    EventSeries,
     EventTopic,
     OccurrenceVenue,
     Registration,
@@ -31,6 +30,7 @@ class EventOccurrenceInline(admin.TabularInline):
         "end_date",
         "end_time",
         "time_precision",
+        "attendance_mode",
         "occurrence_status",
     )
 
@@ -53,7 +53,6 @@ class EventAdmin(admin.ModelAdmin):
         "title",
         "publication_status",
         "verification_status",
-        "series",
         "updated_at",
     )
     list_filter = (
@@ -75,19 +74,6 @@ class EventAdmin(admin.ModelAdmin):
     )
 
 
-class SeriesRegistrationInline(admin.TabularInline):
-    model = Registration
-    fk_name = "series"
-    extra = 0
-
-
-@admin.register(EventSeries)
-class EventSeriesAdmin(admin.ModelAdmin):
-    list_display = ("title", "updated_at")
-    search_fields = ("title", "description")
-    inlines = (SeriesRegistrationInline,)
-
-
 class OccurrenceVenueInline(admin.TabularInline):
     model = OccurrenceVenue
     extra = 0
@@ -107,18 +93,25 @@ class EventOccurrenceAdmin(admin.ModelAdmin):
         "label",
         "start_date",
         "start_time",
+        "attendance_mode",
         "occurrence_status",
     )
-    list_filter = ("occurrence_status", "capacity_status", "time_precision", "is_all_day")
-    search_fields = ("event__title", "label", "raw_location_text")
+    list_filter = (
+        "attendance_mode",
+        "occurrence_status",
+        "capacity_status",
+        "time_precision",
+        "is_all_day",
+    )
+    search_fields = ("event__title", "label", "raw_location_text", "meeting_url")
     inlines = (OccurrenceVenueInline, OccurrenceRegistrationInline)
 
 
 @admin.register(Registration)
 class RegistrationAdmin(admin.ModelAdmin):
-    list_display = ("name", "registration_type", "status", "series", "event", "occurrence")
+    list_display = ("name", "registration_type", "status", "event", "occurrence")
     list_filter = ("registration_type", "status", "time_precision")
-    search_fields = ("name", "url", "instructions", "event__title", "series__title")
+    search_fields = ("name", "url", "instructions", "event__title")
 
 
 @admin.register(EventProvenance)

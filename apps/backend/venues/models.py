@@ -20,7 +20,6 @@ class VenueType(models.TextChoices):
     HALL = "HALL", "Hall"
     SPORTS_FACILITY = "SPORTS_FACILITY", "Sports facility"
     OUTDOOR = "OUTDOOR", "Outdoor"
-    ONLINE = "ONLINE", "Online"
     OTHER = "OTHER", "Other"
 
 

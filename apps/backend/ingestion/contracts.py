@@ -2,31 +2,13 @@ from __future__ import annotations
 
 from datetime import date, time
 from enum import StrEnum
-from typing import Annotated, Literal
+from typing import Literal
 
-from pydantic import (
-    AfterValidator,
-    BaseModel,
-    ConfigDict,
-    Field,
-    HttpUrl,
-    TypeAdapter,
-    model_validator,
-)
+from pydantic import BaseModel, ConfigDict, Field
 
-CANDIDATE_SCHEMA_VERSION = "event-candidate-v1"
-SCREENING_SCHEMA_VERSION = "telegram-screening-v1"
-EXTRACTION_SCHEMA_VERSION = "telegram-extraction-v1"
-
-_HTTP_URL_ADAPTER = TypeAdapter(HttpUrl)
-
-
-def _validate_http_url(value: str) -> str:
-    _HTTP_URL_ADAPTER.validate_python(value)
-    return value
-
-
-HttpUrlString = Annotated[str, AfterValidator(_validate_http_url)]
+CANDIDATE_SCHEMA_VERSION = "event-candidate-v2"
+SCREENING_SCHEMA_VERSION = "telegram-screening-v2"
+EXTRACTION_SCHEMA_VERSION = "telegram-extraction-v2"
 
 
 class StrictModel(BaseModel):
@@ -47,8 +29,14 @@ class OccurrenceStatus(StrEnum):
     UNKNOWN = "UNKNOWN"
 
 
+class AttendanceMode(StrEnum):
+    IN_PERSON = "IN_PERSON"
+    ONLINE = "ONLINE"
+    HYBRID = "HYBRID"
+    UNKNOWN = "UNKNOWN"
+
+
 class RegistrationScope(StrEnum):
-    SERIES = "SERIES"
     EVENT = "EVENT"
     OCCURRENCE = "OCCURRENCE"
 
@@ -71,50 +59,32 @@ class ScreeningBatch(StrictModel):
 
 
 class CandidateOccurrence(StrictModel):
+    local_ref: str = Field(min_length=1, max_length=100)
     label: str | None = None
-    start_date: date
+    start_date: date | None = None
     start_time: time | None = None
     end_date: date | None = None
     end_time: time | None = None
-    time_precision: TimePrecision
+    time_precision: TimePrecision = TimePrecision.UNKNOWN
     is_all_day: bool = False
+    attendance_mode: AttendanceMode = AttendanceMode.UNKNOWN
     raw_location: str | None = None
+    suggested_venue_ids: list[int] = Field(default_factory=list)
+    meeting_url: str | None = None
     status: OccurrenceStatus = OccurrenceStatus.SCHEDULED
-
-    @model_validator(mode="after")
-    def validate_time_shape(self) -> CandidateOccurrence:
-        if self.end_date is not None and self.end_date < self.start_date:
-            raise ValueError("end_date must not precede start_date")
-        if self.end_time is not None and self.end_date is None:
-            raise ValueError("end_time requires end_date")
-        if self.end_time is not None and self.start_time is None:
-            raise ValueError("end_time requires start_time")
-        if (
-            self.end_date == self.start_date
-            and self.start_time is not None
-            and self.end_time is not None
-            and self.end_time < self.start_time
-        ):
-            raise ValueError("same-day end_time must not precede start_time")
-        if self.is_all_day and (self.start_time is not None or self.end_time is not None):
-            raise ValueError("all-day occurrences cannot contain times")
-        if self.time_precision == TimePrecision.EXACT and self.start_time is None:
-            raise ValueError("exact occurrences require start_time")
-        if self.time_precision == TimePrecision.DATE_ONLY and self.start_time is not None:
-            raise ValueError("date-only occurrences cannot contain times")
-        return self
 
 
 class CandidateOrganizer(StrictModel):
-    name: str = Field(min_length=1)
+    name: str | None = None
     role: str | None = None
     is_primary: bool = False
 
 
 class CandidateRegistration(StrictModel):
     scope: RegistrationScope
-    name: str = Field(min_length=1)
-    url: HttpUrlString | None = None
+    occurrence_ref: str | None = None
+    name: str | None = None
+    url: str | None = None
     opens_date: date | None = None
     opens_time: time | None = None
     closes_date: date | None = None
@@ -128,19 +98,24 @@ class CandidateEvidence(StrictModel):
     value: str
 
 
+class CandidateControlledValues(StrictModel):
+    supported_codes: list[str] = Field(default_factory=list)
+    other_values: list[str] = Field(default_factory=list)
+
+
 class EventCandidatePayload(StrictModel):
-    schema_version: Literal["event-candidate-v1"] = CANDIDATE_SCHEMA_VERSION
-    title: str = Field(min_length=1, max_length=500)
+    schema_version: Literal["event-candidate-v2"] = CANDIDATE_SCHEMA_VERSION
+    title: str | None = Field(default=None, max_length=500)
     description: str | None = None
-    occurrences: list[CandidateOccurrence] = Field(min_length=1)
+    occurrences: list[CandidateOccurrence] = Field(default_factory=list)
     organizers: list[CandidateOrganizer] = Field(default_factory=list)
     registrations: list[CandidateRegistration] = Field(default_factory=list)
-    format_codes: list[str] = Field(default_factory=list)
-    topic_codes: list[str] = Field(default_factory=list)
-    purpose_codes: list[str] = Field(default_factory=list)
-    audience_codes: list[str] = Field(default_factory=list)
-    image_url: HttpUrlString | None = None
-    source_url: HttpUrlString
+    formats: CandidateControlledValues = Field(default_factory=CandidateControlledValues)
+    topics: CandidateControlledValues = Field(default_factory=CandidateControlledValues)
+    purposes: CandidateControlledValues = Field(default_factory=CandidateControlledValues)
+    audiences: CandidateControlledValues = Field(default_factory=CandidateControlledValues)
+    image_url: str | None = None
+    source_url: str | None = None
     evidence: list[CandidateEvidence] = Field(default_factory=list)
     ambiguities: list[str] = Field(default_factory=list)
     overall_confidence: float | None = Field(default=None, ge=0, le=1)

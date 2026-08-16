@@ -40,6 +40,13 @@ class TimePrecision(models.TextChoices):
     UNKNOWN = "UNKNOWN", "Unknown"
 
 
+class AttendanceMode(models.TextChoices):
+    IN_PERSON = "IN_PERSON", "In person"
+    ONLINE = "ONLINE", "Online"
+    HYBRID = "HYBRID", "Hybrid"
+    UNKNOWN = "UNKNOWN", "Unknown"
+
+
 class RegistrationType(models.TextChoices):
     ATTENDEE = "ATTENDEE", "Attendee"
     VOLUNTEER = "VOLUNTEER", "Volunteer"
@@ -88,30 +95,11 @@ class EventAudience(ClassificationValue):
     pass
 
 
-class EventSeries(TimestampedModel):
-    title = models.CharField(max_length=500)
-    description = models.TextField(blank=True)
-
-    class Meta:
-        verbose_name_plural = "event series"
-        ordering = ("title",)
-
-    def __str__(self) -> str:
-        return self.title
-
-
 class Event(TimestampedModel):
     slug = models.SlugField(max_length=255, unique=True)
     title = models.CharField(max_length=500)
     normalized_title = models.CharField(max_length=500, db_index=True)
     description = models.TextField(blank=True)
-    series = models.ForeignKey(
-        EventSeries,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="events",
-    )
     publication_status = models.CharField(
         max_length=30,
         choices=PublicationStatus.choices,
@@ -176,7 +164,13 @@ class EventOccurrence(TimestampedModel):
     end_time = models.TimeField(null=True, blank=True)
     time_precision = models.CharField(max_length=20, choices=TimePrecision.choices)
     is_all_day = models.BooleanField(default=False)
+    attendance_mode = models.CharField(
+        max_length=20,
+        choices=AttendanceMode.choices,
+        default=AttendanceMode.UNKNOWN,
+    )
     raw_location_text = models.TextField(blank=True)
+    meeting_url = models.URLField(max_length=2000, blank=True)
     occurrence_status = models.CharField(
         max_length=20,
         choices=OccurrenceStatus.choices,
@@ -263,13 +257,6 @@ class OccurrenceVenue(models.Model):
 
 
 class Registration(TimestampedModel):
-    series = models.ForeignKey(
-        EventSeries,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name="registrations",
-    )
     event = models.ForeignKey(
         Event,
         on_delete=models.CASCADE,
@@ -308,9 +295,8 @@ class Registration(TimestampedModel):
         constraints = [
             models.CheckConstraint(
                 condition=(
-                    Q(series__isnull=False, event__isnull=True, occurrence__isnull=True)
-                    | Q(series__isnull=True, event__isnull=False, occurrence__isnull=True)
-                    | Q(series__isnull=True, event__isnull=True, occurrence__isnull=False)
+                    Q(event__isnull=False, occurrence__isnull=True)
+                    | Q(event__isnull=True, occurrence__isnull=False)
                 ),
                 name="registration_has_exactly_one_owner",
             ),

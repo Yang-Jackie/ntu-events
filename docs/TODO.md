@@ -22,11 +22,3 @@ Screening takes changed message content into account, but extraction reuse can
 still treat an older successful extraction for the same source representation
 as current. Tie reuse to the processed content or otherwise make the changed
 content state explicit.
-
-## Candidate readiness for canonicalization
-
-The current candidate contract and validator cannot yet carry every state needed
-by canonical processing. Milestone 4 must decide and cover incomplete dates,
-occurrence-scoped registrations, controlled classifications, registration time
-consistency, occurrence-status mapping, and physical versus hybrid or online
-eligibility before candidates create canonical data.

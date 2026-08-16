@@ -2,16 +2,17 @@ from datetime import date, time
 
 import pytest
 from django.contrib.gis.geos import Point
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 from events.models import (
+    AttendanceMode,
     Event,
     EventAudience,
     EventFormat,
     EventOccurrence,
     EventProvenance,
     EventPurpose,
-    EventSeries,
     EventTopic,
     OccurrenceVenue,
     Registration,
@@ -106,31 +107,25 @@ def test_building_uses_postgis_point() -> None:
 
 @pytest.mark.parametrize("owner_count", [0, 2])
 def test_registration_requires_exactly_one_owner(owner_count: int) -> None:
-    series = EventSeries.objects.create(title="Test Series")
     event = make_event()
+    occurrence = make_occurrence(event)
 
     values = {
         "name": "Attendee registration",
         "registration_type": RegistrationType.ATTENDEE,
     }
     if owner_count == 2:
-        values.update({"series": series, "event": event})
+        values.update({"event": event, "occurrence": occurrence})
 
     with pytest.raises(IntegrityError), transaction.atomic():
         Registration.objects.create(**values)
 
 
 def test_registration_accepts_each_owner_scope() -> None:
-    series = EventSeries.objects.create(title="Test Series")
     event = make_event()
     occurrence = make_occurrence(event)
 
     registrations = [
-        Registration.objects.create(
-            series=series,
-            name="Series registration",
-            registration_type=RegistrationType.ATTENDEE,
-        ),
         Registration.objects.create(
             event=event,
             name="Event registration",
@@ -143,7 +138,7 @@ def test_registration_accepts_each_owner_scope() -> None:
         ),
     ]
 
-    assert len(registrations) == 3
+    assert len(registrations) == 2
 
 
 def test_occurrence_cannot_end_before_it_starts() -> None:
@@ -175,6 +170,23 @@ def test_occurrence_allows_crossing_midnight() -> None:
     )
 
     assert occurrence.pk is not None
+
+
+def test_online_occurrence_keeps_meeting_access_without_a_venue() -> None:
+    event = make_event()
+
+    occurrence = EventOccurrence.objects.create(
+        event=event,
+        sequence=1,
+        start_date=date(2026, 8, 1),
+        start_time=time(10),
+        time_precision=TimePrecision.EXACT,
+        attendance_mode=AttendanceMode.ONLINE,
+        meeting_url="https://example.com/meeting",
+    )
+
+    assert occurrence.attendance_mode == AttendanceMode.ONLINE
+    assert occurrence.meeting_url == "https://example.com/meeting"
 
 
 def test_exact_occurrence_requires_start_time() -> None:
@@ -250,6 +262,14 @@ def test_candidate_confidence_is_bounded() -> None:
 
     with pytest.raises(IntegrityError), transaction.atomic():
         EventCandidate.objects.filter(pk=candidate.pk).update(overall_confidence=1.1)
+
+
+def test_candidate_cannot_be_changed_after_creation() -> None:
+    candidate, _representation = make_candidate()
+    candidate.title = "Changed title"
+
+    with pytest.raises(ValidationError, match="immutable"):
+        candidate.save()
 
 
 def test_registration_close_time_cannot_precede_open_time_on_same_day() -> None:

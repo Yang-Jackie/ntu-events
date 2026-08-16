@@ -54,7 +54,8 @@ When CCDS ingestion is implemented, decide:
 - How listing and detail observations are reconciled
 - How changed content is detected and retained
 - How source schedules map into candidate occurrences
-- How missing, online-only, off-campus, and ambiguous items enter review
+- How missing, off-campus, and ambiguous facts enter review
+- How occurrence attendance mode and online access map into shared candidates
 - How source categories map to product facets
 - What source-specific evidence is required for troubleshooting
 

@@ -146,13 +146,14 @@ change:
 - **Extraction attempt and candidate:** the interpretation history and
   provisional event data produced from source material.
 - **Event and occurrence:** the conceptual activity and the attendable time and
-  place information presented to users.
-- **Series:** an optional grouping for related events.
+  place information presented to users. One event may have multiple labeled
+  occurrences with different dates, locations, attendance modes, meeting
+  access, or registration details.
 - **Organizer and classification facets:** normalized discovery metadata.
 - **Building and venue:** canonical location data kept separate from raw
   source wording.
 - **Registration:** external participation information associated with the
-  appropriate event context.
+  appropriate event or occurrence.
 - **Provenance and revision information:** links and history needed to explain
   canonical data and later changes.
 
@@ -209,24 +210,30 @@ advance.
 
 ### Candidate contract
 
-The contract must be able to retain useful incomplete or ambiguous source
-observations without presenting them as valid events. During implementation,
-decide:
+The candidate contract retains complete model output even when the source facts
+are incomplete, ambiguous, or internally inconsistent. Missing source facts
+use explicit unknown or empty representations. Occurrences have candidate-local
+references so registrations can identify their intended occurrence.
 
-- Which information is required to store a candidate
-- How missing dates, locations, modality, and uncertainty are represented
-- How multi-occurrence and scoped registration information is referenced
-- How extracted classification values map to controlled product data
-- How schema changes are versioned and reprocessed
+Extraction receives a snapshot of supported classification and venue values.
+The model may suggest those values, while unmatched source-grounded values
+remain available for review. Model suggestions do not create or modify trusted
+canonical records.
+
+Candidate schemas and extraction instructions are versioned so changed
+semantics can be reprocessed safely.
 
 ### Validation
 
-Validation should separate malformed data, ineligible content, unresolved
-content, and candidates ready for further processing. Decide the validation
-outcomes and checks using production cases, including difficult date, time,
-location, modality, and registration examples.
+Structurally malformed, incomplete, or unassociateable provider output creates
+no candidate. The source observation, failed invocation, error metadata, and
+available provider response remain inspectable for diagnosis.
 
-Validation results must be inspectable and must not fabricate missing facts.
+Once an event candidate is structurally interpretable, business-rule problems
+do not discard it. Validation records structured issues and routes any affected
+candidate to review. Issues may block canonicalization without blocking
+storage. Product-scope eligibility is not used to reject an extracted
+candidate.
 
 ### Venue resolution
 
@@ -288,7 +295,8 @@ that interface.
 
 The current product interprets event schedules in the NTU Singapore context.
 The implementation must preserve date-only and ambiguous source information
-without inventing precision.
+without inventing precision. Attendance mode and public meeting access belong
+to the occurrence because different sessions of one event may differ.
 
 Detailed treatment of multi-day events, separate sessions, recurrence,
 overnight events, registration windows, and timezone exceptions should be

@@ -9,6 +9,7 @@ is authoritative for progress.
 - The product is owner-operated and non-public.
 - Telegram broadcast channels are the first production ingestion source.
 - Source material, processing records, and candidates are inspectable.
+- Structurally valid candidates retain business-rule problems as review issues.
 - Core event, occurrence, organizer, classification, building, venue, and
   provenance data structures exist.
 - Milestone 4 is implementing the path from candidate review to canonical event
@@ -26,12 +27,11 @@ is authoritative for progress.
 
 ## Milestone 4 questions
 
-Decide these while implementing and testing the processing workflow:
+Decide these while implementing and testing the remaining processing workflow:
 
-- What a candidate must contain to be stored, reviewed, or processed
-- How missing, ambiguous, ineligible, and conflicting information is represented
+- How reviewer corrections and approval relate to immutable extracted candidates
 - How candidate occurrences, registrations, classifications, and modality map
-  into the canonical domain
+  into the canonical domain after review
 - How venue matches and unresolved locations are reviewed
 - How canonicalization avoids accidental duplicates and preserves provenance
 - What limited change or duplicate behavior, if any, is necessary for the first

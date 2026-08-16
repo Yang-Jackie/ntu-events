@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor, wait
 from dataclasses import dataclass
+from functools import partial
 from typing import Any
 
 from django.db import transaction
@@ -34,15 +35,20 @@ from ingestion.pipelines.telegram.adapter import TelegramMessage
 from ingestion.pipelines.telegram.extraction import (
     EXTRACTION_PROMPT_VERSION,
     SCREENING_PROMPT_VERSION,
+    ModelOutputError,
     ModelResult,
     OpenAITelegramModels,
     batch_input_hash,
 )
 from ingestion.raw_storage import RawContentStorage
+from ingestion.reference_data import (
+    build_candidate_reference_data,
+    candidate_reference_data_hash,
+)
 from ingestion.validation import validate_candidate
 
 TELEGRAM_EXTRACTOR_TYPE = "telegram-llm"
-TELEGRAM_EXTRACTOR_VERSION = "telegram-m3-v1"
+TELEGRAM_EXTRACTOR_VERSION = "telegram-m4-v1"
 
 
 @dataclass
@@ -205,19 +211,29 @@ def _extract_messages(
     concurrency: int,
     batch_size: int,
 ) -> tuple[set[str], int, int]:
-    pending = [
-        item
-        for item in relevant
-        if not ExtractionRun.objects.filter(
-            raw_source_document__source_representation=item.representation,
+    if not relevant:
+        return set(), 0, 0
+
+    reference_data = build_candidate_reference_data()
+    reference_data_hash = candidate_reference_data_hash(reference_data)
+    pending: list[MessageWork] = []
+    for item in relevant:
+        if item.raw_document is None:
+            raise RuntimeError("Relevant messages must have a preserved raw document")
+        already_extracted = ExtractionRun.objects.filter(
+            raw_source_document=item.raw_document,
             extractor_type=TELEGRAM_EXTRACTOR_TYPE,
             extractor_version=TELEGRAM_EXTRACTOR_VERSION,
             model_name=models.extraction_model,
             prompt_version=EXTRACTION_PROMPT_VERSION,
             model_invocation__schema_version=EXTRACTION_SCHEMA_VERSION,
+            model_invocation__reference_data_hash=reference_data_hash,
             status=ExtractionStatus.SUCCEEDED,
         ).exists()
-    ]
+        if not already_extracted:
+            pending.append(item)
+    if not pending:
+        return set(), 0, 0
     by_identity = {item.message.identity: item for item in pending}
     failure_ids: set[str] = set()
     candidates_created = 0
@@ -252,17 +268,17 @@ def _extract_messages(
                 )
                 for index, candidate in enumerate(result.events):
                     candidate = _trusted_source_url(candidate, item.message.source_url)
-                    validation = validate_candidate(candidate)
+                    validation = validate_candidate(candidate, reference_data)
                     EventCandidate.objects.create(
                         extraction_run=extraction,
                         source_representation=item.representation,
                         candidate_index=index,
                         schema_version=CANDIDATE_SCHEMA_VERSION,
                         payload=candidate.model_dump(mode="json"),
-                        title=candidate.title,
+                        title=candidate.title or "",
                         overall_confidence=candidate.overall_confidence,
                         validation_status=validation.status,
-                        validation_errors=validation.errors,
+                        validation_issues=validation.issues,
                     )
                     candidates_created += 1
                 raw_document.processing_status = ProcessingStatus.PROCESSED
@@ -286,6 +302,9 @@ def _extract_messages(
                 completed_at=outcome.completed_at,
                 status=ExtractionStatus.FAILED,
                 input_storage_key=raw_document.storage_key,
+                raw_output_storage_key=invocation.raw_output_storage_key,
+                response_identifier=invocation.response_identifier,
+                token_usage=invocation.token_usage,
                 error_message=str(outcome.error),
             )
             raw_document.processing_status = ProcessingStatus.FAILED
@@ -301,8 +320,9 @@ def _extract_messages(
         model_name=models.extraction_model,
         prompt_version=EXTRACTION_PROMPT_VERSION,
         schema_version=EXTRACTION_SCHEMA_VERSION,
-        call=models.extract,
+        call=partial(models.extract, reference_data=reference_data),
         storage=storage,
+        reference_data=reference_data,
         on_success=success,
         on_final_failure=failed,
     )
@@ -322,6 +342,7 @@ def _run_batches[ParsedT: BaseModel](
     schema_version: str,
     call: Callable[[list[TelegramMessage]], ModelResult[ParsedT]],
     storage: RawContentStorage,
+    reference_data: dict[str, Any] | None = None,
     on_success: Callable[[BatchOutcome[ParsedT], ModelInvocation], None],
     on_final_failure: Callable[[BatchOutcome[ParsedT], ModelInvocation], None],
 ) -> None:
@@ -364,6 +385,7 @@ def _run_batches[ParsedT: BaseModel](
                     prompt_version=prompt_version,
                     schema_version=schema_version,
                     storage=storage,
+                    reference_data=reference_data,
                 )
                 if result is not None:
                     on_success(outcome, invocation)
@@ -387,10 +409,23 @@ def _record_invocation(
     prompt_version: str,
     schema_version: str,
     storage: RawContentStorage,
+    reference_data: dict[str, Any] | None,
 ) -> ModelInvocation:
     raw_output_key = ""
+    response_identifier = ""
+    token_usage: dict = {}
     if outcome.result is not None:
         raw_output_key = storage.save(outcome.result.raw_response, suffix=".json").storage_key
+        response_identifier = outcome.result.response_identifier
+        token_usage = outcome.result.token_usage
+    elif isinstance(outcome.error, ModelOutputError):
+        raw_output_key = storage.save(outcome.error.raw_response, suffix=".json").storage_key
+        response_identifier = outcome.error.response_identifier
+        token_usage = outcome.error.token_usage
+    reference_data_snapshot = reference_data or {}
+    reference_hash = (
+        candidate_reference_data_hash(reference_data_snapshot) if reference_data_snapshot else ""
+    )
     return ModelInvocation.objects.create(
         job=job,
         stage=stage,
@@ -402,15 +437,18 @@ def _record_invocation(
         status=(ExtractionStatus.SUCCEEDED if outcome.result else ExtractionStatus.FAILED),
         started_at=outcome.started_at,
         completed_at=outcome.completed_at,
-        response_identifier=(outcome.result.response_identifier if outcome.result else ""),
+        response_identifier=response_identifier,
         input_hash=batch_input_hash(
             outcome.messages,
             model=model_name,
             prompt_version=prompt_version,
             schema_version=schema_version,
+            reference_data_hash=reference_hash,
         ),
+        reference_data_hash=reference_hash,
+        reference_data_snapshot=reference_data_snapshot,
         raw_output_storage_key=raw_output_key,
-        token_usage=(outcome.result.token_usage if outcome.result else {}),
+        token_usage=token_usage,
         error_type=(type(outcome.error).__name__ if outcome.error else ""),
         error_message=(str(outcome.error) if outcome.error else ""),
     )

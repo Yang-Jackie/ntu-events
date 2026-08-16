@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import F, Q
@@ -13,8 +14,7 @@ class ExtractionStatus(models.TextChoices):
 
 class ValidationStatus(models.TextChoices):
     PENDING = "PENDING", "Pending"
-    VALID = "VALID", "Valid"
-    INVALID = "INVALID", "Invalid"
+    READY = "READY", "Ready"
     REVIEW_REQUIRED = "REVIEW_REQUIRED", "Review required"
 
 
@@ -148,6 +148,8 @@ class ModelInvocation(models.Model):
     completed_at = models.DateTimeField(null=True, blank=True)
     response_identifier = models.CharField(max_length=255, blank=True)
     input_hash = models.CharField(max_length=128, db_index=True)
+    reference_data_hash = models.CharField(max_length=64, blank=True, db_index=True)
+    reference_data_snapshot = models.JSONField(default=dict, blank=True)
     raw_output_storage_key = models.CharField(max_length=1000, blank=True)
     token_usage = models.JSONField(default=dict, blank=True)
     error_type = models.CharField(max_length=100, blank=True)
@@ -285,7 +287,7 @@ class EventCandidate(models.Model):
         choices=ValidationStatus.choices,
         default=ValidationStatus.PENDING,
     )
-    validation_errors = models.JSONField(default=list, blank=True)
+    validation_issues = models.JSONField(default=list, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -304,3 +306,8 @@ class EventCandidate(models.Model):
 
     def __str__(self) -> str:
         return self.title or f"Candidate {self.pk or 'unsaved'}"
+
+    def save(self, *args, **kwargs) -> None:
+        if self.pk is not None:
+            raise ValidationError("Event candidates are immutable; create a review record instead")
+        super().save(*args, **kwargs)

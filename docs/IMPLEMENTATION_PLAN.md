@@ -87,13 +87,17 @@ the working path rather than fixing them in planning prose.
 
 ### Candidate and validation work
 
-- Review the current candidate contract against real Telegram cases and the
-  canonical domain.
-- Decide how incomplete, ambiguous, ineligible, and ready candidates are
-  represented.
-- Ensure occurrences, registrations, classifications, modality, and source
-  evidence can be carried into later processing without losing meaning.
-- Define deterministic validation outcomes and add focused regression cases.
+- Candidate v2 preserves incomplete source facts, stable occurrence references,
+  attendance mode, meeting access, scoped registrations, controlled-value
+  suggestions, unmatched values, ambiguity, and evidence.
+- Structurally invalid provider output creates no candidate while retaining
+  available diagnostic evidence.
+- Business-rule problems are stored as structured issues and route the
+  candidate to review instead of discarding it.
+- Supported venue and classification references are supplied to extraction and
+  snapshotted with the invocation.
+- The remaining candidate work is the reviewer correction and approval path
+  used by canonicalization.
 
 ### Venue and canonical-event work
 
