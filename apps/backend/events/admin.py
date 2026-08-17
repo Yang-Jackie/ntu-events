@@ -1,4 +1,9 @@
 from django.contrib import admin
+from ingestion.models import (
+    CandidateReview,
+    CandidateReviewOccurrence,
+    CandidateReviewRegistration,
+)
 
 from .models import (
     Event,
@@ -73,6 +78,16 @@ class EventAdmin(admin.ModelAdmin):
         EventProvenanceInline,
     )
 
+    def has_change_permission(self, request, obj=None) -> bool:
+        if obj is not None and CandidateReview.objects.filter(canonical_event=obj).exists():
+            return False
+        return super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None) -> bool:
+        if obj is not None and CandidateReview.objects.filter(canonical_event=obj).exists():
+            return False
+        return super().has_delete_permission(request, obj)
+
 
 class OccurrenceVenueInline(admin.TabularInline):
     model = OccurrenceVenue
@@ -106,12 +121,38 @@ class EventOccurrenceAdmin(admin.ModelAdmin):
     search_fields = ("event__title", "label", "raw_location_text", "meeting_url")
     inlines = (OccurrenceVenueInline, OccurrenceRegistrationInline)
 
+    def has_change_permission(self, request, obj=None) -> bool:
+        if obj is not None and CandidateReviewOccurrence.objects.filter(occurrence=obj).exists():
+            return False
+        return super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None) -> bool:
+        if obj is not None and CandidateReviewOccurrence.objects.filter(occurrence=obj).exists():
+            return False
+        return super().has_delete_permission(request, obj)
+
 
 @admin.register(Registration)
 class RegistrationAdmin(admin.ModelAdmin):
     list_display = ("name", "registration_type", "status", "event", "occurrence")
     list_filter = ("registration_type", "status", "time_precision")
     search_fields = ("name", "url", "instructions", "event__title")
+
+    def has_change_permission(self, request, obj=None) -> bool:
+        if (
+            obj is not None
+            and CandidateReviewRegistration.objects.filter(registration=obj).exists()
+        ):
+            return False
+        return super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None) -> bool:
+        if (
+            obj is not None
+            and CandidateReviewRegistration.objects.filter(registration=obj).exists()
+        ):
+            return False
+        return super().has_delete_permission(request, obj)
 
 
 @admin.register(EventProvenance)
@@ -123,6 +164,16 @@ class EventProvenanceAdmin(admin.ModelAdmin):
         "source_representation__external_identifier",
         "event_candidate__title",
     )
+    readonly_fields = [field.name for field in EventProvenance._meta.fields]
+
+    def has_add_permission(self, request) -> bool:
+        return False
+
+    def has_change_permission(self, request, obj=None) -> bool:
+        return False
+
+    def has_delete_permission(self, request, obj=None) -> bool:
+        return False
 
 
 class ClassificationAdmin(admin.ModelAdmin):

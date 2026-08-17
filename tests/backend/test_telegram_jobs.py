@@ -22,6 +22,7 @@ from ingestion.contracts import (
 from ingestion.errors import RetryableIngestionError
 from ingestion.jobs import claim_job, enqueue_sources
 from ingestion.models import (
+    CandidateReview,
     EventCandidate,
     ExtractionRun,
     IngestionRequest,
@@ -374,6 +375,7 @@ def test_telegram_job_uses_fixed_batches_and_preserves_only_relevant_content(tmp
     assert RawSourceDocument.objects.count() == 12
     assert set(RawSourceDocument.objects.values_list("ingestion_job_id", flat=True)) == {job.pk}
     assert EventCandidate.objects.count() == 12
+    assert CandidateReview.objects.count() == 12
     assert ModelInvocation.objects.count() == 5
     extraction_invocation = ModelInvocation.objects.filter(stage="EXTRACTION").first()
     assert extraction_invocation is not None
@@ -551,7 +553,10 @@ def test_business_validation_issue_keeps_candidate_for_review(tmp_path) -> None:
     ).execute(job)
 
     candidate = EventCandidate.objects.get()
+    review = candidate.review
     assert candidate.validation_status == "REVIEW_REQUIRED"
+    assert review.sync_status == "BLOCKED"
+    assert review.canonical_event is None
     assert any(
         issue["code"] == "OCCURRENCE_END_BEFORE_START" for issue in candidate.validation_issues
     )
@@ -572,6 +577,7 @@ def test_structural_output_failure_creates_no_candidate_but_retains_diagnostics(
     invocation = ModelInvocation.objects.get(stage="EXTRACTION")
     extraction = ExtractionRun.objects.get()
     assert EventCandidate.objects.count() == 0
+    assert CandidateReview.objects.count() == 0
     assert invocation.status == "FAILED"
     assert invocation.response_identifier == "response-incomplete"
     assert (tmp_path / invocation.raw_output_storage_key).read_bytes() == b'{"status":"incomplete"}'

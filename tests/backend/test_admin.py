@@ -1,10 +1,14 @@
+import json
+
 import pytest
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils import timezone
 from events.models import Event, EventOccurrence
+from ingestion.candidate_reviews import create_review_and_sync
 from ingestion.models import (
+    CandidateReview,
     EventCandidate,
     ExtractionRun,
     IngestionJob,
@@ -31,6 +35,7 @@ pytestmark = pytest.mark.django_db
         MessageScreening,
         ExtractionRun,
         EventCandidate,
+        CandidateReview,
         Organizer,
         Building,
         Venue,
@@ -127,3 +132,75 @@ def test_candidate_admin_is_read_only_and_presents_payload_summary(client) -> No
     assert b"Candidate overview" in response.content
     assert b"Online candidate" in response.content
     assert b'name="_save"' not in response.content
+
+
+def test_review_admin_correction_synchronizes_existing_event(client) -> None:
+    now = timezone.now()
+    source = Source.objects.create(
+        name="Review Admin source",
+        source_type="PUBLIC_CHANNEL",
+        adapter_key="test",
+    )
+    representation = SourceRepresentation.objects.create(
+        source=source,
+        external_identifier="review-message-1",
+        first_seen_at=now,
+        last_seen_at=now,
+    )
+    document = RawSourceDocument.objects.create(
+        source_representation=representation,
+        fetched_at=now,
+        storage_key="raw/review-message-1.json",
+        content_hash="b" * 64,
+        processing_status="PROCESSED",
+    )
+    extraction = ExtractionRun.objects.create(
+        raw_source_document=document,
+        extractor_type="test",
+        extractor_version="1",
+        started_at=now,
+        status="SUCCEEDED",
+    )
+    candidate = EventCandidate.objects.create(
+        extraction_run=extraction,
+        source_representation=representation,
+        candidate_index=0,
+        schema_version="event-candidate-v2",
+        payload={"schema_version": "event-candidate-v2", "title": "Original title"},
+        title="Original title",
+        validation_status="REVIEW_REQUIRED",
+    )
+    review = create_review_and_sync(candidate)
+    event_id = review.canonical_event_id
+    user_model = get_user_model()
+    superuser = user_model.objects.create_superuser(
+        username="review-admin",
+        email="admin@example.com",
+        password="test-password",
+    )
+    client.force_login(superuser)
+
+    response = client.post(
+        reverse("admin:ingestion_candidatereview_change", args=[review.pk]),
+        {
+            "effective_payload": json.dumps(
+                {
+                    "schema_version": "event-candidate-v2",
+                    "title": "Corrected by reviewer",
+                }
+            ),
+            "review_status": "APPROVED",
+            "reviewer_notes": "Title checked against the source.",
+            "expected_version": review.review_version,
+            "_save": "Save",
+        },
+    )
+
+    assert response.status_code == 302
+    review.refresh_from_db()
+    assert review.review_version == 2
+    assert review.synced_version == 2
+    assert review.has_manual_edits is True
+    assert review.reviewed_by == superuser
+    assert review.canonical_event_id == event_id
+    assert review.canonical_event.title == "Corrected by reviewer"

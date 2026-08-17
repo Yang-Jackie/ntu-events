@@ -1,9 +1,9 @@
 # NTU Events Implementation Plan
 
 **Document status:** Active implementation plan
-**Current milestone:** 4 — Processing workflow
-**Next delivery goal:** Turn a reviewed Telegram candidate into a canonical
-event safely and repeatably
+**Current milestone:** 5 — API contract
+**Next delivery goal:** Expose the first useful canonical event resource through
+OpenAPI and the generated TypeScript client
 
 ## 1. Delivery target
 
@@ -23,8 +23,8 @@ Public deployment remains a separate later gate.
 | 1. Repository scaffold          | Backend, web, API-client package, local database, and basic checks run                           | Complete    |
 | 2. Domain foundation            | Core source, ingestion, event, organizer, classification, and venue records are reviewable       | Complete    |
 | 3. First-source ingestion       | Telegram content can be processed repeatedly with retained provenance and inspectable results    | Complete    |
-| 4. Processing workflow          | A reviewed candidate can become canonical event data safely and without accidental duplication   | In progress |
-| 5. API contract                 | The web application can retrieve typed event data through the generated client                   | Not started |
+| 4. Processing workflow          | A reviewed candidate can become canonical event data safely and without accidental duplication   | Complete    |
+| 5. API contract                 | The web application can retrieve typed event data through the generated client                   | In progress |
 | 6. Personal discovery interface | The owner can find the ingested event through a local map, list, and detail view                 | Not started |
 | 7. Personal-use hardening       | Corrections, reruns, failures, and source changes are handled reliably                           | Not started |
 | 8. Controlled source expansion  | Additional approved sources reuse the shared workflow                                            | Not started |
@@ -79,11 +79,7 @@ it is not the implemented first production pipeline.
 - Verified an authenticated production-path run and inspected its persisted
   results.
 
-## 4. Milestone 4 — Processing workflow
-
-The current implementation has enough candidate and domain structure to expose
-the remaining decisions. Milestone 4 should make those decisions while building
-the working path rather than fixing them in planning prose.
+## 4. Completed processing workflow
 
 ### Candidate and validation work
 
@@ -96,36 +92,26 @@ the working path rather than fixing them in planning prose.
   candidate to review instead of discarding it.
 - Supported venue and classification references are supplied to extraction and
   snapshotted with the invocation.
-- The remaining candidate work is the reviewer correction and approval path
-  used by canonicalization.
+- Every candidate receives a mutable review record while the extracted candidate
+  remains immutable.
 
-### Venue and canonical-event work
+### Review and canonical-event work
 
-- Implement a first useful venue-resolution path against the reviewed campus
-  data.
-- Decide how unresolved and suggested locations enter review.
-- Decide and implement the initial canonicalization behavior, including
-  provenance, safe reruns, transaction boundaries, and protection of manual
-  decisions.
-- Make processing results and review actions inspectable in Django Admin.
-
-### Milestone 4 exit condition
-
-Milestone 4 is complete when:
-
-- A representative reviewed candidate can become canonical event and occurrence
-  data.
-- Reprocessing the same input does not create an accidental duplicate.
-- Incomplete or unsafe candidates remain reviewable rather than being
-  fabricated or silently accepted.
-- The chosen venue and canonicalization behavior is covered by focused tests.
-- The technical documentation records the durable behavior actually
-  implemented, without prescribing unimplemented future update or matching
-  rules.
+- Automatic and manual promotion share a versioned, repeatable review-to-event
+  synchronization workflow.
+- Useful sparse candidates can create draft event shells, while contradictions
+  block synchronization and preserve the last good event state.
+- Supported venue references and canonical classification values are projected;
+  unmatched data remains visible as review issues.
+- Exact-title duplicates pause for an explicit reviewer decision rather than
+  being merged or created automatically.
+- Reviewer corrections, approval, rejection, synchronization state, and linked
+  canonical data are inspectable in Django Admin.
+- Focused tests cover projection, correction, rejection, duplicate gating,
+  incomplete data, failures, reruns, and provenance.
 
 Cross-source duplicate matching, general canonical updates, and automatic
-publication remain later work unless Milestone 4 evidence makes a minimal part
-of them necessary.
+publication remain later work.
 
 ## 5. Later milestone prompts
 

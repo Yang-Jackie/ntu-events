@@ -10,10 +10,11 @@ is authoritative for progress.
 - Telegram broadcast channels are the first production ingestion source.
 - Source material, processing records, and candidates are inspectable.
 - Structurally valid candidates retain business-rule problems as review issues.
-- Core event, occurrence, organizer, classification, building, venue, and
-  provenance data structures exist.
-- Milestone 4 is implementing the path from candidate review to canonical event
-  data.
+- Every candidate has a mutable review that can synchronize a draft canonical
+  event automatically or after manual correction.
+- Sparse useful events are retained; contradictions block synchronization, and
+  exact-title duplicates require an explicit separate-event decision.
+- Milestone 5 is the first canonical event API contract.
 
 ## Durable guardrails
 
@@ -25,23 +26,22 @@ is authoritative for progress.
 - Make reruns safe and protect manual decisions.
 - Do not expose the product publicly before the readiness gate.
 
-## Milestone 4 questions
+## Milestone 5 questions
 
-Decide these while implementing and testing the remaining processing workflow:
+Decide these while implementing and testing the first useful event API:
 
-- How reviewer corrections and approval relate to immutable extracted candidates
-- How candidate occurrences, registrations, classifications, and modality map
-  into the canonical domain after review
-- How venue matches and unresolved locations are reviewed
-- How canonicalization avoids accidental duplicates and preserves provenance
-- What limited change or duplicate behavior, if any, is necessary for the first
-  safe vertical path
+- Which canonical event, occurrence, registration, classification, organizer,
+  venue, and provenance fields the first interface needs
+- Which records are visible to the owner-facing API before publication rules
+  exist
+- What filter, ordering, pagination, and identifier behavior the first map/list
+  slice requires
+- How online-only events remain list-visible without map geometry
 
 Record the resulting durable behavior only after it is verified.
 
 ## Later questions
 
-- API resource and filter semantics belong to the API milestone.
 - Map provider and interaction details belong to the discovery-interface
   milestone.
 - Change handling, source cadence, and operational recovery belong to

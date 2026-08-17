@@ -19,6 +19,7 @@ class VerificationStatus(models.TextChoices):
 
 
 class OccurrenceStatus(models.TextChoices):
+    UNKNOWN = "UNKNOWN", "Unknown"
     SCHEDULED = "SCHEDULED", "Scheduled"
     POSTPONED = "POSTPONED", "Postponed"
     CANCELLED = "CANCELLED", "Cancelled"
@@ -174,7 +175,7 @@ class EventOccurrence(TimestampedModel):
     occurrence_status = models.CharField(
         max_length=20,
         choices=OccurrenceStatus.choices,
-        default=OccurrenceStatus.SCHEDULED,
+        default=OccurrenceStatus.UNKNOWN,
     )
     capacity_status = models.CharField(
         max_length=20,

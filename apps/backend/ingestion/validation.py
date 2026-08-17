@@ -50,8 +50,8 @@ def validate_candidate(
             code="OCCURRENCE_MISSING",
             path="occurrences",
             message="The source does not provide an event occurrence.",
-            severity=IssueSeverity.ERROR,
-            blocks_canonicalization=True,
+            severity=IssueSeverity.WARNING,
+            blocks_canonicalization=False,
         )
 
     occurrence_refs = [occurrence.local_ref for occurrence in candidate.occurrences]
@@ -135,7 +135,7 @@ def validate_candidate(
         path="source_url",
         code="SOURCE_URL_INVALID",
         issues=issues,
-        blocks_canonicalization=True,
+        blocks_canonicalization=False,
     )
 
     if candidate.ambiguities:
@@ -166,8 +166,8 @@ def _validate_occurrence(
             code="OCCURRENCE_DATE_MISSING",
             path=f"{path}.start_date",
             message="The occurrence has no start date.",
-            severity=IssueSeverity.ERROR,
-            blocks_canonicalization=True,
+            severity=IssueSeverity.WARNING,
+            blocks_canonicalization=False,
         )
     if (
         occurrence.start_date is not None
@@ -189,7 +189,7 @@ def _validate_occurrence(
             path=f"{path}.start_time",
             message="The occurrence has a start time but no start date.",
             severity=IssueSeverity.ERROR,
-            blocks_canonicalization=True,
+            blocks_canonicalization=False,
         )
     if occurrence.end_time is not None and occurrence.end_date is None:
         _issue(
@@ -198,7 +198,7 @@ def _validate_occurrence(
             path=f"{path}.end_time",
             message="The occurrence has an end time but no end date.",
             severity=IssueSeverity.ERROR,
-            blocks_canonicalization=True,
+            blocks_canonicalization=False,
         )
     if occurrence.end_time is not None and occurrence.start_time is None:
         _issue(
@@ -207,7 +207,7 @@ def _validate_occurrence(
             path=f"{path}.end_time",
             message="The occurrence has an end time but no start time.",
             severity=IssueSeverity.ERROR,
-            blocks_canonicalization=True,
+            blocks_canonicalization=False,
         )
     if (
         occurrence.start_date is not None
@@ -242,7 +242,7 @@ def _validate_occurrence(
             path=f"{path}.start_time",
             message="An exact occurrence has no start time.",
             severity=IssueSeverity.ERROR,
-            blocks_canonicalization=True,
+            blocks_canonicalization=False,
         )
     if occurrence.time_precision == TimePrecision.DATE_ONLY and (
         occurrence.start_time is not None or occurrence.end_time is not None
@@ -264,7 +264,7 @@ def _validate_occurrence(
             path=f"{path}.attendance_mode",
             message="The occurrence attendance mode is unknown.",
             severity=IssueSeverity.WARNING,
-            blocks_canonicalization=True,
+            blocks_canonicalization=False,
         )
     if occurrence.attendance_mode in (AttendanceMode.IN_PERSON, AttendanceMode.HYBRID):
         if not raw_location:
@@ -274,7 +274,7 @@ def _validate_occurrence(
                 path=f"{path}.raw_location",
                 message="An in-person attendance option has no source-provided location.",
                 severity=IssueSeverity.ERROR,
-                blocks_canonicalization=True,
+                blocks_canonicalization=False,
             )
         if not occurrence.suggested_venue_ids:
             _issue(
@@ -283,7 +283,7 @@ def _validate_occurrence(
                 path=f"{path}.suggested_venue_ids",
                 message="The physical location is not linked to a supported venue.",
                 severity=IssueSeverity.WARNING,
-                blocks_canonicalization=True,
+                blocks_canonicalization=False,
             )
     if occurrence.attendance_mode == AttendanceMode.ONLINE and occurrence.suggested_venue_ids:
         _issue(
@@ -292,7 +292,7 @@ def _validate_occurrence(
             path=f"{path}.suggested_venue_ids",
             message="An online-only occurrence also suggests a physical venue.",
             severity=IssueSeverity.WARNING,
-            blocks_canonicalization=True,
+            blocks_canonicalization=False,
         )
 
     unknown_venue_ids = sorted(set(occurrence.suggested_venue_ids) - supported_venue_ids)
@@ -303,7 +303,7 @@ def _validate_occurrence(
             path=f"{path}.suggested_venue_ids",
             message=f"Unsupported venue references: {unknown_venue_ids}.",
             severity=IssueSeverity.WARNING,
-            blocks_canonicalization=True,
+            blocks_canonicalization=False,
         )
 
     if occurrence.attendance_mode in (AttendanceMode.ONLINE, AttendanceMode.HYBRID):
@@ -330,7 +330,7 @@ def _validate_occurrence(
         path=f"{path}.meeting_url",
         code="MEETING_URL_INVALID",
         issues=issues,
-        blocks_canonicalization=True,
+        blocks_canonicalization=False,
     )
 
 
@@ -349,7 +349,7 @@ def _validate_registration(
             path=f"{path}.name",
             message="The registration entry has no usable name.",
             severity=IssueSeverity.WARNING,
-            blocks_canonicalization=True,
+            blocks_canonicalization=False,
         )
     if registration.scope == RegistrationScope.OCCURRENCE:
         if not registration.occurrence_ref:
@@ -359,7 +359,7 @@ def _validate_registration(
                 path=f"{path}.occurrence_ref",
                 message="An occurrence-scoped registration has no occurrence reference.",
                 severity=IssueSeverity.ERROR,
-                blocks_canonicalization=True,
+                blocks_canonicalization=False,
             )
         elif registration.occurrence_ref not in known_occurrence_refs:
             _issue(
@@ -368,7 +368,7 @@ def _validate_registration(
                 path=f"{path}.occurrence_ref",
                 message="The registration references an occurrence that does not exist.",
                 severity=IssueSeverity.ERROR,
-                blocks_canonicalization=True,
+                blocks_canonicalization=False,
             )
     elif registration.occurrence_ref:
         _issue(
@@ -377,7 +377,7 @@ def _validate_registration(
             path=f"{path}.occurrence_ref",
             message="An event-scoped registration also contains an occurrence reference.",
             severity=IssueSeverity.ERROR,
-            blocks_canonicalization=True,
+            blocks_canonicalization=False,
         )
 
     if registration.opens_time is not None and registration.opens_date is None:
@@ -387,7 +387,7 @@ def _validate_registration(
             path=f"{path}.opens_time",
             message="The registration opening time has no opening date.",
             severity=IssueSeverity.ERROR,
-            blocks_canonicalization=True,
+            blocks_canonicalization=False,
         )
     if registration.closes_time is not None and registration.closes_date is None:
         _issue(
@@ -396,7 +396,7 @@ def _validate_registration(
             path=f"{path}.closes_time",
             message="The registration closing time has no closing date.",
             severity=IssueSeverity.ERROR,
-            blocks_canonicalization=True,
+            blocks_canonicalization=False,
         )
     if (
         registration.opens_date is not None
@@ -431,7 +431,7 @@ def _validate_registration(
         path=f"{path}.url",
         code="REGISTRATION_URL_INVALID",
         issues=issues,
-        blocks_canonicalization=True,
+        blocks_canonicalization=False,
     )
 
 
@@ -474,8 +474,7 @@ def _validate_optional_url(
 ) -> None:
     if not value:
         return
-    parsed = urlsplit(value)
-    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+    if not is_valid_http_url(value):
         _issue(
             issues,
             code=code,
@@ -484,6 +483,13 @@ def _validate_optional_url(
             severity=IssueSeverity.WARNING,
             blocks_canonicalization=blocks_canonicalization,
         )
+
+
+def is_valid_http_url(value: str | None) -> bool:
+    if not value:
+        return False
+    parsed = urlsplit(value)
+    return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
 
 
 def _issue(

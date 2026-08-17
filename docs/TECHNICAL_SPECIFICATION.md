@@ -143,8 +143,10 @@ change:
 - **Raw source document:** a preserved retrieval observation or artifact.
 - **Ingestion request and job:** durable records used to trigger, execute, and
   inspect source processing.
-- **Extraction attempt and candidate:** the interpretation history and
+- **Extraction attempt and candidate:** the interpretation history and immutable
   provisional event data produced from source material.
+- **Candidate review:** the mutable correction and decision record between an
+  extracted candidate and canonical data.
 - **Event and occurrence:** the conceptual activity and the attendable time and
   place information presented to users. One event may have multiple labeled
   occurrences with different dates, locations, attendance modes, meeting
@@ -154,7 +156,7 @@ change:
   source wording.
 - **Registration:** external participation information associated with the
   appropriate event or occurrence.
-- **Provenance and revision information:** links and history needed to explain
+- **Provenance and review state:** links and decisions needed to explain
   canonical data and later changes.
 
 When implementing a concept, decide its fields, cardinality, constraints, and
@@ -172,8 +174,8 @@ current pipeline:
 - Registers channels as independent sources
 - Retrieves text and captions
 - Uses model-assisted screening and candidate extraction
-- Persists durable job, invocation, screening, extraction, candidate, and
-  provenance-related records
+- Persists durable job, invocation, screening, extraction, candidate, review,
+  and provenance-related records
 - Retains relevant, uncertain, and failed content while keeping reduced audit
   metadata for confirmed non-events
 - Exposes operations through commands, Django Admin, and a polling worker
@@ -202,11 +204,7 @@ authorization and are outside ordinary ingestion.
 
 Treat source content and provider output as untrusted.
 
-## 9. Processing decisions
-
-Milestone 4 owns the detailed decisions in this section. The documentation
-records the questions and required outcomes, not their implementation in
-advance.
+## 9. Processing workflow
 
 ### Candidate contract
 
@@ -225,15 +223,17 @@ semantics can be reprocessed safely.
 
 ### Validation
 
-Structurally malformed, incomplete, or unassociateable provider output creates
+Structurally malformed, truncated, or unassociateable provider output creates
 no candidate. The source observation, failed invocation, error metadata, and
 available provider response remain inspectable for diagnosis.
 
 Once an event candidate is structurally interpretable, business-rule problems
 do not discard it. Validation records structured issues and routes any affected
-candidate to review. Issues may block canonicalization without blocking
-storage. Product-scope eligibility is not used to reject an extracted
-candidate.
+candidate to review. Missing dates, occurrences, venues, links, or other child
+details do not prevent a useful event shell from being stored. Contradictory or
+unusable content, such as a missing title or impossible time window, blocks
+canonical synchronization without discarding the candidate or review.
+Product-scope eligibility is not used to reject an extracted candidate.
 
 ### Venue resolution
 
@@ -241,25 +241,30 @@ Keep raw location text even when a canonical venue is found. Prefer reviewed
 authoritative location data and never create trusted venue records solely from
 model output.
 
-During implementation, decide the matching order, confidence handling, and
-review path from observed location strings and the seeded campus data.
+The initial path accepts supported venue identifiers supplied during extraction.
+Unknown or unresolved locations remain in the review payload and are flagged;
+they do not prevent creation of the event or an otherwise usable occurrence.
+Broader location matching remains later work and should be based on observed
+source wording.
 
 ### Canonicalization and duplicates
 
-Canonical processing must be safely repeatable, preserve provenance, avoid
-accidental duplicate creation, and protect manual corrections.
+Every stored candidate has one mutable review record. Both automatic promotion
+and manual approval use the same review-to-event synchronization workflow. A
+review may therefore need attention even when a draft canonical event has
+already been created.
 
-During implementation, decide:
+Reviewer changes update the linked event through that workflow. Blocking edits
+leave the last successfully synchronized event unchanged, and rejection
+withholds an existing event rather than deleting it. The review records whether
+it has manual edits and whether its current version has synchronized; separate
+edit-history records are not retained.
 
-- When a candidate creates a new event
-- When it should be held for review
-- How repeated, edited, or conflicting source content is handled
-- When two representations refer to the same event
-- What is committed atomically
-- What history or reversal support is needed
-
-Do not introduce automatic cross-source merging or update behavior until its
-rules are supported by representative cases and focused tests.
+Synchronization is invoked directly by ingestion or Django Admin and is safely
+repeatable for a review version. Exact normalized-title matches block creation
+of a separate event until a reviewer explicitly allows it. This is a narrow
+duplicate safety gate, not automatic merging. Cross-source matching and general
+source-update reconciliation remain later work.
 
 ### Publication
 
@@ -298,9 +303,9 @@ The implementation must preserve date-only and ambiguous source information
 without inventing precision. Attendance mode and public meeting access belong
 to the occurrence because different sessions of one event may differ.
 
-Detailed treatment of multi-day events, separate sessions, recurrence,
-overnight events, registration windows, and timezone exceptions should be
-decided with candidate and canonicalization work.
+The current model can retain multiple occurrences and registration windows.
+Further edge-case behavior for recurrence, overnight events, and timezone
+exceptions belongs to hardening when representative sources require it.
 
 The map initially uses reviewed building-level locations. Precise venue text
 can be shown before room-level geometry exists. Coordinates must come from an
@@ -372,8 +377,6 @@ The following remain deferred until the product demonstrates a need:
 
 ## 16. Decisions to make in later milestones
 
-- **Processing workflow:** candidate states, validation outcomes, venue
-  resolution, canonicalization, duplicate handling, and review behavior
 - **API:** resource shapes, filter semantics, identifiers, ordering, and map
   query behavior
 - **Discovery interface:** map provider, rendering boundaries, interaction

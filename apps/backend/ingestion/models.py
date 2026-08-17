@@ -18,6 +18,26 @@ class ValidationStatus(models.TextChoices):
     REVIEW_REQUIRED = "REVIEW_REQUIRED", "Review required"
 
 
+class ReviewStatus(models.TextChoices):
+    NOT_REQUIRED = "NOT_REQUIRED", "Not required"
+    NEEDS_REVIEW = "NEEDS_REVIEW", "Needs review"
+    APPROVED = "APPROVED", "Approved"
+    REJECTED = "REJECTED", "Rejected"
+
+
+class ReviewSyncStatus(models.TextChoices):
+    PENDING = "PENDING", "Pending"
+    BLOCKED = "BLOCKED", "Blocked"
+    SYNCED = "SYNCED", "Synced"
+    FAILED = "FAILED", "Failed"
+
+
+class PromotionMethod(models.TextChoices):
+    NONE = "NONE", "None"
+    AUTOMATIC = "AUTOMATIC", "Automatic"
+    MANUAL = "MANUAL", "Manual"
+
+
 class IngestionTrigger(models.TextChoices):
     ADMIN = "ADMIN", "Admin"
     COMMAND = "COMMAND", "Command"
@@ -311,3 +331,120 @@ class EventCandidate(models.Model):
         if self.pk is not None:
             raise ValidationError("Event candidates are immutable; create a review record instead")
         super().save(*args, **kwargs)
+
+
+class CandidateReview(models.Model):
+    event_candidate = models.OneToOneField(
+        EventCandidate,
+        on_delete=models.PROTECT,
+        related_name="review",
+    )
+    canonical_event = models.ForeignKey(
+        "events.Event",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="candidate_reviews",
+    )
+    effective_payload = models.JSONField()
+    validation_issues = models.JSONField(default=list, blank=True)
+    review_status = models.CharField(
+        max_length=30,
+        choices=ReviewStatus.choices,
+        default=ReviewStatus.NEEDS_REVIEW,
+        db_index=True,
+    )
+    sync_status = models.CharField(
+        max_length=20,
+        choices=ReviewSyncStatus.choices,
+        default=ReviewSyncStatus.PENDING,
+        db_index=True,
+    )
+    promotion_method = models.CharField(
+        max_length=20,
+        choices=PromotionMethod.choices,
+        default=PromotionMethod.NONE,
+    )
+    allow_duplicate = models.BooleanField(default=False)
+    has_manual_edits = models.BooleanField(default=False)
+    review_version = models.PositiveIntegerField(default=1)
+    synced_version = models.PositiveIntegerField(default=0)
+    reviewer_notes = models.TextField(blank=True)
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="candidate_reviews",
+    )
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    last_synced_at = models.DateTimeField(null=True, blank=True)
+    sync_error = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-updated_at", "-pk")
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(review_version__gte=1),
+                name="candidate_review_version_positive",
+            ),
+            models.CheckConstraint(
+                condition=Q(synced_version__lte=F("review_version")),
+                name="candidate_review_synced_version_not_ahead",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"Review for {self.event_candidate}"
+
+    @property
+    def has_unsynced_changes(self) -> bool:
+        return self.review_version != self.synced_version
+
+
+class CandidateReviewOccurrence(models.Model):
+    review = models.ForeignKey(
+        CandidateReview,
+        on_delete=models.CASCADE,
+        related_name="occurrence_links",
+    )
+    local_ref = models.CharField(max_length=100)
+    occurrence = models.OneToOneField(
+        "events.EventOccurrence",
+        on_delete=models.CASCADE,
+        related_name="candidate_review_link",
+    )
+
+    class Meta:
+        ordering = ("review_id", "local_ref")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("review", "local_ref"),
+                name="unique_occurrence_ref_per_candidate_review",
+            )
+        ]
+
+
+class CandidateReviewRegistration(models.Model):
+    review = models.ForeignKey(
+        CandidateReview,
+        on_delete=models.CASCADE,
+        related_name="registration_links",
+    )
+    source_index = models.PositiveSmallIntegerField()
+    registration = models.OneToOneField(
+        "events.Registration",
+        on_delete=models.CASCADE,
+        related_name="candidate_review_link",
+    )
+
+    class Meta:
+        ordering = ("review_id", "source_index")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("review", "source_index"),
+                name="unique_registration_index_per_candidate_review",
+            )
+        ]

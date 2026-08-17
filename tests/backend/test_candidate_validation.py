@@ -130,6 +130,38 @@ def test_off_campus_location_is_not_rejected_for_product_eligibility() -> None:
     assert "VENUE_UNRESOLVED" in codes
 
 
+def test_missing_occurrence_is_review_only_not_a_canonicalization_blocker() -> None:
+    result = validate_candidate(_candidate(occurrences=[]), REFERENCE_DATA)
+
+    issue = next(issue for issue in result.issues if issue["code"] == "OCCURRENCE_MISSING")
+
+    assert result.status == ValidationStatus.REVIEW_REQUIRED
+    assert issue["blocks_canonicalization"] is False
+
+
+def test_incomplete_child_fields_are_review_only() -> None:
+    candidate = _candidate(
+        occurrences=[
+            CandidateOccurrence(
+                local_ref="unknown-date",
+                time_precision=TimePrecision.EXACT,
+                attendance_mode=AttendanceMode.UNKNOWN,
+            )
+        ],
+        registrations=[
+            CandidateRegistration(
+                scope=RegistrationScope.OCCURRENCE,
+                occurrence_ref="missing-session",
+            )
+        ],
+    )
+
+    result = validate_candidate(candidate, REFERENCE_DATA)
+
+    assert result.issues
+    assert all(issue["blocks_canonicalization"] is False for issue in result.issues)
+
+
 def _candidate(**overrides: object) -> EventCandidatePayload:
     values: dict[str, object] = {
         "title": "Test event",

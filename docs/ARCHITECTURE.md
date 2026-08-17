@@ -116,7 +116,8 @@ Source-neutral workflow code owns:
 - Durable execution and inspection
 - Storage and provenance
 - Candidate contract validation
-- Canonical and publication decisions
+- Candidate review and canonical synchronization
+- Publication decisions
 - Protection against unsafe reruns
 
 External SDK objects and provider response types should stay behind their
@@ -181,7 +182,7 @@ response to measured workflow or operational needs.
 ## 9. Deliberately open architecture details
 
 - Internal file-versus-folder layout as domains grow
-- Detailed processing and canonicalization design
+- Cross-source entity resolution and later source-update policy
 - Search and map-query organization
 - Production raw-content storage
 - Scheduler and queue evolution

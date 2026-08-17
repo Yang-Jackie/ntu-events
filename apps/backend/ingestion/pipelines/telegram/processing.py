@@ -11,6 +11,7 @@ from django.utils import timezone
 from pydantic import BaseModel, ValidationError
 from sources.models import ProcessingStatus, RawSourceDocument, SourceRepresentation
 
+from ingestion.candidate_reviews import create_review_and_sync
 from ingestion.contracts import (
     CANDIDATE_SCHEMA_VERSION,
     EXTRACTION_SCHEMA_VERSION,
@@ -269,7 +270,7 @@ def _extract_messages(
                 for index, candidate in enumerate(result.events):
                     candidate = _trusted_source_url(candidate, item.message.source_url)
                     validation = validate_candidate(candidate, reference_data)
-                    EventCandidate.objects.create(
+                    event_candidate = EventCandidate.objects.create(
                         extraction_run=extraction,
                         source_representation=item.representation,
                         candidate_index=index,
@@ -280,6 +281,7 @@ def _extract_messages(
                         validation_status=validation.status,
                         validation_issues=validation.issues,
                     )
+                    create_review_and_sync(event_candidate, reference_data=reference_data)
                     candidates_created += 1
                 raw_document.processing_status = ProcessingStatus.PROCESSED
                 raw_document.save(update_fields=("processing_status",))
