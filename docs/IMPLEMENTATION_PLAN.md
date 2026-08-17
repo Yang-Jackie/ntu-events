@@ -73,6 +73,8 @@ it is not the implemented first production pipeline.
   without sharing source-specific behavior.
 - Added Telegram authentication, channel registration, incremental retrieval,
   screening, candidate extraction, selective raw retention, and provenance.
+- Preserved Telegram entity and button URLs as raw evidence and supplied their
+  labels and targets to screening and extraction without following them.
 - Added Admin and command entry points that invoke the same workflow.
 - Added regression coverage for job execution, batching, raw retention, and
   unchanged reruns.
@@ -103,6 +105,9 @@ it is not the implemented first production pipeline.
   block synchronization and preserve the last good event state.
 - Supported venue references and canonical classification values are projected;
   unmatched data remains visible as review issues.
+- Direct online meeting access is kept separate from registration and general
+  webpages, and useful sparse registration details survive projection with
+  their problems retained as review issues.
 - Exact-title duplicates pause for an explicit reviewer decision rather than
   being merged or created automatically.
 - Reviewer corrections, approval, rejection, synchronization state, and linked

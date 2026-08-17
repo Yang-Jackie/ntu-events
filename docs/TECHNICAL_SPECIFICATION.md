@@ -172,7 +172,8 @@ channels accessed through the owner's authenticated Telethon session. The
 current pipeline:
 
 - Registers channels as independent sources
-- Retrieves text and captions
+- Retrieves text, captions, and URL metadata attached to message entities and
+  public buttons
 - Uses model-assisted screening and candidate extraction
 - Persists durable job, invocation, screening, extraction, candidate, review,
   and provenance-related records
@@ -221,6 +222,14 @@ canonical records.
 Candidate schemas and extraction instructions are versioned so changed
 semantics can be reprocessed safely.
 
+Telegram link targets and their visible labels remain part of the raw source
+observation even when Telegram stores them outside the message text. They are
+untrusted evidence supplied to extraction, not URLs the ingestion workflow
+follows. Candidate registration URLs represent external sign-up actions.
+Occurrence meeting URLs represent direct public access to an online or hybrid
+attendance option; general pages, forms, stores, and informational links are
+not meeting access.
+
 ### Validation
 
 Structurally malformed, truncated, or unassociateable provider output creates
@@ -234,6 +243,13 @@ details do not prevent a useful event shell from being stored. Contradictory or
 unusable content, such as a missing title or impossible time window, blocks
 canonical synchronization without discarding the candidate or review.
 Product-scope eligibility is not used to reject an extracted candidate.
+
+A useful registration may be projected even when its source-provided display
+name is missing. The canonical record receives a neutral label while the
+missing name remains a review issue. Invalid URLs and inconsistent optional
+fields remain visible in the review payload; independently useful registration
+details are preserved when they can be attached to an event or occurrence
+without guessing ownership.
 
 ### Venue resolution
 

@@ -9,6 +9,7 @@ from typing import Any
 
 from telethon import TelegramClient
 from telethon.errors import FloodWaitError, ServerError, TimedOutError
+from telethon.tl.types import MessageEntityTextUrl, MessageEntityUrl
 
 from ingestion.errors import RetryableIngestionError
 
@@ -21,6 +22,13 @@ class TelegramConfigurationError(RuntimeError):
 
 class TelegramAuthenticationRequired(RuntimeError):
     pass
+
+
+@dataclass(frozen=True)
+class TelegramLink:
+    kind: str
+    text: str
+    url: str
 
 
 @dataclass(frozen=True)
@@ -37,6 +45,7 @@ class TelegramMessage:
     forwarded_from: str | None
     retrieved_at: datetime
     content_hash: str
+    links: tuple[TelegramLink, ...] = ()
 
     @property
     def identity(self) -> str:
@@ -50,6 +59,7 @@ class TelegramMessage:
             "published_at": self.published_at.astimezone(SINGAPORE_TIMEZONE).isoformat(),
             "source_url": self.source_url,
             "text": self.text,
+            "links": [asdict(link) for link in self.links],
         }
 
     def raw_bytes(self) -> bytes:
@@ -190,6 +200,7 @@ def _normalize_message(
     retrieved_at: datetime,
 ) -> TelegramMessage:
     text = message.raw_text or ""
+    links = _extract_links(message)
     reply = getattr(message, "reply_to", None)
     forwarded = getattr(message, "forward", None)
     forwarded_from = str(forwarded) if forwarded else None
@@ -205,5 +216,75 @@ def _normalize_message(
         reply_to_message_id=getattr(reply, "reply_to_msg_id", None),
         forwarded_from=forwarded_from,
         retrieved_at=retrieved_at,
-        content_hash=hashlib.sha256(text.encode("utf-8")).hexdigest(),
+        content_hash=_content_hash(text, links),
+        links=links,
     )
+
+
+def _extract_links(message: Any) -> tuple[TelegramLink, ...]:
+    links: list[TelegramLink] = []
+    get_entities_text = getattr(message, "get_entities_text", None)
+    if callable(get_entities_text):
+        for entity, inner_text in get_entities_text():
+            if isinstance(entity, MessageEntityTextUrl):
+                _append_link(
+                    links,
+                    kind="TEXT_LINK",
+                    text=inner_text,
+                    url=entity.url,
+                )
+            elif isinstance(entity, MessageEntityUrl):
+                _append_link(
+                    links,
+                    kind="VISIBLE_URL",
+                    text=inner_text,
+                    url=inner_text,
+                )
+
+    reply_markup = getattr(message, "reply_markup", None)
+    for row in getattr(reply_markup, "rows", ()) or ():
+        for button in getattr(row, "buttons", ()) or ():
+            url = getattr(button, "url", None)
+            if url:
+                _append_link(
+                    links,
+                    kind="BUTTON",
+                    text=getattr(button, "text", ""),
+                    url=url,
+                )
+    return tuple(links)
+
+
+def _append_link(
+    links: list[TelegramLink],
+    *,
+    kind: str,
+    text: str | None,
+    url: str | None,
+) -> None:
+    normalized_url = (url or "").strip()
+    if not normalized_url:
+        return
+    link = TelegramLink(
+        kind=kind,
+        text=(text or "").strip(),
+        url=normalized_url,
+    )
+    if link not in links:
+        links.append(link)
+
+
+def _content_hash(text: str, links: tuple[TelegramLink, ...]) -> str:
+    if not links:
+        return hashlib.sha256(text.encode("utf-8")).hexdigest()
+    payload = {
+        "text": text,
+        "links": [asdict(link) for link in links],
+    }
+    normalized = json.dumps(
+        payload,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()

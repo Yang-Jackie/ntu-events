@@ -49,7 +49,7 @@ from ingestion.reference_data import (
 from ingestion.validation import validate_candidate
 
 TELEGRAM_EXTRACTOR_TYPE = "telegram-llm"
-TELEGRAM_EXTRACTOR_VERSION = "telegram-m4-v1"
+TELEGRAM_EXTRACTOR_VERSION = "telegram-m4-v2"
 
 
 @dataclass

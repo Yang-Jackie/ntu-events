@@ -11,7 +11,7 @@ from ingestion.contracts import (
     ScreeningItem,
     ScreeningLabel,
 )
-from ingestion.pipelines.telegram.adapter import TelegramMessage
+from ingestion.pipelines.telegram.adapter import TelegramLink, TelegramMessage
 from ingestion.pipelines.telegram.extraction import ModelOutputError, OpenAITelegramModels
 
 
@@ -29,6 +29,13 @@ def test_model_calls_send_verbosity_inside_text_configuration() -> None:
         forwarded_from=None,
         retrieved_at=datetime(2026, 8, 11, tzinfo=UTC),
         content_hash="1" * 64,
+        links=(
+            TelegramLink(
+                kind="BUTTON",
+                text="Register",
+                url="https://example.com/register",
+            ),
+        ),
     )
     responses = (
         _response(
@@ -60,6 +67,13 @@ def test_model_calls_send_verbosity_inside_text_configuration() -> None:
         assert "verbosity" not in call.kwargs
         prompt = json.loads(call.kwargs["input"][1]["content"])
         assert prompt["messages"][0]["published_at"] == "2026-08-11T02:00:00+08:00"
+        assert prompt["messages"][0]["links"] == [
+            {
+                "kind": "BUTTON",
+                "text": "Register",
+                "url": "https://example.com/register",
+            }
+        ]
     extraction_prompt = json.loads(parse.call_args_list[1].kwargs["input"][1]["content"])
     assert extraction_prompt["reference_data"] == reference_data
     for response in responses:

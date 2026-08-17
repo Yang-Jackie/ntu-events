@@ -321,7 +321,7 @@ def _validate_occurrence(
             issues,
             code="IN_PERSON_OCCURRENCE_HAS_MEETING_URL",
             path=f"{path}.meeting_url",
-            message="An in-person occurrence also contains a meeting link.",
+            message=("An occurrence not marked online or hybrid also contains a meeting link."),
             severity=IssueSeverity.WARNING,
             blocks_canonicalization=False,
         )

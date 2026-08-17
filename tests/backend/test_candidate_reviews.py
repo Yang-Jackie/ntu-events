@@ -71,6 +71,70 @@ def test_sparse_candidate_creates_an_unverified_event_and_keeps_review_flags() -
     assert not review.canonical_event.occurrences.exists()
 
 
+def test_non_online_occurrence_does_not_project_a_meeting_url() -> None:
+    payload = EventCandidatePayload(
+        title="In-person event",
+        occurrences=[
+            CandidateOccurrence(
+                local_ref="session-1",
+                start_date=date(2026, 9, 1),
+                time_precision=TimePrecision.DATE_ONLY,
+                attendance_mode=AttendanceMode.IN_PERSON,
+                meeting_url="https://example.com/register",
+            )
+        ],
+    )
+
+    review = create_review_and_sync(_make_candidate(payload))
+
+    assert review.sync_status == ReviewSyncStatus.SYNCED
+    assert review.canonical_event.occurrences.get().meeting_url == ""
+    assert any(
+        issue["code"] == "IN_PERSON_OCCURRENCE_HAS_MEETING_URL"
+        for issue in review.validation_issues
+    )
+
+
+def test_sparse_registration_details_are_preserved_safely() -> None:
+    payload = EventCandidatePayload(
+        title="Registration preservation",
+        registrations=[
+            CandidateRegistration(
+                scope=RegistrationScope.EVENT,
+                name=None,
+                url="https://example.com/register",
+                occurrence_ref="extra-reference",
+                closes_time=time(23, 59),
+                instructions="Use the registration form.",
+            ),
+            CandidateRegistration(
+                scope=RegistrationScope.EVENT,
+                name=None,
+                url="[HERE]",
+                instructions="Scan the QR code in the source post.",
+            ),
+        ],
+    )
+
+    review = create_review_and_sync(_make_candidate(payload))
+
+    assert review.sync_status == ReviewSyncStatus.SYNCED
+    registrations = list(review.canonical_event.registrations.order_by("pk"))
+    assert len(registrations) == 2
+    assert registrations[0].name == "Registration"
+    assert registrations[0].url == "https://example.com/register"
+    assert registrations[0].closes_time is None
+    assert registrations[1].name == "Registration"
+    assert registrations[1].url == ""
+    assert registrations[1].instructions == "Scan the QR code in the source post."
+    assert {
+        "REGISTRATION_NAME_MISSING",
+        "EVENT_REGISTRATION_HAS_OCCURRENCE_REFERENCE",
+        "REGISTRATION_CLOSE_TIME_WITHOUT_DATE",
+        "REGISTRATION_URL_INVALID",
+    }.issubset({issue["code"] for issue in review.validation_issues})
+
+
 def test_missing_title_blocks_projection_but_not_review_storage() -> None:
     candidate = _make_candidate(EventCandidatePayload())
 

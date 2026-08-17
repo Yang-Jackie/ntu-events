@@ -488,7 +488,12 @@ def _synchronize_occurrences(
         occurrence.is_all_day = source.is_all_day
         occurrence.attendance_mode = source.attendance_mode.value
         occurrence.raw_location_text = source.raw_location or ""
-        occurrence.meeting_url = source.meeting_url if is_valid_http_url(source.meeting_url) else ""
+        occurrence.meeting_url = (
+            source.meeting_url
+            if source.attendance_mode in (AttendanceMode.ONLINE, AttendanceMode.HYBRID)
+            and is_valid_http_url(source.meeting_url)
+            else ""
+        )
         occurrence.occurrence_status = source.status.value
         occurrence.save()
         if link is None:
@@ -588,13 +593,13 @@ def _synchronize_registrations(
             registration = link.registration
         registration.event = event_owner
         registration.occurrence = occurrence_owner
-        registration.name = source.name.strip()
+        registration.name = (source.name or "").strip() or "Registration"
         registration.registration_type = RegistrationType.ATTENDEE
         registration.url = source.url if is_valid_http_url(source.url) else ""
         registration.opens_date = source.opens_date
-        registration.opens_time = source.opens_time
+        registration.opens_time = source.opens_time if source.opens_date is not None else None
         registration.closes_date = source.closes_date
-        registration.closes_time = source.closes_time
+        registration.closes_time = source.closes_time if source.closes_date is not None else None
         registration.time_precision = CanonicalTimePrecision.UNKNOWN
         registration.instructions = source.instructions or ""
         registration.status = RegistrationStatus.UNKNOWN
@@ -617,8 +622,6 @@ def _registration_owners(
     occurrence_by_ref: dict[str, EventOccurrence],
 ) -> tuple[Event | None, EventOccurrence | None] | None:
     if source.scope == RegistrationScope.EVENT:
-        if source.occurrence_ref:
-            return None
         return event, None
     if not source.occurrence_ref or source.occurrence_ref not in occurrence_by_ref:
         return None
@@ -626,11 +629,16 @@ def _registration_owners(
 
 
 def _registration_is_projectable(source: CandidateRegistration) -> bool:
-    if not source.name or not source.name.strip():
-        return False
-    if source.opens_time is not None and source.opens_date is None:
-        return False
-    if source.closes_time is not None and source.closes_date is None:
+    has_meaningful_detail = any(
+        (
+            bool(source.name and source.name.strip()),
+            is_valid_http_url(source.url),
+            bool(source.instructions and source.instructions.strip()),
+            source.opens_date is not None,
+            source.closes_date is not None,
+        )
+    )
+    if not has_meaningful_detail:
         return False
     if (
         source.opens_date is not None
