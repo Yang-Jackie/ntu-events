@@ -21,14 +21,20 @@ def build_candidate_reference_data() -> dict[str, Any]:
     }
 
 
-def candidate_reference_data_hash(reference_data: dict[str, Any]) -> str:
-    serialized = json.dumps(
-        reference_data,
+def canonical_json(value: Any) -> str:
+    # The single canonical serialization of reference data. Both the hash below and
+    # the extraction prompt use it, so reference_data_hash always identifies the exact
+    # bytes sent to the provider and the cached prompt prefix stays byte-stable.
+    return json.dumps(
+        value,
         ensure_ascii=False,
         sort_keys=True,
         separators=(",", ":"),
     )
-    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+
+
+def candidate_reference_data_hash(reference_data: dict[str, Any]) -> str:
+    return hashlib.sha256(canonical_json(reference_data).encode("utf-8")).hexdigest()
 
 
 def _classification_values(model) -> list[dict[str, Any]]:

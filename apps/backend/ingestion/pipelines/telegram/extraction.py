@@ -8,8 +8,14 @@ from typing import Any
 from openai import OpenAI
 from pydantic import BaseModel
 
-from ingestion.contracts import ExtractionBatch, ScreeningBatch
+from ingestion.contracts import (
+    EXTRACTION_SCHEMA_VERSION,
+    SCREENING_SCHEMA_VERSION,
+    ExtractionBatch,
+    ScreeningBatch,
+)
 from ingestion.pipelines.telegram.adapter import TelegramMessage
+from ingestion.reference_data import candidate_reference_data_hash, canonical_json
 
 SCREENING_PROMPT_VERSION = "telegram-screening-v3"
 EXTRACTION_PROMPT_VERSION = "telegram-extraction-v3"
@@ -90,6 +96,12 @@ class OpenAITelegramModels:
             text_format=ScreeningBatch,
             reasoning={"effort": "minimal"},
             text={"verbosity": "low"},
+            prompt_cache_key=prompt_cache_key(
+                stage="telegram-screening",
+                model=self.screening_model,
+                prompt_version=SCREENING_PROMPT_VERSION,
+                schema_version=SCREENING_SCHEMA_VERSION,
+            ),
         )
         return _validated_model_result(response, messages)
 
@@ -105,17 +117,41 @@ class OpenAITelegramModels:
                 {"role": "system", "content": EXTRACTION_PROMPT},
                 {
                     "role": "user",
-                    "content": _messages_json(messages, reference_data=reference_data),
+                    "content": _extraction_prompt_json(messages, reference_data),
                 },
             ],
             text_format=ExtractionBatch,
             reasoning={"effort": "minimal"},
             text={"verbosity": "low"},
+            prompt_cache_key=prompt_cache_key(
+                stage="telegram-extraction",
+                model=self.extraction_model,
+                prompt_version=EXTRACTION_PROMPT_VERSION,
+                schema_version=EXTRACTION_SCHEMA_VERSION,
+                reference_data_hash=candidate_reference_data_hash(reference_data),
+            ),
         )
         return _validated_model_result(response, messages)
 
     def close(self) -> None:
         self.client.close()
+
+
+def prompt_cache_key(
+    *,
+    stage: str,
+    model: str,
+    prompt_version: str,
+    schema_version: str,
+    reference_data_hash: str = "",
+) -> str:
+    # Routes same-prefix requests to the same provider cache. It must identify the shared
+    # prefix and nothing else: adding batch or message identity would give every call a
+    # unique key and defeat the cache entirely.
+    parts = [stage, model, prompt_version, schema_version]
+    if reference_data_hash:
+        parts.append(reference_data_hash[:12])
+    return ":".join(parts)
 
 
 def batch_input_hash(
@@ -138,18 +174,29 @@ def batch_input_hash(
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
-def _messages_json(
-    messages: list[TelegramMessage],
-    *,
-    reference_data: dict[str, Any] | None = None,
-) -> str:
-    payload: dict[str, Any] = {"messages": [message.prompt_record() for message in messages]}
-    if reference_data is not None:
-        payload["reference_data"] = reference_data
+def _messages_json(messages: list[TelegramMessage]) -> str:
     return json.dumps(
-        payload,
+        {"messages": [message.prompt_record() for message in messages]},
         ensure_ascii=False,
+        separators=(",", ":"),
     )
+
+
+def _extraction_prompt_json(
+    messages: list[TelegramMessage],
+    reference_data: dict[str, Any],
+) -> str:
+    # reference_data precedes messages so the static reference catalog falls inside the
+    # cacheable prompt prefix and only the per-batch messages are billed at full rate.
+    # Re-parsing the canonical form normalizes nested key order into insertion order, so the
+    # emitted fragment is byte-identical to what candidate_reference_data_hash covers.
+    # These outer keys must not be sorted: alphabetical order puts messages first and moves
+    # reference_data out of the shared prefix. test_openai_models.py guards the ordering.
+    payload = {
+        "reference_data": json.loads(canonical_json(reference_data)),
+        "messages": [message.prompt_record() for message in messages],
+    }
+    return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
 
 
 def _validate_identities(messages: list[TelegramMessage], returned: list[str]) -> None:
