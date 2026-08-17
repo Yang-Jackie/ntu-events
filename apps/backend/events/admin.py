@@ -1,4 +1,9 @@
+from urllib.parse import urlencode
+
 from django.contrib import admin
+from django.db.models import Count
+from django.urls import reverse
+from django.utils.html import format_html
 from ingestion.models import (
     CandidateReview,
     CandidateReviewOccurrence,
@@ -27,6 +32,7 @@ class EventOrganizerInline(admin.TabularInline):
 class EventOccurrenceInline(admin.TabularInline):
     model = EventOccurrence
     extra = 0
+    show_change_link = True
     fields = (
         "sequence",
         "label",
@@ -56,6 +62,7 @@ class EventProvenanceInline(admin.TabularInline):
 class EventAdmin(admin.ModelAdmin):
     list_display = (
         "title",
+        "occurrence_link",
         "publication_status",
         "verification_status",
         "updated_at",
@@ -77,6 +84,19 @@ class EventAdmin(admin.ModelAdmin):
         EventRegistrationInline,
         EventProvenanceInline,
     )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(admin_occurrence_count=Count("occurrences"))
+
+    @admin.display(description="Occurrences", ordering="admin_occurrence_count")
+    def occurrence_link(self, obj: Event) -> str:
+        count = getattr(obj, "admin_occurrence_count", None)
+        if count is None:
+            count = obj.occurrences.count()
+        url = reverse("admin:events_eventoccurrence_changelist")
+        filtered_url = f"{url}?{urlencode({'event__id__exact': obj.pk})}"
+        label = "occurrence" if count == 1 else "occurrences"
+        return format_html('<a href="{}">{} {}</a>', filtered_url, count, label)
 
     def has_change_permission(self, request, obj=None) -> bool:
         if obj is not None and CandidateReview.objects.filter(canonical_event=obj).exists():
@@ -112,6 +132,7 @@ class EventOccurrenceAdmin(admin.ModelAdmin):
         "occurrence_status",
     )
     list_filter = (
+        "event",
         "attendance_mode",
         "occurrence_status",
         "capacity_status",

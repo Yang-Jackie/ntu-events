@@ -1,4 +1,6 @@
 import json
+from datetime import date
+from urllib.parse import urlencode
 
 import pytest
 from django.contrib import admin
@@ -166,12 +168,25 @@ def test_review_admin_correction_synchronizes_existing_event(client) -> None:
         source_representation=representation,
         candidate_index=0,
         schema_version="event-candidate-v2",
-        payload={"schema_version": "event-candidate-v2", "title": "Original title"},
+        payload={
+            "schema_version": "event-candidate-v2",
+            "title": "Original title",
+            "occurrences": [
+                {
+                    "local_ref": "session-1",
+                    "start_date": "2026-09-01",
+                    "time_precision": "DATE_ONLY",
+                    "attendance_mode": "IN_PERSON",
+                    "raw_location": "Location pending review",
+                }
+            ],
+        },
         title="Original title",
         validation_status="REVIEW_REQUIRED",
     )
     review = create_review_and_sync(candidate)
     event_id = review.canonical_event_id
+    occurrence_id = review.canonical_event.occurrences.get().pk
     user_model = get_user_model()
     superuser = user_model.objects.create_superuser(
         username="review-admin",
@@ -179,6 +194,8 @@ def test_review_admin_correction_synchronizes_existing_event(client) -> None:
         password="test-password",
     )
     client.force_login(superuser)
+
+    protected_event_response = client.get(reverse("admin:events_event_change", args=[event_id]))
 
     response = client.post(
         reverse("admin:ingestion_candidatereview_change", args=[review.pk]),
@@ -196,6 +213,11 @@ def test_review_admin_correction_synchronizes_existing_event(client) -> None:
         },
     )
 
+    assert protected_event_response.status_code == 200
+    assert (
+        reverse("admin:events_eventoccurrence_change", args=[occurrence_id]).encode()
+        in protected_event_response.content
+    )
     assert response.status_code == 302
     review.refresh_from_db()
     assert review.review_version == 2
@@ -204,3 +226,39 @@ def test_review_admin_correction_synchronizes_existing_event(client) -> None:
     assert review.reviewed_by == superuser
     assert review.canonical_event_id == event_id
     assert review.canonical_event.title == "Corrected by reviewer"
+
+
+def test_event_admin_links_to_its_occurrences(client) -> None:
+    event = Event.objects.create(
+        slug="linked-event",
+        title="Linked event",
+        normalized_title="linked event",
+    )
+    occurrence = EventOccurrence.objects.create(
+        event=event,
+        sequence=1,
+        start_date=date(2026, 9, 1),
+        time_precision="DATE_ONLY",
+    )
+    user_model = get_user_model()
+    superuser = user_model.objects.create_superuser(
+        username="event-link-admin",
+        email="admin@example.com",
+        password="test-password",
+    )
+    client.force_login(superuser)
+    occurrence_url = reverse("admin:events_eventoccurrence_change", args=[occurrence.pk])
+    occurrence_list_url = reverse("admin:events_eventoccurrence_changelist")
+    filtered_url = f"{occurrence_list_url}?{urlencode({'event__id__exact': event.pk})}"
+
+    event_list_response = client.get(reverse("admin:events_event_changelist"))
+    event_detail_response = client.get(reverse("admin:events_event_change", args=[event.pk]))
+    filtered_response = client.get(filtered_url)
+
+    assert event_list_response.status_code == 200
+    assert filtered_url.encode() in event_list_response.content
+    assert b"1 occurrence" in event_list_response.content
+    assert event_detail_response.status_code == 200
+    assert occurrence_url.encode() in event_detail_response.content
+    assert filtered_response.status_code == 200
+    assert b"Linked event" in filtered_response.content
