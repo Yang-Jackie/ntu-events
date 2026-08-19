@@ -216,11 +216,14 @@ def _extract_messages(
         return set(), 0, 0
 
     reference_data = build_candidate_reference_data()
-    reference_data_hash = candidate_reference_data_hash(reference_data)
     pending: list[MessageWork] = []
     for item in relevant:
         if item.raw_document is None:
             raise RuntimeError("Relevant messages must have a preserved raw document")
+        # Deliberately not gated on the reference catalog: venue and classification
+        # identity (PKs, unique codes) is stable, so routine catalog edits such as
+        # verifying a venue must not invalidate prior extractions. Bump
+        # TELEGRAM_EXTRACTOR_VERSION when a reprocessing pass is actually wanted.
         already_extracted = ExtractionRun.objects.filter(
             raw_source_document=item.raw_document,
             extractor_type=TELEGRAM_EXTRACTOR_TYPE,
@@ -228,7 +231,6 @@ def _extract_messages(
             model_name=models.extraction_model,
             prompt_version=EXTRACTION_PROMPT_VERSION,
             model_invocation__schema_version=EXTRACTION_SCHEMA_VERSION,
-            model_invocation__reference_data_hash=reference_data_hash,
             status=ExtractionStatus.SUCCEEDED,
         ).exists()
         if not already_extracted:

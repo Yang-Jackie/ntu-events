@@ -43,6 +43,7 @@ from ingestion.raw_storage import LocalRawContentStorage
 from sources.models import RawSourceDocument, Source, SourceType
 from telethon.errors import ServerError, TimedOutError
 from telethon.tl.types import MessageEntityTextUrl, MessageEntityUrl
+from venues.models import Venue, VenueType
 
 pytestmark = pytest.mark.django_db
 
@@ -488,6 +489,46 @@ def test_unchanged_messages_do_not_create_duplicate_candidates_or_model_calls(tm
         models=first_models,
         storage=LocalRawContentStorage(tmp_path),
     ).execute(first_job)
+
+    second = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
+    second_job = claim_job(second.jobs[0].pk, "test-worker")
+    assert second_job is not None
+    second_models = FakeModels()
+    TelegramTextPipeline(
+        fetcher=FakeFetcher(messages),
+        models=second_models,
+        storage=LocalRawContentStorage(tmp_path),
+    ).execute(second_job)
+
+    second_job.refresh_from_db()
+    assert second_job.status == JobStatus.SUCCEEDED
+    assert second_models.screening_batch_sizes == []
+    assert second_models.extraction_batch_sizes == []
+    assert EventCandidate.objects.count() == 12
+
+
+def test_reference_catalog_changes_do_not_invalidate_cached_extraction(tmp_path) -> None:
+    source = make_source()
+    messages = fixture_messages()
+    first = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
+    first_job = claim_job(first.jobs[0].pk, "test-worker")
+    assert first_job is not None
+    TelegramTextPipeline(
+        fetcher=FakeFetcher(messages),
+        models=FakeModels(),
+        storage=LocalRawContentStorage(tmp_path),
+    ).execute(first_job)
+
+    # Verifying a venue changes build_candidate_reference_data()'s output and therefore
+    # candidate_reference_data_hash. Routine catalog maintenance like this must not force
+    # re-extraction of every unrelated message; only a deliberate TELEGRAM_EXTRACTOR_VERSION
+    # bump should.
+    Venue.objects.create(
+        name="New Verified Venue",
+        normalized_name="new verified venue",
+        venue_type=VenueType.OTHER,
+        is_verified=True,
+    )
 
     second = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
     second_job = claim_job(second.jobs[0].pk, "test-worker")
