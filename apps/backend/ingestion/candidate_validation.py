@@ -43,6 +43,15 @@ def validate_candidate(
             severity=IssueSeverity.ERROR,
             blocks_canonicalization=True,
         )
+    elif not _has_information_beyond_title(candidate):
+        _issue(
+            issues,
+            code="TITLE_ONLY",
+            path="title",
+            message="The candidate contains a title but no other useful event information.",
+            severity=IssueSeverity.ERROR,
+            blocks_canonicalization=True,
+        )
 
     if not candidate.occurrences:
         _issue(
@@ -119,7 +128,7 @@ def validate_candidate(
                 code="ORGANIZER_NAME_MISSING",
                 path=f"organizers.{index}.name",
                 message="An organizer entry has no usable name.",
-                severity=IssueSeverity.WARNING,
+                severity=IssueSeverity.ERROR,
                 blocks_canonicalization=False,
             )
 
@@ -166,7 +175,7 @@ def _validate_occurrence(
             code="OCCURRENCE_DATE_MISSING",
             path=f"{path}.start_date",
             message="The occurrence has no start date.",
-            severity=IssueSeverity.WARNING,
+            severity=IssueSeverity.ERROR,
             blocks_canonicalization=False,
         )
     if (
@@ -233,7 +242,7 @@ def _validate_occurrence(
             path=path,
             message="An all-day occurrence also contains a time.",
             severity=IssueSeverity.ERROR,
-            blocks_canonicalization=True,
+            blocks_canonicalization=False,
         )
     if occurrence.time_precision == TimePrecision.EXACT and occurrence.start_time is None:
         _issue(
@@ -253,7 +262,7 @@ def _validate_occurrence(
             path=path,
             message="A date-only occurrence also contains a time.",
             severity=IssueSeverity.ERROR,
-            blocks_canonicalization=True,
+            blocks_canonicalization=False,
         )
 
     raw_location = occurrence.raw_location.strip() if occurrence.raw_location else ""
@@ -342,6 +351,23 @@ def _validate_registration(
     issues: list[dict[str, object]],
 ) -> None:
     path = f"registrations.{index}"
+    if not any(
+        (
+            bool(registration.name and registration.name.strip()),
+            bool(registration.url),
+            bool(registration.instructions and registration.instructions.strip()),
+            registration.opens_date is not None,
+            registration.closes_date is not None,
+        )
+    ):
+        _issue(
+            issues,
+            code="REGISTRATION_EMPTY",
+            path=path,
+            message="The registration entry contains no useful information.",
+            severity=IssueSeverity.ERROR,
+            blocks_canonicalization=False,
+        )
     if not registration.name or not registration.name.strip():
         _issue(
             issues,
@@ -359,7 +385,7 @@ def _validate_registration(
                 path=f"{path}.occurrence_ref",
                 message="An occurrence-scoped registration has no occurrence reference.",
                 severity=IssueSeverity.ERROR,
-                blocks_canonicalization=False,
+                blocks_canonicalization=True,
             )
         elif registration.occurrence_ref not in known_occurrence_refs:
             _issue(
@@ -368,7 +394,7 @@ def _validate_registration(
                 path=f"{path}.occurrence_ref",
                 message="The registration references an occurrence that does not exist.",
                 severity=IssueSeverity.ERROR,
-                blocks_canonicalization=False,
+                blocks_canonicalization=True,
             )
     elif registration.occurrence_ref:
         _issue(
@@ -377,7 +403,7 @@ def _validate_registration(
             path=f"{path}.occurrence_ref",
             message="An event-scoped registration also contains an occurrence reference.",
             severity=IssueSeverity.ERROR,
-            blocks_canonicalization=False,
+            blocks_canonicalization=True,
         )
 
     if registration.opens_time is not None and registration.opens_date is None:
@@ -432,6 +458,25 @@ def _validate_registration(
         code="REGISTRATION_URL_INVALID",
         issues=issues,
         blocks_canonicalization=False,
+    )
+
+
+def _has_information_beyond_title(candidate: EventCandidatePayload) -> bool:
+    controlled_values = (
+        candidate.formats,
+        candidate.topics,
+        candidate.purposes,
+        candidate.audiences,
+    )
+    return any(
+        (
+            bool(candidate.description and candidate.description.strip()),
+            bool(candidate.occurrences),
+            bool(candidate.organizers),
+            bool(candidate.registrations),
+            any(item.supported_codes or item.other_values for item in controlled_values),
+            bool(candidate.image_url),
+        )
     )
 
 

@@ -116,7 +116,8 @@ Source-neutral workflow code owns:
 - Durable execution and inspection
 - Storage and provenance
 - Candidate contract validation
-- Candidate review and canonical synchronization
+- Candidate logical gates, deterministic matching, canonicalization plans, and
+  transactional plan application
 - Publication decisions
 - Protection against unsafe reruns
 
@@ -124,11 +125,34 @@ External SDK objects and provider response types should stay behind their
 pipeline or infrastructure boundary. Providers and models cannot directly
 publish or modify canonical event data.
 
+`ingestion` owns `EventCandidate`, `CandidateMatch`, and `CanonicalizationPlan`
+because they describe interpretation and workflow. `EventCandidate` contains
+the immutable extracted observation plus the editable effective payload and
+BLOCKED/READY/PROCESSED logical gate; no separate review aggregate exists.
+`events` owns the current Event graph plus `EventSourceLink`,
+`EventObservation`, and `EventRevision` because they describe canonical state,
+its source associations, and applied history. The canonicalization workflow is
+the only automated writer across that boundary.
+
+Within `ingestion`, source-specific access, screening, extraction, document
+handling, and stage runtime live under `pipelines/<source>/`. Their durable
+handoff is a persisted `EventCandidate`; shared candidate creation and repair
+rules remain source-neutral. The `canonicalization` package owns everything
+from a READY candidate through matching, reconciliation context, proposal
+validation, plan creation, Event application, and provenance. It accepts a
+source-neutral decision-provider interface, so canonicalization model calls do
+not belong to any source pipeline. Source pipelines stop after persisting their
+EventCandidates. A separate source-neutral worker consumes unplanned READY
+candidates, including manually repaired ones, and the canonicalization package
+must never import a source pipeline. The worker is a separate process in the
+same modular Django application, not a separate service or data owner.
+
 The first production pipeline is Telegram text ingestion. Future pipelines may
 use structured mapping, model-assisted extraction, OCR, managed retrieval, or
 bounded browser interaction without changing the worker's general ownership.
-The detailed pipeline layout and resource lifecycle should follow the
-implementation needs discovered for that source.
+Each source may split its adapter, documents, model client, screening,
+extraction, and orchestration as its implemented complexity requires without
+moving shared candidate or canonicalization policy into the source package.
 
 ## 6. Data and fixtures
 
@@ -182,7 +206,8 @@ response to measured workflow or operational needs.
 ## 9. Deliberately open architecture details
 
 - Internal file-versus-folder layout as domains grow
-- Cross-source entity resolution and later source-update policy
+- Matching evaluation thresholds, manual-edit protection, and broader
+  source-update policy
 - Search and map-query organization
 - Production raw-content storage
 - Scheduler and queue evolution

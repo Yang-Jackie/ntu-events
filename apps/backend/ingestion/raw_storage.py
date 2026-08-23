@@ -18,6 +18,8 @@ class StoredRawObject:
 class RawContentStorage(Protocol):
     def save(self, content: bytes, *, suffix: str) -> StoredRawObject: ...
 
+    def load(self, storage_key: str) -> bytes: ...
+
 
 class LocalRawContentStorage:
     def __init__(self, root: Path):
@@ -39,3 +41,9 @@ class LocalRawContentStorage:
             os.fsync(handle.fileno())
         temporary.replace(destination)
         return StoredRawObject(storage_key=relative.as_posix(), content_hash=content_hash)
+
+    def load(self, storage_key: str) -> bytes:
+        source = (self.root / storage_key).resolve()
+        if self.root not in source.parents:
+            raise ValueError("raw storage key escaped its configured root")
+        return source.read_bytes()

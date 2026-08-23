@@ -18,24 +18,16 @@ class ValidationStatus(models.TextChoices):
     REVIEW_REQUIRED = "REVIEW_REQUIRED", "Review required"
 
 
-class ReviewStatus(models.TextChoices):
-    NOT_REQUIRED = "NOT_REQUIRED", "Not required"
-    NEEDS_REVIEW = "NEEDS_REVIEW", "Needs review"
-    APPROVED = "APPROVED", "Approved"
-    REJECTED = "REJECTED", "Rejected"
-
-
-class ReviewSyncStatus(models.TextChoices):
-    PENDING = "PENDING", "Pending"
+class CandidateStatus(models.TextChoices):
     BLOCKED = "BLOCKED", "Blocked"
-    SYNCED = "SYNCED", "Synced"
-    FAILED = "FAILED", "Failed"
+    READY = "READY", "Ready"
+    PROCESSED = "PROCESSED", "Processed"
 
 
-class PromotionMethod(models.TextChoices):
-    NONE = "NONE", "None"
-    AUTOMATIC = "AUTOMATIC", "Automatic"
-    MANUAL = "MANUAL", "Manual"
+class ObservationType(models.TextChoices):
+    EVENT_ANNOUNCEMENT = "EVENT_ANNOUNCEMENT", "Event announcement"
+    EVENT_FOLLOW_UP = "EVENT_FOLLOW_UP", "Event follow-up"
+    UNKNOWN = "UNKNOWN", "Unknown"
 
 
 class IngestionTrigger(models.TextChoices):
@@ -55,6 +47,23 @@ class JobStatus(models.TextChoices):
 class ModelInvocationStage(models.TextChoices):
     SCREENING = "SCREENING", "Screening"
     EXTRACTION = "EXTRACTION", "Extraction"
+    CANONICALIZATION = "CANONICALIZATION", "Canonicalization"
+
+
+class CanonicalizationAction(models.TextChoices):
+    ADD = "ADD", "Add"
+    UPDATE = "UPDATE", "Update"
+    LINK_ONLY = "LINK_ONLY", "Link only"
+
+
+class CanonicalizationPlanStatus(models.TextChoices):
+    PENDING = "PENDING", "Pending"
+    READY = "READY", "Ready"
+    REVIEW_REQUIRED = "REVIEW_REQUIRED", "Review required"
+    REJECTED = "REJECTED", "Rejected"
+    APPLIED = "APPLIED", "Applied"
+    STALE = "STALE", "Stale"
+    FAILED = "FAILED", "Failed"
 
 
 class ScreeningDecision(models.TextChoices):
@@ -293,7 +302,13 @@ class EventCandidate(models.Model):
     )
     candidate_index = models.PositiveSmallIntegerField()
     schema_version = models.CharField(max_length=50)
-    payload = models.JSONField()
+    observation_type = models.CharField(
+        max_length=30,
+        choices=ObservationType.choices,
+        default=ObservationType.UNKNOWN,
+    )
+    extracted_payload = models.JSONField()
+    effective_payload = models.JSONField()
     title = models.CharField(max_length=500, blank=True)
     overall_confidence = models.DecimalField(
         max_digits=4,
@@ -302,13 +317,27 @@ class EventCandidate(models.Model):
         blank=True,
         validators=(MinValueValidator(0), MaxValueValidator(1)),
     )
-    validation_status = models.CharField(
+    status = models.CharField(
         max_length=30,
-        choices=ValidationStatus.choices,
-        default=ValidationStatus.PENDING,
+        choices=CandidateStatus.choices,
+        default=CandidateStatus.BLOCKED,
+        db_index=True,
     )
     validation_issues = models.JSONField(default=list, blank=True)
+    has_manual_edits = models.BooleanField(default=False)
+    edit_version = models.PositiveIntegerField(default=1)
+    reviewer_notes = models.TextField(blank=True)
+    edited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="edited_event_candidates",
+    )
+    edited_at = models.DateTimeField(null=True, blank=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ("extraction_run_id", "candidate_index")
@@ -322,6 +351,10 @@ class EventCandidate(models.Model):
                 | (Q(overall_confidence__gte=0) & Q(overall_confidence__lte=1)),
                 name="candidate_confidence_between_zero_and_one",
             ),
+            models.CheckConstraint(
+                condition=Q(edit_version__gte=1),
+                name="event_candidate_edit_version_positive",
+            ),
         ]
 
     def __str__(self) -> str:
@@ -329,57 +362,129 @@ class EventCandidate(models.Model):
 
     def save(self, *args, **kwargs) -> None:
         if self.pk is not None:
-            raise ValidationError("Event candidates are immutable; create a review record instead")
+            original = type(self).objects.get(pk=self.pk)
+            immutable_fields = (
+                "extraction_run_id",
+                "source_representation_id",
+                "candidate_index",
+                "schema_version",
+                "observation_type",
+                "extracted_payload",
+                "title",
+                "overall_confidence",
+                "created_at",
+            )
+            changed = [
+                field
+                for field in immutable_fields
+                if getattr(self, field) != getattr(original, field)
+            ]
+            if changed:
+                raise ValidationError(
+                    f"Extracted EventCandidate fields are immutable: {', '.join(changed)}"
+                )
+            repair_fields = (
+                "effective_payload",
+                "has_manual_edits",
+                "edit_version",
+                "reviewer_notes",
+                "edited_by_id",
+                "edited_at",
+            )
+            repaired = [
+                field for field in repair_fields if getattr(self, field) != getattr(original, field)
+            ]
+            if repaired and original.status != CandidateStatus.BLOCKED:
+                raise ValidationError(
+                    "Only BLOCKED EventCandidates may be repaired; edit the canonical Event "
+                    "after processing."
+                )
         super().save(*args, **kwargs)
 
 
-class CandidateReview(models.Model):
+class CandidateMatch(models.Model):
+    event_candidate = models.ForeignKey(
+        EventCandidate,
+        on_delete=models.CASCADE,
+        related_name="matches",
+    )
+    event = models.ForeignKey(
+        "events.Event",
+        on_delete=models.CASCADE,
+        related_name="candidate_matches",
+    )
+    rank = models.PositiveSmallIntegerField()
+    score = models.DecimalField(
+        max_digits=5,
+        decimal_places=4,
+        validators=(MinValueValidator(0), MaxValueValidator(1)),
+    )
+    signals = models.JSONField(default=list)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("event_candidate_id", "rank")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("event_candidate", "event"),
+                name="unique_candidate_match_per_event",
+            ),
+            models.UniqueConstraint(
+                fields=("event_candidate", "rank"),
+                name="unique_candidate_match_rank",
+            ),
+            models.CheckConstraint(
+                condition=Q(score__gte=0) & Q(score__lte=1),
+                name="candidate_match_score_between_zero_and_one",
+            ),
+        ]
+
+
+class CanonicalizationPlan(models.Model):
     event_candidate = models.OneToOneField(
         EventCandidate,
         on_delete=models.PROTECT,
-        related_name="review",
+        related_name="canonicalization_plan",
     )
-    canonical_event = models.ForeignKey(
+    plan_version = models.PositiveIntegerField(default=1)
+    applied_version = models.PositiveIntegerField(default=0)
+    action = models.CharField(
+        max_length=20,
+        choices=CanonicalizationAction.choices,
+        blank=True,
+    )
+    status = models.CharField(
+        max_length=30,
+        choices=CanonicalizationPlanStatus.choices,
+        default=CanonicalizationPlanStatus.PENDING,
+        db_index=True,
+    )
+    target_event = models.ForeignKey(
         "events.Event",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
-        related_name="candidate_reviews",
+        related_name="canonicalization_plans",
     )
-    effective_payload = models.JSONField()
-    validation_issues = models.JSONField(default=list, blank=True)
-    review_status = models.CharField(
-        max_length=30,
-        choices=ReviewStatus.choices,
-        default=ReviewStatus.NEEDS_REVIEW,
-        db_index=True,
-    )
-    sync_status = models.CharField(
-        max_length=20,
-        choices=ReviewSyncStatus.choices,
-        default=ReviewSyncStatus.PENDING,
-        db_index=True,
-    )
-    promotion_method = models.CharField(
-        max_length=20,
-        choices=PromotionMethod.choices,
-        default=PromotionMethod.NONE,
-    )
-    allow_duplicate = models.BooleanField(default=False)
-    has_manual_edits = models.BooleanField(default=False)
-    review_version = models.PositiveIntegerField(default=1)
-    synced_version = models.PositiveIntegerField(default=0)
-    reviewer_notes = models.TextField(blank=True)
-    reviewed_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
+    target_event_updated_at = models.DateTimeField(null=True, blank=True)
+    target_snapshot_hash = models.CharField(max_length=64, blank=True)
+    model_invocation = models.ForeignKey(
+        ModelInvocation,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
-        related_name="candidate_reviews",
+        related_name="canonicalization_plans",
     )
-    reviewed_at = models.DateTimeField(null=True, blank=True)
-    last_synced_at = models.DateTimeField(null=True, blank=True)
-    sync_error = models.TextField(blank=True)
+    match_snapshot = models.JSONField(default=list)
+    generated_proposal = models.JSONField(default=dict)
+    effective_proposal = models.JSONField(default=dict)
+    validation_issues = models.JSONField(default=list)
+    domain_flags = models.JSONField(default=list)
+    grounding_flags = models.JSONField(default=list)
+    has_manual_edits = models.BooleanField(default=False)
+    applied_snapshot = models.JSONField(default=dict)
+    application_error = models.TextField(blank=True)
+    applied_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -387,64 +492,14 @@ class CandidateReview(models.Model):
         ordering = ("-updated_at", "-pk")
         constraints = [
             models.CheckConstraint(
-                condition=Q(review_version__gte=1),
-                name="candidate_review_version_positive",
+                condition=Q(plan_version__gte=1),
+                name="canonicalization_plan_version_positive",
             ),
             models.CheckConstraint(
-                condition=Q(synced_version__lte=F("review_version")),
-                name="candidate_review_synced_version_not_ahead",
+                condition=Q(applied_version__lte=F("plan_version")),
+                name="canonicalization_plan_applied_version_not_ahead",
             ),
         ]
 
     def __str__(self) -> str:
-        return f"Review for {self.event_candidate}"
-
-    @property
-    def has_unsynced_changes(self) -> bool:
-        return self.review_version != self.synced_version
-
-
-class CandidateReviewOccurrence(models.Model):
-    review = models.ForeignKey(
-        CandidateReview,
-        on_delete=models.CASCADE,
-        related_name="occurrence_links",
-    )
-    local_ref = models.CharField(max_length=100)
-    occurrence = models.OneToOneField(
-        "events.EventOccurrence",
-        on_delete=models.CASCADE,
-        related_name="candidate_review_link",
-    )
-
-    class Meta:
-        ordering = ("review_id", "local_ref")
-        constraints = [
-            models.UniqueConstraint(
-                fields=("review", "local_ref"),
-                name="unique_occurrence_ref_per_candidate_review",
-            )
-        ]
-
-
-class CandidateReviewRegistration(models.Model):
-    review = models.ForeignKey(
-        CandidateReview,
-        on_delete=models.CASCADE,
-        related_name="registration_links",
-    )
-    source_index = models.PositiveSmallIntegerField()
-    registration = models.OneToOneField(
-        "events.Registration",
-        on_delete=models.CASCADE,
-        related_name="candidate_review_link",
-    )
-
-    class Meta:
-        ordering = ("review_id", "source_index")
-        constraints = [
-            models.UniqueConstraint(
-                fields=("review", "source_index"),
-                name="unique_registration_index_per_candidate_review",
-            )
-        ]
+        return f"Plan for {self.event_candidate}"

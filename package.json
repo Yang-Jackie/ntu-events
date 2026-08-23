@@ -14,6 +14,7 @@
     "backend:build": "docker compose build backend",
     "dev:backend": "docker compose up backend",
     "dev:worker": "docker compose up ingestion-worker",
+    "dev:canonicalization": "docker compose up canonicalization-worker",
     "dev:web": "corepack pnpm --filter @ntu-events/web dev",
     "db:migrate": "docker compose run --rm backend python apps/backend/manage.py migrate",
     "telegram:login": "docker compose run --rm backend python apps/backend/manage.py telegram_login",

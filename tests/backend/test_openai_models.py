@@ -1,25 +1,30 @@
+import hashlib
 import json
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
+from ingestion.canonicalization.decision_provider import (
+    OpenAICanonicalizationDecisionProvider,
+)
 from ingestion.contracts import (
     EXTRACTION_SCHEMA_VERSION,
     SCREENING_SCHEMA_VERSION,
+    CanonicalizationAction,
+    CanonicalizationProposal,
     ExtractedMessage,
     ExtractionBatch,
     ScreeningBatch,
     ScreeningItem,
     ScreeningLabel,
 )
+from ingestion.model_outputs import ModelOutputError, prompt_cache_key
 from ingestion.pipelines.telegram.adapter import TelegramLink, TelegramMessage
-from ingestion.pipelines.telegram.extraction import (
+from ingestion.pipelines.telegram.model_client import (
     EXTRACTION_PROMPT_VERSION,
     SCREENING_PROMPT_VERSION,
-    ModelOutputError,
     OpenAITelegramModels,
-    prompt_cache_key,
 )
 from ingestion.reference_data import candidate_reference_data_hash, canonical_json
 
@@ -85,8 +90,37 @@ def test_model_calls_send_verbosity_inside_text_configuration() -> None:
         ]
     extraction_prompt = json.loads(parse.call_args_list[1].kwargs["input"][1]["content"])
     assert extraction_prompt["reference_data"] == reference_data
+    assert parse.call_args_list[0].kwargs["reasoning"] == {"effort": "minimal"}
+    assert parse.call_args_list[1].kwargs["reasoning"] == {"effort": "low"}
     for response in responses:
         response.model_dump_json.assert_called_once_with(warnings=False)
+
+
+def test_canonicalization_decision_provider_is_source_neutral() -> None:
+    proposal = CanonicalizationProposal(
+        action=CanonicalizationAction.LINK_ONLY,
+        target_event_id=42,
+        reasoning="Same event; no canonical change.",
+        add_event=None,
+        event_changes=[],
+        classification_changes=[],
+        organizer_changes=[],
+        occurrence_changes=[],
+        registration_changes=[],
+    )
+    response = _response(proposal)
+    parse = Mock(return_value=response)
+    provider = object.__new__(OpenAICanonicalizationDecisionProvider)
+    provider.model_name = "gpt-5-mini"
+    provider.client = SimpleNamespace(responses=SimpleNamespace(parse=parse))
+
+    result = provider.decide({"event_candidate": {"id": 1}, "possible_matches": []})
+
+    assert result.parsed == proposal
+    call = parse.call_args
+    assert call.kwargs["model"] == "gpt-5-mini"
+    assert call.kwargs["text"] == {"verbosity": "low"}
+    assert json.loads(call.kwargs["input"][1]["content"])["event_candidate"]["id"] == 1
 
 
 def test_incomplete_response_raises_error_with_raw_provider_artifact() -> None:
@@ -170,15 +204,29 @@ def test_prompt_cache_key_tracks_the_reference_catalog() -> None:
 
     assert key({"venues": []}) != key({"venues": [{"id": 1}]})
     assert key({"venues": [], "classifications": {}}) == key({"classifications": {}, "venues": []})
-    assert (
-        prompt_cache_key(
-            stage="telegram-screening",
-            model="gpt-5-nano",
-            prompt_version=SCREENING_PROMPT_VERSION,
-            schema_version=SCREENING_SCHEMA_VERSION,
-        )
-        == f"telegram-screening:gpt-5-nano:{SCREENING_PROMPT_VERSION}:{SCREENING_SCHEMA_VERSION}"
+    screening_material = (
+        f"telegram-screening:gpt-5-nano:{SCREENING_PROMPT_VERSION}:{SCREENING_SCHEMA_VERSION}"
     )
+    screening_key = prompt_cache_key(
+        stage="telegram-screening",
+        model="gpt-5-nano",
+        prompt_version=SCREENING_PROMPT_VERSION,
+        schema_version=SCREENING_SCHEMA_VERSION,
+    )
+    assert screening_key == hashlib.sha256(screening_material.encode("utf-8")).hexdigest()
+    assert len(screening_key) == 64
+
+
+def test_prompt_cache_key_stays_within_the_provider_limit_for_long_components() -> None:
+    key = prompt_cache_key(
+        stage="event-canonicalization-with-a-future-long-stage-name",
+        model="gpt-5-mini-with-a-long-version-suffix",
+        prompt_version="event-canonicalization-prompt-version-123",
+        schema_version="canonicalization-plan-schema-version-123",
+        reference_data_hash="a" * 64,
+    )
+
+    assert len(key) == 64
 
 
 def _message(message_id: int) -> TelegramMessage:

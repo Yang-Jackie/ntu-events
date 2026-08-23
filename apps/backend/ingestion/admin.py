@@ -3,41 +3,37 @@ import json
 from django import forms
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
-from django.urls import reverse
-from django.utils import timezone
 from django.utils.html import format_html
-from events.models import Event
 from pydantic import ValidationError as PydanticValidationError
 
-from .candidate_reviews import ReviewVersionConflict, synchronize_review
-from .contracts import EventCandidatePayload
+from .candidates import CandidateVersionConflict, update_event_candidate
+from .canonicalization import update_canonicalization_plan
+from .contracts import CanonicalizationProposal, EventCandidatePayload
 from .models import (
-    CandidateReview,
+    CandidateMatch,
+    CandidateStatus,
+    CanonicalizationPlan,
     EventCandidate,
     ExtractionRun,
     IngestionJob,
     IngestionRequest,
     MessageScreening,
     ModelInvocation,
-    ReviewStatus,
-    ReviewSyncStatus,
 )
-from .reference_data import build_candidate_reference_data
-from .validation import validate_candidate
 
 
-class CandidateReviewAdminForm(forms.ModelForm):
+class EventCandidateAdminForm(forms.ModelForm):
     expected_version = forms.IntegerField(widget=forms.HiddenInput)
 
     class Meta:
-        model = CandidateReview
-        fields = ("effective_payload", "review_status", "allow_duplicate", "reviewer_notes")
+        model = EventCandidate
+        fields = ("effective_payload", "reviewer_notes")
         widgets = {"effective_payload": forms.Textarea(attrs={"rows": 32, "cols": 120})}
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if self.instance.pk:
-            self.fields["expected_version"].initial = self.instance.review_version
+            self.fields["expected_version"].initial = self.instance.edit_version
 
     def clean_effective_payload(self) -> dict:
         value = self.cleaned_data["effective_payload"]
@@ -55,42 +51,53 @@ class CandidateReviewAdminForm(forms.ModelForm):
         if not self.instance.pk or "expected_version" not in cleaned_data:
             return cleaned_data
         current_version = (
-            CandidateReview.objects.filter(pk=self.instance.pk)
-            .values_list("review_version", flat=True)
+            EventCandidate.objects.filter(pk=self.instance.pk)
+            .values_list("edit_version", flat=True)
             .first()
         )
         if current_version != cleaned_data["expected_version"]:
             raise ValidationError(
-                "This review changed after the page was loaded. Reload and retry."
+                "This candidate changed after the page was loaded. Reload and retry."
             )
 
-        raw_payload = cleaned_data.get("effective_payload")
-        if raw_payload is None:
-            return cleaned_data
-        payload = EventCandidatePayload.model_validate(raw_payload)
-        if (
-            "effective_payload" in self.changed_data
-            and cleaned_data.get("review_status") == ReviewStatus.NOT_REQUIRED
-        ):
-            cleaned_data["review_status"] = ReviewStatus.NEEDS_REVIEW
-        if cleaned_data.get("review_status") != ReviewStatus.APPROVED:
-            return cleaned_data
+        return cleaned_data
 
-        validation = validate_candidate(payload, build_candidate_reference_data())
-        blockers = [issue for issue in validation.issues if issue.get("blocks_canonicalization")]
-        if blockers:
-            codes = ", ".join(str(issue["code"]) for issue in blockers)
-            raise ValidationError(f"Resolve blocking validation issues before approval: {codes}.")
-        if not cleaned_data.get("allow_duplicate") and payload.title:
-            normalized_title = " ".join(payload.title.split()).casefold()
-            duplicates = Event.objects.filter(normalized_title=normalized_title)
-            if self.instance.canonical_event_id:
-                duplicates = duplicates.exclude(pk=self.instance.canonical_event_id)
-            if duplicates.exists():
-                raise ValidationError(
-                    "An exact-title event already exists. Confirm 'Allow separate duplicate' "
-                    "to approve this as a separate event."
-                )
+
+class CanonicalizationPlanAdminForm(forms.ModelForm):
+    expected_version = forms.IntegerField(widget=forms.HiddenInput)
+
+    class Meta:
+        model = CanonicalizationPlan
+        fields = ("effective_proposal",)
+        widgets = {"effective_proposal": forms.Textarea(attrs={"rows": 36, "cols": 120})}
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            self.fields["expected_version"].initial = self.instance.plan_version
+
+    def clean_effective_proposal(self) -> dict:
+        value = self.cleaned_data["effective_proposal"]
+        try:
+            CanonicalizationProposal.model_validate(value)
+        except PydanticValidationError as exc:
+            raise forms.ValidationError(
+                "The proposal does not match the canonicalization schema: "
+                f"{exc.errors(include_url=False)}"
+            ) from exc
+        return value
+
+    def clean(self) -> dict:
+        cleaned_data = super().clean()
+        if not self.instance.pk or "expected_version" not in cleaned_data:
+            return cleaned_data
+        current = (
+            CanonicalizationPlan.objects.filter(pk=self.instance.pk)
+            .values_list("plan_version", flat=True)
+            .first()
+        )
+        if current != cleaned_data["expected_version"]:
+            raise ValidationError("This plan changed after the page was loaded. Reload and retry.")
         return cleaned_data
 
 
@@ -213,17 +220,18 @@ class ExtractionRunAdmin(admin.ModelAdmin):
 
 @admin.register(EventCandidate)
 class EventCandidateAdmin(admin.ModelAdmin):
+    form = EventCandidateAdminForm
     list_display = (
         "title",
         "source_representation",
         "schema_version",
         "overall_confidence",
-        "validation_status",
-        "review_state",
+        "status",
+        "has_manual_edits",
         "issue_count",
         "created_at",
     )
-    list_filter = ("validation_status", "schema_version")
+    list_filter = ("status", "has_manual_edits", "schema_version")
     search_fields = (
         "title",
         "source_representation__external_identifier",
@@ -238,9 +246,14 @@ class EventCandidateAdmin(admin.ModelAdmin):
         "schema_version",
         "title",
         "overall_confidence",
-        "validation_status",
-        "review_link",
+        "status",
+        "has_manual_edits",
+        "edit_version",
+        "edited_by",
+        "edited_at",
+        "processed_at",
         "created_at",
+        "updated_at",
     )
     fieldsets = (
         (
@@ -250,12 +263,27 @@ class EventCandidateAdmin(admin.ModelAdmin):
                     "candidate_summary",
                     "title",
                     "overall_confidence",
-                    "validation_status",
-                    "review_link",
+                    "status",
+                    "effective_payload",
+                    "reviewer_notes",
+                    "expected_version",
                 )
             },
         ),
         ("Validation issues", {"fields": ("validation_issue_summary",)}),
+        (
+            "Candidate lifecycle",
+            {
+                "fields": (
+                    "has_manual_edits",
+                    "edit_version",
+                    "edited_by",
+                    "edited_at",
+                    "processed_at",
+                    "updated_at",
+                )
+            },
+        ),
         (
             "Provenance",
             {
@@ -271,31 +299,13 @@ class EventCandidateAdmin(admin.ModelAdmin):
         ("Raw payload", {"classes": ("collapse",), "fields": ("raw_payload",)}),
     )
 
-    @admin.display(description="Issues", ordering="validation_status")
+    @admin.display(description="Issues", ordering="status")
     def issue_count(self, obj: EventCandidate) -> int:
         return len(obj.validation_issues)
 
-    @admin.display(description="Review", ordering="review__review_status")
-    def review_state(self, obj: EventCandidate) -> str:
-        try:
-            return obj.review.get_review_status_display()
-        except CandidateReview.DoesNotExist:
-            return "Missing"
-
-    @admin.display(description="Mutable review")
-    def review_link(self, obj: EventCandidate) -> str:
-        try:
-            review = obj.review
-        except CandidateReview.DoesNotExist:
-            return "No review record"
-        return format_html(
-            '<a href="{}">Review and synchronize this candidate</a>',
-            reverse("admin:ingestion_candidatereview_change", args=[review.pk]),
-        )
-
     @admin.display(description="Candidate overview")
     def candidate_summary(self, obj: EventCandidate) -> str:
-        return _payload_summary(obj.payload)
+        return _payload_summary(obj.effective_payload)
 
     @admin.display(description="Validation issues")
     def validation_issue_summary(self, obj: EventCandidate) -> str:
@@ -316,8 +326,57 @@ class EventCandidateAdmin(admin.ModelAdmin):
 
     @admin.display(description="Original extracted payload")
     def raw_payload(self, obj: EventCandidate) -> str:
-        rendered = json.dumps(obj.payload, ensure_ascii=False, indent=2, sort_keys=True)
+        rendered = json.dumps(obj.extracted_payload, ensure_ascii=False, indent=2, sort_keys=True)
         return format_html('<pre style="white-space: pre-wrap">{}</pre>', rendered)
+
+    def has_add_permission(self, request) -> bool:
+        return False
+
+    def has_change_permission(self, request, obj=None) -> bool:
+        return obj is None or obj.status == CandidateStatus.BLOCKED
+
+    def has_delete_permission(self, request, obj=None) -> bool:
+        return False
+
+    def save_model(self, request, obj: EventCandidate, form, change: bool) -> None:
+        try:
+            updated = update_event_candidate(
+                obj.pk,
+                expected_version=form.cleaned_data["expected_version"],
+                effective_payload=form.cleaned_data["effective_payload"],
+                reviewer_notes=form.cleaned_data["reviewer_notes"],
+                edited_by_id=request.user.pk,
+            )
+        except CandidateVersionConflict as exc:
+            self.message_user(request, str(exc), level=messages.ERROR)
+            return
+        for field in EventCandidate._meta.concrete_fields:
+            setattr(obj, field.attname, getattr(updated, field.attname))
+        if updated.status == CandidateStatus.READY:
+            self.message_user(request, "Candidate repaired and READY for future processing.")
+        else:
+            self.message_user(
+                request,
+                "Candidate remains BLOCKED by validation issues.",
+                level=messages.WARNING,
+            )
+
+
+@admin.register(CandidateMatch)
+class CandidateMatchAdmin(admin.ModelAdmin):
+    list_display = (
+        "event_candidate",
+        "rank",
+        "event",
+        "match_percentage",
+        "created_at",
+    )
+    search_fields = ("event_candidate__title", "event__title")
+    readonly_fields = [field.name for field in CandidateMatch._meta.fields]
+
+    @admin.display(description="Match")
+    def match_percentage(self, obj) -> str:
+        return f"{float(obj.score) * 100:.2f}%"
 
     def has_add_permission(self, request) -> bool:
         return False
@@ -329,141 +388,46 @@ class EventCandidateAdmin(admin.ModelAdmin):
         return False
 
 
-@admin.register(CandidateReview)
-class CandidateReviewAdmin(admin.ModelAdmin):
-    form = CandidateReviewAdminForm
-    list_display = (
-        "event_candidate",
-        "review_status",
-        "sync_status",
-        "canonical_event",
-        "has_manual_edits",
-        "version_state",
-        "updated_at",
-    )
-    list_filter = (
-        "review_status",
-        "sync_status",
-        "promotion_method",
-        "has_manual_edits",
-        "allow_duplicate",
-    )
-    search_fields = (
-        "event_candidate__title",
-        "canonical_event__title",
-        "reviewer_notes",
-    )
+@admin.register(CanonicalizationPlan)
+class CanonicalizationPlanAdmin(admin.ModelAdmin):
+    form = CanonicalizationPlanAdminForm
+    list_display = ("event_candidate", "action", "status", "target_event", "updated_at")
+    list_filter = ("action", "status", "has_manual_edits")
+    search_fields = ("event_candidate__title", "target_event__title", "application_error")
     readonly_fields = (
         "event_candidate",
-        "canonical_event",
-        "review_summary",
-        "validation_issue_summary",
-        "sync_status",
-        "promotion_method",
+        "action",
+        "status",
+        "target_event",
+        "model_invocation",
+        "match_snapshot",
+        "generated_proposal",
+        "validation_issues",
+        "domain_flags",
+        "grounding_flags",
         "has_manual_edits",
-        "review_version",
-        "synced_version",
-        "reviewed_by",
-        "reviewed_at",
-        "last_synced_at",
-        "sync_error",
+        "plan_version",
+        "applied_version",
+        "applied_snapshot",
+        "application_error",
+        "applied_at",
         "created_at",
         "updated_at",
     )
-    fieldsets = (
-        (
-            "Review decision",
-            {
-                "fields": (
-                    "event_candidate",
-                    "canonical_event",
-                    "review_summary",
-                    "effective_payload",
-                    "review_status",
-                    "allow_duplicate",
-                    "reviewer_notes",
-                    "expected_version",
-                )
-            },
-        ),
-        ("Current validation", {"fields": ("validation_issue_summary",)}),
-        (
-            "Synchronization",
-            {
-                "fields": (
-                    "sync_status",
-                    "promotion_method",
-                    "has_manual_edits",
-                    "review_version",
-                    "synced_version",
-                    "sync_error",
-                    "last_synced_at",
-                )
-            },
-        ),
-        (
-            "Review metadata",
-            {
-                "classes": ("collapse",),
-                "fields": ("reviewed_by", "reviewed_at", "created_at", "updated_at"),
-            },
-        ),
-    )
 
-    @admin.display(description="Version")
-    def version_state(self, obj: CandidateReview) -> str:
-        return f"{obj.synced_version}/{obj.review_version}"
-
-    @admin.display(description="Effective candidate overview")
-    def review_summary(self, obj: CandidateReview) -> str:
-        return _payload_summary(obj.effective_payload)
-
-    @admin.display(description="Validation issues")
-    def validation_issue_summary(self, obj: CandidateReview) -> str:
-        if not obj.validation_issues:
-            return "No validation issues"
-        lines = []
-        for issue in obj.validation_issues:
-            blocking = "blocking" if issue.get("blocks_canonicalization") else "review"
-            lines.append(
-                f"[{issue.get('severity', 'WARNING')}/{blocking}] "
-                f"{issue.get('code', 'UNKNOWN')} at {issue.get('path', '')}: "
-                f"{issue.get('message', '')}"
-            )
-        return format_html('<pre style="white-space: pre-wrap">{}</pre>', "\n".join(lines))
-
-    def save_model(self, request, obj: CandidateReview, form, change: bool) -> None:
-        synchronization_fields = {"effective_payload", "review_status", "allow_duplicate"}
-        should_synchronize = bool(synchronization_fields.intersection(form.changed_data))
-        if should_synchronize:
-            obj.review_version += 1
-            obj.sync_status = ReviewSyncStatus.PENDING
-            obj.sync_error = ""
-            obj.has_manual_edits = True
-            if obj.review_status in (ReviewStatus.APPROVED, ReviewStatus.REJECTED):
-                obj.reviewed_by = request.user
-                obj.reviewed_at = timezone.now()
-            else:
-                obj.reviewed_by = None
-                obj.reviewed_at = None
-        super().save_model(request, obj, form, change)
-        if not should_synchronize:
-            return
+    def save_model(self, request, obj, form, change) -> None:
         try:
-            result = synchronize_review(obj.pk, expected_version=obj.review_version)
-        except ReviewVersionConflict as exc:
+            updated = update_canonicalization_plan(
+                obj.pk,
+                expected_version=form.cleaned_data["expected_version"],
+                effective_proposal=form.cleaned_data["effective_proposal"],
+            )
+        except CandidateVersionConflict as exc:
             self.message_user(request, str(exc), level=messages.ERROR)
             return
-        if result.sync_status == ReviewSyncStatus.SYNCED:
-            self.message_user(request, "Review synchronized to the canonical event.")
-        elif result.sync_status == ReviewSyncStatus.BLOCKED:
-            self.message_user(request, result.message, level=messages.WARNING)
-        else:
-            self.message_user(
-                request,
-                f"The review was saved but synchronization failed: {result.message}",
-                level=messages.ERROR,
-            )
+        for field in CanonicalizationPlan._meta.concrete_fields:
+            setattr(obj, field.attname, getattr(updated, field.attname))
+        self.message_user(request, f"Plan status: {updated.status}.")
 
     def has_add_permission(self, request) -> bool:
         return False

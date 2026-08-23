@@ -8,9 +8,14 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from events.models import Event
+from ingestion.candidates import update_event_candidate
+from ingestion.canonicalization.worker import CanonicalizationWorkerRuntime
 from ingestion.contracts import (
     AttendanceMode,
     CandidateOccurrence,
+    CanonicalizationAction,
+    CanonicalizationProposal,
     EventCandidatePayload,
     ExtractedMessage,
     ExtractionBatch,
@@ -21,10 +26,12 @@ from ingestion.contracts import (
 )
 from ingestion.errors import RetryableIngestionError
 from ingestion.jobs import claim_job, enqueue_sources
+from ingestion.model_outputs import ModelOutputError, ModelResult
 from ingestion.models import (
-    CandidateReview,
+    CandidateStatus,
     EventCandidate,
     ExtractionRun,
+    IngestionJob,
     IngestionRequest,
     IngestionTrigger,
     JobStatus,
@@ -37,9 +44,9 @@ from ingestion.pipelines.telegram.adapter import (
     TelegramMessage,
     _normalize_message,
 )
-from ingestion.pipelines.telegram.extraction import ModelOutputError, ModelResult
 from ingestion.pipelines.telegram.pipeline import TelegramTextPipeline
 from ingestion.raw_storage import LocalRawContentStorage
+from ingestion.reference_data import build_candidate_reference_data
 from sources.models import RawSourceDocument, Source, SourceType
 from telethon.errors import ServerError, TimedOutError
 from telethon.tl.types import MessageEntityTextUrl, MessageEntityUrl
@@ -74,12 +81,14 @@ class FakeFetcher:
 class FakeModels:
     screening_model = "gpt-5-nano"
     extraction_model = "gpt-5-mini"
+    model_name = "gpt-5-mini"
 
     def __init__(self):
         self.screening_batch_sizes: list[int] = []
         self.extraction_batch_sizes: list[int] = []
         self.reference_data_snapshots: list[dict] = []
         self.response_count = 0
+        self.canonicalization_contexts: list[dict] = []
 
     def screen(self, messages: list[TelegramMessage]) -> ModelResult[ScreeningBatch]:
         self.screening_batch_sizes.append(len(messages))
@@ -150,6 +159,25 @@ class FakeModels:
             raw_response=b"{}",
         )
 
+    def decide(self, context: dict) -> ModelResult[CanonicalizationProposal]:
+        self.canonicalization_contexts.append(context)
+        return self._result(
+            CanonicalizationProposal(
+                action=CanonicalizationAction.LINK_ONLY,
+                target_event_id=context["possible_matches"][0]["event_id"],
+                reasoning="The edited source representation describes the same event.",
+                add_event=None,
+                event_changes=[],
+                classification_changes=[],
+                organizer_changes=[],
+                occurrence_changes=[],
+                registration_changes=[],
+            )
+        )
+
+    def close(self) -> None:
+        return None
+
 
 class FirstExtractionBatchFails(FakeModels):
     def extract(
@@ -214,6 +242,14 @@ class StructuralOutputFails(FakeModels):
             response_identifier="response-incomplete",
             token_usage={"output_tokens": 20},
         )
+
+
+class ConcurrentEventEditModels(FakeModels):
+    def decide(self, context: dict) -> ModelResult[CanonicalizationProposal]:
+        event = Event.objects.get(pk=context["possible_matches"][0]["event_id"])
+        event.description = "Owner edit made while the model was deciding."
+        event.save(update_fields=("description", "updated_at"))
+        return super().decide(context)
 
 
 def make_source() -> Source:
@@ -468,13 +504,149 @@ def test_telegram_job_uses_fixed_batches_and_preserves_only_relevant_content(tmp
     assert RawSourceDocument.objects.count() == 12
     assert set(RawSourceDocument.objects.values_list("ingestion_job_id", flat=True)) == {job.pk}
     assert EventCandidate.objects.count() == 12
-    assert CandidateReview.objects.count() == 12
-    assert ModelInvocation.objects.count() == 5
+    assert set(EventCandidate.objects.values_list("status", flat=True)) == {CandidateStatus.READY}
+    assert Event.objects.count() == 0
+    assert ModelInvocation.objects.filter(stage="SCREENING").count() == 2
+    assert ModelInvocation.objects.filter(stage="EXTRACTION").count() == 3
+    assert ModelInvocation.objects.filter(stage="CANONICALIZATION").count() == 0
     extraction_invocation = ModelInvocation.objects.filter(stage="EXTRACTION").first()
     assert extraction_invocation is not None
     assert extraction_invocation.reference_data_snapshot["venues"]
     assert extraction_invocation.reference_data_hash
     assert source.configuration["last_message_id"] == 23
+
+
+def test_canonicalization_worker_processes_ready_candidates_after_ingestion(tmp_path) -> None:
+    source = make_source()
+    enqueue = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
+    job = claim_job(enqueue.jobs[0].pk, "ingestion-worker")
+    assert job is not None
+    models = FakeModels()
+    storage = LocalRawContentStorage(tmp_path)
+
+    TelegramTextPipeline(
+        fetcher=FakeFetcher(fixture_messages()),
+        models=models,
+        storage=storage,
+    ).execute(job)
+    job.refresh_from_db()
+    assert job.status == JobStatus.SUCCEEDED
+    assert EventCandidate.objects.filter(status=CandidateStatus.READY).count() == 12
+    IngestionJob.objects.filter(pk=job.pk).update(attempt_count=7)
+
+    runtime = CanonicalizationWorkerRuntime(decision_provider=models, storage=storage)
+    processed = 0
+    while runtime.run_next_candidate() is not None:
+        processed += 1
+
+    job.refresh_from_db()
+    assert processed == 12
+    assert EventCandidate.objects.filter(status=CandidateStatus.PROCESSED).count() == 12
+    assert ModelInvocation.objects.filter(stage="CANONICALIZATION").count() == 11
+    assert {
+        invocation.attempt_number
+        for invocation in ModelInvocation.objects.filter(stage="CANONICALIZATION")
+    } == {1}
+    assert models.canonicalization_contexts
+    assert models.canonicalization_contexts[0]["raw_document"]["text"]
+    assert job.status == JobStatus.SUCCEEDED
+
+
+def test_unexpected_canonicalization_failure_leaves_candidate_ready(tmp_path) -> None:
+    source = make_source()
+    enqueue = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
+    job = claim_job(enqueue.jobs[0].pk, "ingestion-worker")
+    assert job is not None
+    models = FakeModels()
+    storage = LocalRawContentStorage(tmp_path)
+    TelegramTextPipeline(
+        fetcher=FakeFetcher(fixture_messages()[:2]),
+        models=models,
+        storage=storage,
+    ).execute(job)
+    runtime = CanonicalizationWorkerRuntime(decision_provider=models, storage=storage)
+    assert runtime.run_next_candidate() is not None
+    candidate = EventCandidate.objects.get(
+        candidate_index=0,
+        extraction_run__raw_source_document__source_representation__external_identifier="2",
+    )
+    models.decide = Mock(side_effect=RuntimeError("unexpected canonicalization failure"))
+
+    with pytest.raises(RuntimeError, match="unexpected canonicalization failure"):
+        runtime.run_next_candidate()
+
+    candidate.refresh_from_db()
+    assert candidate.status == CandidateStatus.READY
+    assert not hasattr(candidate, "canonicalization_plan")
+    invocation = ModelInvocation.objects.get(stage="CANONICALIZATION")
+    assert invocation.status == "FAILED"
+    assert invocation.error_type == "RuntimeError"
+
+
+def test_worker_plan_uses_the_event_snapshot_seen_by_the_model(tmp_path) -> None:
+    source = make_source()
+    enqueue = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
+    job = claim_job(enqueue.jobs[0].pk, "ingestion-worker")
+    assert job is not None
+    models = ConcurrentEventEditModels()
+    storage = LocalRawContentStorage(tmp_path)
+    TelegramTextPipeline(
+        fetcher=FakeFetcher(fixture_messages()[:2]),
+        models=models,
+        storage=storage,
+    ).execute(job)
+    runtime = CanonicalizationWorkerRuntime(decision_provider=models, storage=storage)
+
+    assert runtime.run_next_candidate() is not None
+    assert runtime.run_next_candidate() is not None
+
+    second = EventCandidate.objects.get(
+        extraction_run__raw_source_document__source_representation__external_identifier="2"
+    )
+    plan = second.canonicalization_plan
+    assert second.status == CandidateStatus.PROCESSED
+    assert plan.status == "STALE"
+    assert plan.application_error == "The target Event changed after this plan was generated."
+    assert plan.target_event.description == "Owner edit made while the model was deciding."
+
+
+def test_repaired_ready_candidate_is_eligible_for_the_worker(tmp_path) -> None:
+    source = make_source()
+    enqueue = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
+    job = claim_job(enqueue.jobs[0].pk, "ingestion-worker")
+    assert job is not None
+    models = BusinessIssueModels()
+    storage = LocalRawContentStorage(tmp_path)
+    TelegramTextPipeline(
+        fetcher=FakeFetcher(fixture_messages()[:1]),
+        models=models,
+        storage=storage,
+    ).execute(job)
+    candidate = EventCandidate.objects.get()
+    assert candidate.status == CandidateStatus.BLOCKED
+
+    repaired = (
+        FakeModels()
+        .extract(
+            fixture_messages()[:1],
+            reference_data=build_candidate_reference_data(),
+        )
+        .parsed.results[0]
+        .events[0]
+    )
+    update_event_candidate(
+        candidate.pk,
+        expected_version=candidate.edit_version,
+        effective_payload=repaired.model_dump(mode="json"),
+        reviewer_notes="Approved repair",
+        edited_by_id=None,
+    )
+
+    runtime = CanonicalizationWorkerRuntime(decision_provider=models, storage=storage)
+    assert runtime.run_next_candidate() is not None
+    candidate.refresh_from_db()
+    assert candidate.status == CandidateStatus.PROCESSED
+    assert Event.objects.count() == 1
 
 
 def test_unchanged_messages_do_not_create_duplicate_candidates_or_model_calls(tmp_path) -> None:
@@ -686,10 +858,8 @@ def test_business_validation_issue_keeps_candidate_for_review(tmp_path) -> None:
     ).execute(job)
 
     candidate = EventCandidate.objects.get()
-    review = candidate.review
-    assert candidate.validation_status == "REVIEW_REQUIRED"
-    assert review.sync_status == "BLOCKED"
-    assert review.canonical_event is None
+    assert candidate.status == "BLOCKED"
+    assert not hasattr(candidate, "canonicalization_plan")
     assert any(
         issue["code"] == "OCCURRENCE_END_BEFORE_START" for issue in candidate.validation_issues
     )
@@ -710,7 +880,6 @@ def test_structural_output_failure_creates_no_candidate_but_retains_diagnostics(
     invocation = ModelInvocation.objects.get(stage="EXTRACTION")
     extraction = ExtractionRun.objects.get()
     assert EventCandidate.objects.count() == 0
-    assert CandidateReview.objects.count() == 0
     assert invocation.status == "FAILED"
     assert invocation.response_identifier == "response-incomplete"
     assert (tmp_path / invocation.raw_output_storage_key).read_bytes() == b'{"status":"incomplete"}'

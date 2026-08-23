@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from ingestion.models import IngestionJob, JobStatus
 from ingestion.pipelines.telegram.adapter import TelegramFetcher
-from ingestion.pipelines.telegram.extraction import OpenAITelegramModels
+from ingestion.pipelines.telegram.model_client import OpenAITelegramModels
 from ingestion.pipelines.telegram.processing import process_telegram_messages
 from ingestion.raw_storage import LocalRawContentStorage, RawContentStorage
 

@@ -1,4 +1,5 @@
 from common.models import TimestampedModel
+from django.contrib.postgres.indexes import GistIndex
 from django.db import models
 from django.db.models import F, Q
 
@@ -128,6 +129,13 @@ class Event(TimestampedModel):
 
     class Meta:
         ordering = ("title",)
+        indexes = [
+            GistIndex(
+                fields=["normalized_title"],
+                name="event_title_trgm_gist",
+                opclasses=["gist_trgm_ops"],
+            )
+        ]
 
     def __str__(self) -> str:
         return self.title
@@ -330,17 +338,12 @@ class Registration(TimestampedModel):
         return self.name
 
 
-class EventProvenance(models.Model):
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="provenance")
-    event_candidate = models.OneToOneField(
-        "ingestion.EventCandidate",
-        on_delete=models.PROTECT,
-        related_name="canonical_provenance",
-    )
+class EventSourceLink(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="source_links")
     source_representation = models.ForeignKey(
         "sources.SourceRepresentation",
         on_delete=models.PROTECT,
-        related_name="event_provenance",
+        related_name="event_source_links",
     )
     is_primary_source = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -350,11 +353,51 @@ class EventProvenance(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=("event", "source_representation"),
-                name="unique_representation_per_event",
+                name="unique_source_representation_per_event",
             ),
             models.UniqueConstraint(
                 fields=("event",),
                 condition=Q(is_primary_source=True),
-                name="one_primary_source_per_event",
+                name="one_primary_source_link_per_event",
             ),
+        ]
+
+
+class EventObservation(models.Model):
+    source_link = models.ForeignKey(
+        EventSourceLink,
+        on_delete=models.CASCADE,
+        related_name="observations",
+    )
+    event_candidate = models.OneToOneField(
+        "ingestion.EventCandidate",
+        on_delete=models.PROTECT,
+        related_name="event_observation",
+    )
+    observation_type = models.CharField(max_length=30)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("created_at", "pk")
+
+
+class EventRevision(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="revisions")
+    canonicalization_plan = models.OneToOneField(
+        "ingestion.CanonicalizationPlan",
+        on_delete=models.PROTECT,
+        related_name="event_revision",
+    )
+    revision_number = models.PositiveIntegerField()
+    before_snapshot = models.JSONField()
+    after_snapshot = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("event_id", "revision_number")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("event", "revision_number"),
+                name="unique_revision_number_per_event",
+            )
         ]

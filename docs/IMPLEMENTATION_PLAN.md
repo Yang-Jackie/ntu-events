@@ -1,9 +1,9 @@
 # NTU Events Implementation Plan
 
 **Document status:** Active implementation plan
-**Current milestone:** 5 — API contract
-**Next delivery goal:** Expose the first useful canonical event resource through
-OpenAPI and the generated TypeScript client
+**Current milestone:** 4A — Deduplication hardening
+**Next delivery goal:** Decide and implement workable, strong duplicate
+detection and resolution before exposing canonical events through the API
 
 ## 1. Delivery target
 
@@ -23,8 +23,9 @@ Public deployment remains a separate later gate.
 | 1. Repository scaffold          | Backend, web, API-client package, local database, and basic checks run                           | Complete    |
 | 2. Domain foundation            | Core source, ingestion, event, organizer, classification, and venue records are reviewable       | Complete    |
 | 3. First-source ingestion       | Telegram content can be processed repeatedly with retained provenance and inspectable results    | Complete    |
-| 4. Processing workflow          | A reviewed candidate can become canonical event data safely and without accidental duplication   | Complete    |
-| 5. API contract                 | The web application can retrieve typed event data through the generated client                   | In progress |
+| 4. Processing workflow          | A reviewed candidate can become canonical event data through a safe, repeatable workflow         | Complete    |
+| 4A. Deduplication hardening     | Likely duplicates and revisions are identified and resolved using reviewable evidence            | In progress |
+| 5. API contract                 | The web application can retrieve typed event data through the generated client                   | Not started |
 | 6. Personal discovery interface | The owner can find the ingested event through a local map, list, and detail view                 | Not started |
 | 7. Personal-use hardening       | Corrections, reruns, failures, and source changes are handled reliably                           | Not started |
 | 8. Controlled source expansion  | Additional approved sources reuse the shared workflow                                            | Not started |
@@ -85,40 +86,100 @@ it is not the implemented first production pipeline.
 
 ### Candidate and validation work
 
-- Candidate v2 preserves incomplete source facts, stable occurrence references,
+- Candidate v3 preserves incomplete source facts, stable occurrence references,
   attendance mode, meeting access, scoped registrations, controlled-value
   suggestions, unmatched values, ambiguity, and evidence.
 - Structurally invalid provider output creates no candidate while retaining
   available diagnostic evidence.
-- Business-rule problems are stored as structured issues and route the
-  candidate to review instead of discarding it.
+- Business-rule problems are stored as structured issues and make the candidate
+  BLOCKED instead of discarding it.
 - Supported venue and classification references are supplied to extraction and
   snapshotted with the invocation.
-- Every candidate receives a mutable review record while the extracted candidate
-  remains immutable.
+- Every candidate stores its immutable extracted payload and an initially copied
+  effective payload; only BLOCKED candidates may be repaired.
 
-### Review and canonical-event work
+### Candidate and canonical-event work
 
-- Automatic and manual promotion share a versioned, repeatable review-to-event
-  synchronization workflow.
+- Newly extracted and manually repaired READY candidates use the same
+  source-neutral canonicalization worker regardless of their source pipeline.
 - Useful sparse candidates can create draft event shells, while contradictions
   block synchronization and preserve the last good event state.
 - Supported venue references and canonical classification values are projected;
-  unmatched data remains visible as review issues.
+  unmatched data remains visible as candidate issues.
 - Direct online meeting access is kept separate from registration and general
   webpages, and useful sparse registration details survive projection with
-  their problems retained as review issues.
-- Exact-title duplicates pause for an explicit reviewer decision rather than
-  being merged or created automatically.
-- Reviewer corrections, approval, rejection, synchronization state, and linked
-  canonical data are inspectable in Django Admin.
-- Focused tests cover projection, correction, rejection, duplicate gating,
+  their problems retained as candidate issues.
+- Possible matches become explicit evidence for a canonicalization decision
+  rather than being silently merged or independently created.
+- Candidate repairs, plan decisions, processing state, and linked canonical data
+  are inspectable in Django Admin.
+- Focused tests cover projection, correction, plan rejection, duplicate gating,
   incomplete data, failures, reruns, and provenance.
 
-Cross-source duplicate matching, general canonical updates, and automatic
-publication remain later work.
+Explicit matching, planning, observation, and revision records now own the
+candidate-to-Event path. Automatic publication remains later work.
 
-## 5. Later milestone prompts
+## 5. Current deduplication-hardening milestone
+
+The implemented foundation now:
+
+- Classifies each extracted observation as an announcement, follow-up, or
+  unknown without using that label as policy yet.
+- Consolidates the old CandidateReview into EventCandidate: immutable extracted
+  payload, editable effective payload, and BLOCKED/READY/PROCESSED lifecycle.
+  Missing or title-only candidates, broken ownership references, duplicate
+  occurrence references, and impossible ordering block the whole candidate;
+  other incomplete optional facts remain review issues and are safely omitted
+  from automatic ADD projection when canonical storage cannot represent them.
+  Only BLOCKED candidates can be repaired; a valid repair becomes READY and is
+  eligible for the same downstream worker as a newly extracted READY candidate.
+- Splits source ingestion from canonicalization at the durable EventCandidate
+  boundary. Ingestion jobs finish after candidate persistence; a separate
+  serial worker consumes unplanned READY candidates. A PostgreSQL advisory lock
+  enforces one canonicalization worker globally, and unexpected exceptions leave
+  the candidate READY while stopping the worker visibly.
+- Uses a PostgreSQL trigram title index plus exact and bounded structured
+  lookups to retrieve a small canonical-Event pool without scanning every Event
+  graph.
+- Uses a fixed additive score led by 65% title weight, plus normalized
+  registration URL, date, organizer, venue, and source evidence. Missing or
+  mismatching fields contribute zero, dates at least 120 days apart subtract 20
+  points, the threshold is 30%, no identity gate applies, and at most five
+  CandidateMatch records explain the complete calculation.
+- Automatically creates and applies ADD when no match exists, while matched
+  candidates use a structured-output model to choose one ADD, UPDATE, or LINK_ONLY
+  action.
+- Represents UPDATE as explicit sparse operations with child identity, ADD,
+  UPDATE, REMOVE, SET, and CLEAR semantics, plus explicit classification
+  ADD_CODES, REMOVE_CODES, and REPLACE_CODES operations.
+- Rejects unsupported classification codes, nonexistent catalog references,
+  invalid targets, wrong child ownership, and persistence-invalid graphs before
+  any write; domain and grounding concerns remain flags.
+- Applies plans transactionally and idempotently with graph-level staleness
+  checks, source links, immutable observations, and EventRevision snapshots.
+- Exposes BLOCKED candidate repairs and unapplied plans in Django Admin while
+  keeping extracted payloads, PROCESSED candidates, generated proposals, and
+  applied plans immutable.
+- Separates source-specific retrieval, document handling, screening, and
+  extraction under each pipeline from the source-neutral candidate and
+  canonicalization workflows. Canonicalization is organized into matching,
+  context, decision-provider, proposal, application, and workflow modules.
+
+The remaining milestone work is:
+
+- Continue evaluating the implemented matching weights and thresholds against
+  representative duplicate, follow-up, separate-edition, and false-match
+  fixtures; the GitHub workshop reminder is now a focused regression case.
+- Finalize automatic-update protection for fields or children that an owner has
+  manually edited and the corresponding manual audit policy.
+- Exercise failed model calls, rejected-plan repair, stale-plan regeneration,
+  and ingestion retry behavior in repeated owner operation.
+
+Complete Milestone 4A only when those remaining behaviors are repeatable,
+explainable, protect canonical and manual data, and have focused coverage for
+reruns and the agreed difficult cases.
+
+## 6. Later milestone prompts
 
 ### API contract
 
@@ -147,7 +208,7 @@ business rules.
 Define measurable readiness thresholds and the rollout plan before choosing
 production hosting and operations.
 
-## 6. Progress rules
+## 7. Progress rules
 
 - Keep one milestone active at a time.
 - Complete the current vertical path before broadening coverage or polishing
@@ -160,7 +221,7 @@ production hosting and operations.
 - Update durable technical or architecture documentation only after decisions
   are implemented and verified.
 
-## 7. Task completion standard
+## 8. Task completion standard
 
 An implementation task is complete when its behavior is reproducible, relevant
 checks pass, schema changes have migrations, and material decisions or

@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.gis",
+    "django.contrib.postgres",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
@@ -136,4 +137,5 @@ TELEGRAM_SESSION_PATH = (
 )
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 OPENAI_SCREENING_MODEL = os.getenv("OPENAI_SCREENING_MODEL", "gpt-5-nano")
-OPENAI_EXTRACTION_MODEL = os.getenv("OPENAI_EXTRACTION_MODEL", "gpt-5-mini")
+OPENAI_EXTRACTION_MODEL = os.getenv("OPENAI_EXTRACTION_MODEL", "gpt-5.6-luna")
+OPENAI_CANONICALIZATION_MODEL = os.getenv("OPENAI_CANONICALIZATION_MODEL", "gpt-5.6-luna")

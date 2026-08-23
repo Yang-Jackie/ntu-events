@@ -8,9 +8,8 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils import timezone
 from events.models import Event, EventOccurrence
-from ingestion.candidate_reviews import create_review_and_sync
 from ingestion.models import (
-    CandidateReview,
+    CandidateStatus,
     EventCandidate,
     ExtractionRun,
     IngestionJob,
@@ -37,7 +36,6 @@ pytestmark = pytest.mark.django_db
         MessageScreening,
         ExtractionRun,
         EventCandidate,
-        CandidateReview,
         Organizer,
         Building,
         Venue,
@@ -74,7 +72,7 @@ def test_core_admin_change_lists_are_accessible(client, url_name: str) -> None:
     assert response.status_code == 200
 
 
-def test_candidate_admin_is_read_only_and_presents_payload_summary(client) -> None:
+def test_processed_candidate_admin_is_read_only_and_presents_payload_summary(client) -> None:
     now = timezone.now()
     source = Source.objects.create(
         name="Candidate source",
@@ -101,24 +99,21 @@ def test_candidate_admin_is_read_only_and_presents_payload_summary(client) -> No
         started_at=now,
         status="SUCCEEDED",
     )
+    payload = {
+        "schema_version": "event-candidate-v3",
+        "observation_type": "UNKNOWN",
+        "title": "Online candidate",
+        "description": "Details are available.",
+    }
     candidate = EventCandidate.objects.create(
         extraction_run=extraction,
         source_representation=representation,
         candidate_index=0,
-        schema_version="event-candidate-v2",
-        payload={
-            "title": "Online candidate",
-            "occurrences": [
-                {
-                    "start_date": "2026-09-01",
-                    "start_time": "19:00:00",
-                    "attendance_mode": "ONLINE",
-                    "raw_location": None,
-                }
-            ],
-        },
+        schema_version="event-candidate-v3",
+        extracted_payload=payload,
+        effective_payload=payload,
         title="Online candidate",
-        validation_status="READY",
+        status=CandidateStatus.PROCESSED,
     )
     user_model = get_user_model()
     superuser = user_model.objects.create_superuser(
@@ -136,7 +131,7 @@ def test_candidate_admin_is_read_only_and_presents_payload_summary(client) -> No
     assert b'name="_save"' not in response.content
 
 
-def test_review_admin_correction_synchronizes_existing_event(client) -> None:
+def test_admin_repair_moves_blocked_candidate_to_ready_without_processing(client) -> None:
     now = timezone.now()
     source = Source.objects.create(
         name="Review Admin source",
@@ -163,30 +158,30 @@ def test_review_admin_correction_synchronizes_existing_event(client) -> None:
         started_at=now,
         status="SUCCEEDED",
     )
+    extracted_payload = {
+        "schema_version": "event-candidate-v3",
+        "observation_type": "UNKNOWN",
+        "title": "Original title",
+    }
     candidate = EventCandidate.objects.create(
         extraction_run=extraction,
         source_representation=representation,
         candidate_index=0,
-        schema_version="event-candidate-v2",
-        payload={
-            "schema_version": "event-candidate-v2",
-            "title": "Original title",
-            "occurrences": [
-                {
-                    "local_ref": "session-1",
-                    "start_date": "2026-09-01",
-                    "time_precision": "DATE_ONLY",
-                    "attendance_mode": "IN_PERSON",
-                    "raw_location": "Location pending review",
-                }
-            ],
-        },
+        schema_version="event-candidate-v3",
+        extracted_payload=extracted_payload,
+        effective_payload=extracted_payload,
         title="Original title",
-        validation_status="REVIEW_REQUIRED",
+        status=CandidateStatus.BLOCKED,
+        validation_issues=[
+            {
+                "code": "TITLE_ONLY",
+                "path": "title",
+                "message": "A title alone is not enough.",
+                "severity": "ERROR",
+                "blocks_canonicalization": True,
+            }
+        ],
     )
-    review = create_review_and_sync(candidate)
-    event_id = review.canonical_event_id
-    occurrence_id = review.canonical_event.occurrences.get().pk
     user_model = get_user_model()
     superuser = user_model.objects.create_superuser(
         username="review-admin",
@@ -195,37 +190,31 @@ def test_review_admin_correction_synchronizes_existing_event(client) -> None:
     )
     client.force_login(superuser)
 
-    protected_event_response = client.get(reverse("admin:events_event_change", args=[event_id]))
-
     response = client.post(
-        reverse("admin:ingestion_candidatereview_change", args=[review.pk]),
+        reverse("admin:ingestion_eventcandidate_change", args=[candidate.pk]),
         {
             "effective_payload": json.dumps(
                 {
-                    "schema_version": "event-candidate-v2",
+                    "schema_version": "event-candidate-v3",
+                    "observation_type": "UNKNOWN",
                     "title": "Corrected by reviewer",
+                    "description": "Original description.",
                 }
             ),
-            "review_status": "APPROVED",
             "reviewer_notes": "Title checked against the source.",
-            "expected_version": review.review_version,
+            "expected_version": candidate.edit_version,
             "_save": "Save",
         },
     )
 
-    assert protected_event_response.status_code == 200
-    assert (
-        reverse("admin:events_eventoccurrence_change", args=[occurrence_id]).encode()
-        in protected_event_response.content
-    )
     assert response.status_code == 302
-    review.refresh_from_db()
-    assert review.review_version == 2
-    assert review.synced_version == 2
-    assert review.has_manual_edits is True
-    assert review.reviewed_by == superuser
-    assert review.canonical_event_id == event_id
-    assert review.canonical_event.title == "Corrected by reviewer"
+    candidate.refresh_from_db()
+    assert candidate.status == CandidateStatus.READY
+    assert candidate.edit_version == 2
+    assert candidate.has_manual_edits is True
+    assert candidate.edited_by == superuser
+    assert candidate.extracted_payload == extracted_payload
+    assert not hasattr(candidate, "canonicalization_plan")
 
 
 def test_event_admin_links_to_its_occurrences(client) -> None:

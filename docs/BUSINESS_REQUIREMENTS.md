@@ -157,11 +157,17 @@ The product should:
 - Keep important source material linked to the resulting event
 - Direct users to the original source for final verification and registration
 
-The implementation milestone that introduces canonicalization should decide how
-new, changed, conflicting, and duplicate candidates are handled. The
-publication milestone should separately decide what may be shown
-automatically. These behaviors should be based on observed data rather than
-fixed in advance here.
+The processing milestones that introduce and harden canonicalization should
+decide how new, changed, conflicting, and duplicate candidates are handled. The
+publication milestone should separately decide what may be shown automatically.
+These behaviors should be based on observed data rather than fixed in advance
+here.
+
+The current owner-operated workflow retains a useful sparse reference when no
+existing Event match is found, rather than hiding an announced event solely
+because details are incomplete. Possible duplicates and follow-up observations
+remain linked to their evidence and are reconciled before changing an existing
+Event.
 
 ## 9. Success and public-release gate
 

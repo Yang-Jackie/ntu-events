@@ -1,5 +1,6 @@
 from datetime import date, time
 
+from ingestion.candidate_validation import validate_candidate
 from ingestion.contracts import (
     AttendanceMode,
     CandidateControlledValues,
@@ -10,7 +11,6 @@ from ingestion.contracts import (
     TimePrecision,
 )
 from ingestion.models import ValidationStatus
-from ingestion.validation import validate_candidate
 
 REFERENCE_DATA = {
     "classifications": {
@@ -104,9 +104,12 @@ def test_occurrence_scoped_registration_requires_a_known_stable_reference() -> N
 
     result = validate_candidate(candidate, REFERENCE_DATA)
 
-    assert any(
-        issue["code"] == "REGISTRATION_OCCURRENCE_REFERENCE_UNKNOWN" for issue in result.issues
+    issue = next(
+        issue
+        for issue in result.issues
+        if issue["code"] == "REGISTRATION_OCCURRENCE_REFERENCE_UNKNOWN"
     )
+    assert issue["blocks_canonicalization"] is True
 
 
 def test_off_campus_location_is_not_rejected_for_product_eligibility() -> None:
@@ -139,27 +142,29 @@ def test_missing_occurrence_is_review_only_not_a_canonicalization_blocker() -> N
     assert issue["blocks_canonicalization"] is False
 
 
-def test_incomplete_child_fields_are_review_only() -> None:
+def test_incomplete_noncontradictory_child_does_not_block_the_candidate() -> None:
     candidate = _candidate(
         occurrences=[
             CandidateOccurrence(
-                local_ref="unknown-date",
+                local_ref="valid-session",
+                start_date=date(2026, 9, 1),
+                time_precision=TimePrecision.DATE_ONLY,
+                attendance_mode=AttendanceMode.IN_PERSON,
+                raw_location="The Arc",
+            ),
+            CandidateOccurrence(
+                local_ref="invalid-session",
                 time_precision=TimePrecision.EXACT,
-                attendance_mode=AttendanceMode.UNKNOWN,
-            )
-        ],
-        registrations=[
-            CandidateRegistration(
-                scope=RegistrationScope.OCCURRENCE,
-                occurrence_ref="missing-session",
-            )
-        ],
+                attendance_mode=AttendanceMode.IN_PERSON,
+            ),
+        ]
     )
 
     result = validate_candidate(candidate, REFERENCE_DATA)
 
+    assert result.status == ValidationStatus.REVIEW_REQUIRED
     assert result.issues
-    assert all(issue["blocks_canonicalization"] is False for issue in result.issues)
+    assert not any(issue["blocks_canonicalization"] for issue in result.issues)
 
 
 def _candidate(**overrides: object) -> EventCandidatePayload:

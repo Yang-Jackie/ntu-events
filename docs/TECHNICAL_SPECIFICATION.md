@@ -101,7 +101,7 @@ The system is divided into:
   interaction
 - A generated API-client package that carries the backend contract into
   TypeScript
-- Background ingestion execution using backend workflows
+- Background ingestion and canonicalization execution using backend workflows
 - PostgreSQL/PostGIS for relational and geographic data
 - Raw-content storage behind an application interface
 
@@ -143,10 +143,9 @@ change:
 - **Raw source document:** a preserved retrieval observation or artifact.
 - **Ingestion request and job:** durable records used to trigger, execute, and
   inspect source processing.
-- **Extraction attempt and candidate:** the interpretation history and immutable
-  provisional event data produced from source material.
-- **Candidate review:** the mutable correction and decision record between an
-  extracted candidate and canonical data.
+- **Extraction attempt and candidate:** the interpretation history plus a
+  provisional event record containing an immutable extracted payload, an
+  initially copied effective payload, and its BLOCKED/READY/PROCESSED gate.
 - **Event and occurrence:** the conceptual activity and the attendable time and
   place information presented to users. One event may have multiple labeled
   occurrences with different dates, locations, attendance modes, meeting
@@ -156,7 +155,7 @@ change:
   source wording.
 - **Registration:** external participation information associated with the
   appropriate event or occurrence.
-- **Provenance and review state:** links and decisions needed to explain
+- **Provenance and workflow state:** links and decisions needed to explain
   canonical data and later changes.
 
 When implementing a concept, decide its fields, cardinality, constraints, and
@@ -175,8 +174,9 @@ current pipeline:
 - Retrieves text, captions, and URL metadata attached to message entities and
   public buttons
 - Uses model-assisted screening and candidate extraction
-- Persists durable job, invocation, screening, extraction, candidate, review,
-  and provenance-related records
+- Persists durable job, invocation, screening, extraction, candidate, and
+  source-evidence records; the separate canonicalization worker persists plans
+  and canonical provenance
 - Retains relevant, uncertain, and failed content while keeping reduced audit
   metadata for confirmed non-events
 - Exposes operations through commands, Django Admin, and a polling worker
@@ -236,20 +236,29 @@ Structurally malformed, truncated, or unassociateable provider output creates
 no candidate. The source observation, failed invocation, error metadata, and
 available provider response remain inspectable for diagnosis.
 
-Once an event candidate is structurally interpretable, business-rule problems
-do not discard it. Validation records structured issues and routes any affected
-candidate to review. Missing dates, occurrences, venues, links, or other child
-details do not prevent a useful event shell from being stored. Contradictory or
-unusable content, such as a missing title or impossible time window, blocks
-canonical synchronization without discarding the candidate or review.
+Once an event candidate is structurally interpretable, validation records
+structured issues without discarding it. A candidate is BLOCKED only when its
+title is missing, it contains only a title and no other useful event information,
+occurrence references are duplicated, registration ownership references are
+missing, unknown, or illegal, an occurrence ends before it starts, or a
+registration closes before it opens. Other incomplete or inconsistent optional
+facts remain review issues. A useful sparse candidate may still proceed without
+an occurrence, date, venue, organizer, registration, or resolved classification.
 Product-scope eligibility is not used to reject an extracted candidate.
 
 A useful registration may be projected even when its source-provided display
 name is missing. The canonical record receives a neutral label while the
-missing name remains a review issue. Invalid URLs and inconsistent optional
-fields remain visible in the review payload; independently useful registration
+missing name remains a candidate issue. Invalid URLs and inconsistent optional
+fields remain visible in the effective payload; independently useful registration
 details are preserved when they can be attached to an event or occurrence
 without guessing ownership.
+
+For an automatic no-match ADD, the candidate remains the complete evidence
+record while projection omits data that cannot safely form canonical storage.
+Occurrences without a start date are not projected; inconsistent optional time
+precision and invalid optional URLs are cleared rather than guessed; and an
+occurrence-scoped registration is omitted when its occurrence cannot be
+projected. These omissions never mutate the candidate payload.
 
 ### Venue resolution
 
@@ -258,29 +267,95 @@ authoritative location data and never create trusted venue records solely from
 model output.
 
 The initial path accepts supported venue identifiers supplied during extraction.
-Unknown or unresolved locations remain in the review payload and are flagged;
-they do not prevent creation of the event or an otherwise usable occurrence.
-Broader location matching remains later work and should be based on observed
-source wording.
+Unknown or unresolved locations with no proposed catalog relationship remain
+in the effective payload and are flagged; they do not prevent creation of the
+event. A canonicalization proposal that does supply a nonexistent venue ID is
+rejected atomically. Broader location matching remains later work and should be
+based on observed source wording.
 
 ### Canonicalization and duplicates
 
-Every stored candidate has one mutable review record. Both automatic promotion
-and manual approval use the same review-to-event synchronization workflow. A
-review may therefore need attention even when a draft canonical event has
-already been created.
+`EventCandidate` owns both the immutable extracted payload and an effective
+payload initially copied from it. Its lifecycle is BLOCKED, READY, or PROCESSED.
+BLOCKED includes invalid candidates and manual rejection reasons; there is no
+separate candidate-level REJECTED state. A reviewer may edit only a BLOCKED
+candidate's effective payload and notes. A valid repair moves it to READY and
+thereby approves it for the same canonicalization queue as a newly extracted
+READY candidate. Creating the candidate's sole `CanonicalizationPlan`,
+regardless of that plan's status, moves the candidate to PROCESSED and freezes
+candidate editing. Later corrections belong to the plan before application or
+directly to the canonical Event after application.
 
-Reviewer changes update the linked event through that workflow. Blocking edits
-leave the last successfully synchronized event unchanged, and rejection
-withholds an existing event rather than deleting it. The review records whether
-it has manual edits and whether its current version has synchronized; separate
-edit-history records are not retained.
+Ingestion and canonicalization run as separate background processes. A
+source-specific ingestion job succeeds once retrieval, screening, extraction,
+and candidate persistence finish; canonicalization outcomes do not change that
+job status. A source-neutral worker serially selects every READY candidate that
+has no plan, reconstructs its raw evidence through the candidate's extraction
+provenance, and runs matching and canonicalization. PostgreSQL session advisory
+locking permits at most one canonicalization worker globally. Unexpected worker
+errors leave the candidate READY and terminate the process visibly; broader
+retry and claim state is deferred until operating evidence warrants it.
 
-Synchronization is invoked directly by ingestion or Django Admin and is safely
-repeatable for a review version. Exact normalized-title matches block creation
-of a separate event until a reviewer explicitly allows it. This is a narrow
-duplicate safety gate, not automatic merging. Cross-source matching and general
-source-update reconciliation remain later work.
+Each extracted candidate also records whether it is an event announcement,
+event follow-up, or unknown. This observation classification is descriptive and
+does not currently alter matching or application behavior.
+
+A READY candidate first retrieves a bounded canonical-Event pool instead of
+scanning every Event graph. PostgreSQL `pg_trgm` and a GiST index return the 10
+nearest normalized titles; exact source-representation and registration-URL
+matches plus bounded occurrence-date, canonical-organizer, and canonical-venue
+lookups are unioned into that pool. Matching deliberately compares only the
+current canonical Event graph, not payloads from its prior observations.
+
+The pool receives a fixed additive matching score with no available-field
+denominator and no identity gate. Weights are title 65%, normalized registration
+URL 15%, occurrence date 10%, organizer 4%, venue 4%, and registered source 2%.
+Missing and nonmatching facts contribute zero. Title uses trigram similarity, a
+normalized exact registration URL gets full credit, an exact date gets full
+credit, and a date within one day gets 40% date credit. When the nearest known
+candidate/Event dates are at least 120 days apart, date similarity is -2 and
+therefore subtracts 20 score points. Organizer and venue sets use overlap
+similarity.
+
+A possible match must score at least 30%. Only the five highest scores are
+stored as `CandidateMatch` evidence. Each record explains field availability,
+weight, similarity, signed contribution, retrieval reason, and evidence
+signals. The score is matching evidence, not a probability. The plan snapshot
+presents it as a percentage and copies the complete candidate Event snapshots
+used by reconciliation.
+
+No qualifying match creates an ADD plan automatically, including for sparse
+follow-ups. When matches exist, the reconciliation model receives the candidate
+payload, raw source document, current catalog, and complete snapshots of up to
+five possible Events. It must choose exactly one ADD, UPDATE, or LINK_ONLY
+action against at most one Event. Multiple matches are alternatives, never
+several mutation targets.
+
+`CanonicalizationPlan` preserves the immutable generated proposal separately
+from its editable effective proposal. ADD carries a complete new Event graph.
+UPDATE uses sparse operations: existing owned objects reference their IDs, new
+owned objects use a null ID, whole-object deletion is REMOVE, unchanged fields
+have no operation, and scalar clearing is explicit CLEAR. Classification updates
+use explicit ADD_CODES, REMOVE_CODES, or REPLACE_CODES operations; an empty
+replacement explicitly clears that classification kind. LINK_ONLY contains no
+canonical mutations. Event-to-Event merging is outside this workflow.
+
+Proposal shape, target membership, child ownership, required fields, catalog
+references, and supported classification codes are hard application checks. A
+failure rejects the whole plan and writes none of it. Domain-plausibility and
+grounding concerns do not reject a plan. The current automatic grounding flag
+detects synthesized descriptions; broader domain and grounding flag generation
+remains pending. A model may synthesize a combined description; unsupported
+factual claims remain grounding concerns rather than schema failures.
+
+Application is transactional, version checked, and idempotent. UPDATE and
+LINK_ONLY plans carry a hash of the complete target graph and become STALE if
+the Event changes before application. Successful actions create or reuse an
+`EventSourceLink`, append an immutable `EventObservation`, and ADD/UPDATE actions
+record `EventRevision` before/after snapshots. Applied plans and PROCESSED
+candidates are immutable through this workflow. Manual Event editing is
+allowed, while detailed automatic-overwrite protection and manual audit policy
+remain the next Milestone 4A design task.
 
 ### Publication
 
@@ -363,7 +438,8 @@ Testing should follow implemented behavior and risk. Important areas include:
 - Ingestion reruns and failure recovery
 - Source adapters using saved or mocked inputs
 - Candidate interpretation and validation cases
-- Venue resolution and duplicate behavior when introduced
+- Deduplication decisions, false matches, revisions, reruns, and manual
+  overrides
 - API visibility, filters, and spatial queries
 - Web map/list synchronization and detail rendering
 - Critical end-to-end discovery paths
@@ -391,8 +467,10 @@ The following remain deferred until the product demonstrates a need:
 - Distributed services or streaming infrastructure
 - Production hosting and public operations
 
-## 16. Decisions to make in later milestones
+## 16. Decisions to make in current and later milestones
 
+- **Deduplication hardening:** match evidence, candidate generation, decision
+  outcomes, reviewer controls, thresholds, and evaluation cases
 - **API:** resource shapes, filter semantics, identifiers, ordering, and map
   query behavior
 - **Discovery interface:** map provider, rendering boundaries, interaction

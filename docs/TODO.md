@@ -16,9 +16,25 @@ A reclaimed job can encounter records written by its earlier attempt. Review
 screening and invocation uniqueness so retrying a partially completed or stale
 job resumes safely instead of violating constraints or duplicating work.
 
-## Edited-message reprocessing
+## Source revisions and older Telegram edits
 
-Screening takes changed message content into account, but extraction reuse can
-still treat an older successful extraction for the same source representation
-as current. Tie reuse to the processed content or otherwise make the changed
-content state explicit.
+When edited content is fetched, its changed content produces a new raw document,
+extraction, and candidate observation that now enters matching and
+canonicalization. Normal Telegram retrieval revisits only a bounded overlap, so
+edits older than that window may not be observed. Broader edit-discovery cadence
+belongs to personal-use hardening.
+
+## Local runtime network boundary
+
+Docker Compose currently publishes PostgreSQL and Django through host port
+mappings while also providing development defaults. Before the event API exposes
+canonical data, make the owner-only boundary explicit by binding development
+services to loopback or implementing an approved private-access control. Django
+`ALLOWED_HOSTS` alone is not a network access boundary.
+
+## Django 6 URL form transition
+
+The current Admin tests pass with `RemovedInDjango60Warning` messages because
+Django 6 will change the default scheme assumed by form URL fields. Review the
+existing URL-entry behavior and opt into the intended scheme explicitly before
+upgrading.

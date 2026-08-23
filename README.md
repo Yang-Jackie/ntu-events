@@ -51,6 +51,7 @@ Run the applications in separate terminals:
 ```powershell
 corepack pnpm dev:backend
 corepack pnpm dev:worker
+corepack pnpm dev:canonicalization
 corepack pnpm dev:web
 ```
 
@@ -89,12 +90,14 @@ independent sources:
 corepack pnpm telegram:channels --limit 20 --register 1 3
 ```
 
-Queue all active Telegram sources. The sustained worker processes each source as
-an independent job:
+Queue all active Telegram sources. The ingestion worker processes each source as
+an independent job and stops after candidate creation. The separate
+canonicalization worker advances READY candidates to canonical Events:
 
 ```powershell
 corepack pnpm ingest:telegram --all-active
 corepack pnpm dev:worker
+corepack pnpm dev:canonicalization
 ```
 
 Use `--source <database-id>` repeatedly to select specific channels. For direct
@@ -107,17 +110,28 @@ corepack pnpm ingest:schedule
 
 Django Admin exposes the same enqueue operation as “Ingest selected Telegram
 sources”. Screening sends up to 20 messages per `gpt-5-nano` request; extraction
-sends up to five relevant or uncertain messages per `gpt-5-mini` request. Up to
+sends up to five relevant or uncertain messages per `gpt-5.6-luna` request. Up to
 ten OpenAI calls run concurrently inside the single worker process.
 
 Relevant, uncertain, and failed message content is preserved under ignored
 `var/raw/`. Confirmed non-event bodies are discarded after their identity, hash,
-decision, and model versions are recorded. The pipeline creates reviewable event
-candidates but does not canonicalize or publish them. The sustained process is
-a generic ingestion worker: it resolves each job's stable `pipeline_key`
-through an explicit in-process catalog. The catalog currently contains the
-Telegram text pipeline; future pipelines may use different retrieval and
-interpretation strategies without changing the worker.
+decision, and model versions are recorded. The pipeline creates event candidates
+containing immutable extracted payloads and effective logical-gate payloads.
+Only BLOCKED candidates are editable; a valid repair becomes READY and therefore
+authorizes the same downstream processing as a newly extracted READY candidate.
+The globally singleton canonicalization worker deterministically matches READY
+candidates against an indexed canonical-Event pool. A fixed additive score led
+by 65% title weight, a 30% threshold, and a five-match cap determine which
+possible Events reach reconciliation. No match creates a draft Event automatically;
+possible matches are reconciled through a versioned structured-output plan that
+can add, update, or only link the observation. Invalid references reject the
+whole plan, and successful changes retain source observations and before/after
+Event revisions. Nothing is published automatically. The ingestion process
+resolves each job's stable `pipeline_key` through an explicit in-process
+catalog. The catalog currently contains the Telegram text pipeline; future
+pipelines may use different retrieval and interpretation strategies without
+changing the worker. Canonicalization is source-neutral and runs serially in its
+own process under a PostgreSQL advisory lock.
 
 ## Telegram research harness
 

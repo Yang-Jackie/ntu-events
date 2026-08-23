@@ -4,20 +4,17 @@ from django.contrib import admin
 from django.db.models import Count
 from django.urls import reverse
 from django.utils.html import format_html
-from ingestion.models import (
-    CandidateReview,
-    CandidateReviewOccurrence,
-    CandidateReviewRegistration,
-)
 
 from .models import (
     Event,
     EventAudience,
     EventFormat,
+    EventObservation,
     EventOccurrence,
     EventOrganizer,
-    EventProvenance,
     EventPurpose,
+    EventRevision,
+    EventSourceLink,
     EventTopic,
     OccurrenceVenue,
     Registration,
@@ -52,8 +49,8 @@ class EventRegistrationInline(admin.TabularInline):
     extra = 0
 
 
-class EventProvenanceInline(admin.TabularInline):
-    model = EventProvenance
+class EventSourceLinkInline(admin.TabularInline):
+    model = EventSourceLink
     extra = 0
     readonly_fields = ("created_at",)
 
@@ -82,7 +79,7 @@ class EventAdmin(admin.ModelAdmin):
         EventOrganizerInline,
         EventOccurrenceInline,
         EventRegistrationInline,
-        EventProvenanceInline,
+        EventSourceLinkInline,
     )
 
     def get_queryset(self, request):
@@ -97,16 +94,6 @@ class EventAdmin(admin.ModelAdmin):
         filtered_url = f"{url}?{urlencode({'event__id__exact': obj.pk})}"
         label = "occurrence" if count == 1 else "occurrences"
         return format_html('<a href="{}">{} {}</a>', filtered_url, count, label)
-
-    def has_change_permission(self, request, obj=None) -> bool:
-        if obj is not None and CandidateReview.objects.filter(canonical_event=obj).exists():
-            return False
-        return super().has_change_permission(request, obj)
-
-    def has_delete_permission(self, request, obj=None) -> bool:
-        if obj is not None and CandidateReview.objects.filter(canonical_event=obj).exists():
-            return False
-        return super().has_delete_permission(request, obj)
 
 
 class OccurrenceVenueInline(admin.TabularInline):
@@ -142,16 +129,6 @@ class EventOccurrenceAdmin(admin.ModelAdmin):
     search_fields = ("event__title", "label", "raw_location_text", "meeting_url")
     inlines = (OccurrenceVenueInline, OccurrenceRegistrationInline)
 
-    def has_change_permission(self, request, obj=None) -> bool:
-        if obj is not None and CandidateReviewOccurrence.objects.filter(occurrence=obj).exists():
-            return False
-        return super().has_change_permission(request, obj)
-
-    def has_delete_permission(self, request, obj=None) -> bool:
-        if obj is not None and CandidateReviewOccurrence.objects.filter(occurrence=obj).exists():
-            return False
-        return super().has_delete_permission(request, obj)
-
 
 @admin.register(Registration)
 class RegistrationAdmin(admin.ModelAdmin):
@@ -159,33 +136,48 @@ class RegistrationAdmin(admin.ModelAdmin):
     list_filter = ("registration_type", "status", "time_precision")
     search_fields = ("name", "url", "instructions", "event__title")
 
-    def has_change_permission(self, request, obj=None) -> bool:
-        if (
-            obj is not None
-            and CandidateReviewRegistration.objects.filter(registration=obj).exists()
-        ):
-            return False
-        return super().has_change_permission(request, obj)
 
-    def has_delete_permission(self, request, obj=None) -> bool:
-        if (
-            obj is not None
-            and CandidateReviewRegistration.objects.filter(registration=obj).exists()
-        ):
-            return False
-        return super().has_delete_permission(request, obj)
-
-
-@admin.register(EventProvenance)
-class EventProvenanceAdmin(admin.ModelAdmin):
-    list_display = ("event", "source_representation", "event_candidate", "is_primary_source")
+@admin.register(EventSourceLink)
+class EventSourceLinkAdmin(admin.ModelAdmin):
+    list_display = ("event", "source_representation", "is_primary_source")
     list_filter = ("is_primary_source",)
     search_fields = (
         "event__title",
         "source_representation__external_identifier",
-        "event_candidate__title",
     )
-    readonly_fields = [field.name for field in EventProvenance._meta.fields]
+    readonly_fields = [field.name for field in EventSourceLink._meta.fields]
+
+    def has_add_permission(self, request) -> bool:
+        return False
+
+    def has_change_permission(self, request, obj=None) -> bool:
+        return False
+
+    def has_delete_permission(self, request, obj=None) -> bool:
+        return False
+
+
+@admin.register(EventObservation)
+class EventObservationAdmin(admin.ModelAdmin):
+    list_display = ("source_link", "event_candidate", "observation_type", "created_at")
+    search_fields = ("source_link__event__title", "event_candidate__title")
+    readonly_fields = [field.name for field in EventObservation._meta.fields]
+
+    def has_add_permission(self, request) -> bool:
+        return False
+
+    def has_change_permission(self, request, obj=None) -> bool:
+        return False
+
+    def has_delete_permission(self, request, obj=None) -> bool:
+        return False
+
+
+@admin.register(EventRevision)
+class EventRevisionAdmin(admin.ModelAdmin):
+    list_display = ("event", "revision_number", "canonicalization_plan", "created_at")
+    search_fields = ("event__title",)
+    readonly_fields = [field.name for field in EventRevision._meta.fields]
 
     def has_add_permission(self, request) -> bool:
         return False

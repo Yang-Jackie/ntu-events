@@ -10,9 +10,10 @@ from events.models import (
     Event,
     EventAudience,
     EventFormat,
+    EventObservation,
     EventOccurrence,
-    EventProvenance,
     EventPurpose,
+    EventSourceLink,
     EventTopic,
     OccurrenceVenue,
     Registration,
@@ -84,7 +85,8 @@ def make_candidate() -> tuple[EventCandidate, SourceRepresentation]:
         source_representation=representation,
         candidate_index=0,
         schema_version="1",
-        payload={"title": "Test Event"},
+        extracted_payload={"title": "Test Event"},
+        effective_payload={"title": "Test Event"},
         title="Test Event",
     )
     return candidate, representation
@@ -237,23 +239,31 @@ def test_occurrence_allows_only_one_primary_venue() -> None:
         )
 
 
-def test_candidate_can_create_at_most_one_event_provenance() -> None:
+def test_candidate_can_create_at_most_one_event_observation() -> None:
     candidate, representation = make_candidate()
     first_event = make_event("first-event")
     second_event = make_event("second-event")
-    EventProvenance.objects.create(
+    first_link = EventSourceLink.objects.create(
         event=first_event,
+        source_representation=representation,
+        is_primary_source=True,
+    )
+    EventObservation.objects.create(
+        source_link=first_link,
         event_candidate=candidate,
+        observation_type="UNKNOWN",
+    )
+    second_link = EventSourceLink.objects.create(
+        event=second_event,
         source_representation=representation,
         is_primary_source=True,
     )
 
     with pytest.raises(IntegrityError), transaction.atomic():
-        EventProvenance.objects.create(
-            event=second_event,
+        EventObservation.objects.create(
+            source_link=second_link,
             event_candidate=candidate,
-            source_representation=representation,
-            is_primary_source=True,
+            observation_type="UNKNOWN",
         )
 
 
