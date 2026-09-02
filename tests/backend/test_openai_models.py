@@ -6,6 +6,7 @@ from unittest.mock import Mock
 
 import pytest
 from ingestion.canonicalization.decision_provider import (
+    CANONICALIZATION_PROMPT_VERSION,
     OpenAICanonicalizationDecisionProvider,
 )
 from ingestion.contracts import (
@@ -215,6 +216,36 @@ def test_prompt_cache_key_tracks_the_reference_catalog() -> None:
     )
     assert screening_key == hashlib.sha256(screening_material.encode("utf-8")).hexdigest()
     assert len(screening_key) == 64
+
+
+def test_changed_prompt_and_schema_versions_do_not_reuse_previous_cache_routes() -> None:
+    current_extraction = prompt_cache_key(
+        stage="telegram-extraction",
+        model="gpt-5-mini",
+        prompt_version=EXTRACTION_PROMPT_VERSION,
+        schema_version=EXTRACTION_SCHEMA_VERSION,
+    )
+    previous_extraction = prompt_cache_key(
+        stage="telegram-extraction",
+        model="gpt-5-mini",
+        prompt_version="telegram-extraction-v4",
+        schema_version="telegram-extraction-v3",
+    )
+    current_canonicalization = prompt_cache_key(
+        stage="event-canonicalization",
+        model="gpt-5-mini",
+        prompt_version=CANONICALIZATION_PROMPT_VERSION,
+        schema_version="canonicalization-plan-v2",
+    )
+    previous_canonicalization = prompt_cache_key(
+        stage="event-canonicalization",
+        model="gpt-5-mini",
+        prompt_version="event-canonicalization-v2",
+        schema_version="canonicalization-plan-v2",
+    )
+
+    assert current_extraction != previous_extraction
+    assert current_canonicalization != previous_canonicalization
 
 
 def test_prompt_cache_key_stays_within_the_provider_limit_for_long_components() -> None:

@@ -125,6 +125,11 @@ The implemented foundation now:
 
 - Classifies each extracted observation as an announcement, follow-up, or
   unknown without using that label as policy yet.
+- Rejects offset-bearing extracted and proposed times so Singapore wall-clock
+  values cannot be converted independently from their dates. The changed
+  extraction schema and extraction/canonicalization prompts have distinct
+  versions, keeping cache reuse and model provenance aligned with their
+  implemented behavior.
 - Consolidates the old CandidateReview into EventCandidate: immutable extracted
   payload, editable effective payload, and BLOCKED/READY/PROCESSED lifecycle.
   Missing or title-only candidates, broken ownership references, duplicate

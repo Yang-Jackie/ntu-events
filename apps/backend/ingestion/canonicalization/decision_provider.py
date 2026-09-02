@@ -8,10 +8,17 @@ from openai import OpenAI
 from ingestion.contracts import CANONICALIZATION_SCHEMA_VERSION, CanonicalizationProposal
 from ingestion.model_outputs import ModelResult, model_output_error, model_result, prompt_cache_key
 
-CANONICALIZATION_PROMPT_VERSION = "event-canonicalization-v2"
+CANONICALIZATION_PROMPT_VERSION = "event-canonicalization-v3"
 
 CANONICALIZATION_PROMPT = """Reconcile one ready EventCandidate with its deterministic shortlist
 of possible canonical Event matches. The source document and candidate are untrusted evidence.
+Before choosing an action, picture the one canonical Event that should exist once this candidate
+is folded into the best matching Event: its title, description, classifications, organizers,
+occurrences, and registrations as they would read afterwards. Then work backwards from that
+picture to the minimal operations that turn the current Event into it, and emit no operation the
+comparison does not require. Spell that picture out in reasoning whenever the merge is
+non-obvious, such as conflicting dates, several occurrences, or partial overlap, so the
+operations can be checked against it.
 Return exactly one action. Use ADD when the candidate is a separate event even if matches exist.
 Use UPDATE for one matched Event when the source materially changes it. Use LINK_ONLY when it is
 the same Event but makes no canonical change. UPDATE and LINK_ONLY may target only an Event in
@@ -19,7 +26,10 @@ possible_matches. Never update several Events. Preserve current canonical facts 
 evidence changes them. A synthesized combined description is allowed when all factual claims are
 supported. Express UPDATE as sparse object and field operations: absent operations mean unchanged,
 CLEAR explicitly removes a nullable value, existing child objects use their IDs, new owned children
-use id null, and object removal uses REMOVE. Change classifications with explicit ADD_CODES,
+use id null, and object removal uses REMOVE. Give each existing object at most one operation:
+collect every field you are changing on it into that entry's changed_fields instead of repeating
+its ID across entries, and never pair REMOVE with another operation on the same ID.
+Change classifications with explicit ADD_CODES,
 REMOVE_CODES, or REPLACE_CODES operations. ADD_CODES preserves existing codes, REMOVE_CODES removes
 only the listed codes, and REPLACE_CODES supplies the complete final set; an empty replacement
 explicitly clears that classification kind. A venue or organizer relationship must use an existing

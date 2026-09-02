@@ -5,6 +5,8 @@ from ingestion.contracts import (
     AttendanceMode,
     CandidateOccurrence,
     CandidateRegistration,
+    CanonicalOccurrenceValue,
+    CanonicalRegistrationValue,
     EventCandidatePayload,
     ExtractionBatch,
     TimePrecision,
@@ -44,6 +46,58 @@ def test_crossing_midnight_occurrence_is_one_valid_occurrence() -> None:
         time_precision=TimePrecision.EXACT,
     )
     assert occurrence.end_date == date(2026, 8, 2)
+
+
+@pytest.mark.parametrize(
+    ("model", "values"),
+    [
+        (
+            CandidateOccurrence,
+            {"local_ref": "occurrence-1", "start_time": "01:00:00+14:00"},
+        ),
+        (
+            CandidateRegistration,
+            {"scope": "EVENT", "opens_time": "23:00:00-05:00"},
+        ),
+        (
+            CanonicalOccurrenceValue,
+            {
+                "client_ref": None,
+                "label": None,
+                "sequence": None,
+                "start_date": None,
+                "start_time": "01:00:00+14:00",
+                "end_date": None,
+                "end_time": None,
+                "time_precision": None,
+                "is_all_day": None,
+                "attendance_mode": None,
+                "raw_location_text": None,
+                "meeting_url": None,
+                "occurrence_status": None,
+                "venue_ids": None,
+            },
+        ),
+        (
+            CanonicalRegistrationValue,
+            {
+                "name": None,
+                "scope": None,
+                "occurrence_id": None,
+                "occurrence_client_ref": None,
+                "url": None,
+                "opens_date": None,
+                "opens_time": None,
+                "closes_date": None,
+                "closes_time": "23:00:00-05:00",
+                "instructions": None,
+            },
+        ),
+    ],
+)
+def test_time_contracts_reject_timezone_qualified_values(model, values) -> None:
+    with pytest.raises(ValidationError, match="Singapore local wall-clock"):
+        model.model_validate(values)
 
 
 def test_extraction_schema_exposes_urls_as_plain_strings() -> None:

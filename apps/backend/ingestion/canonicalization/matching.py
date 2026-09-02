@@ -309,7 +309,16 @@ def normalize_match_text(value: str) -> str:
 
 
 def normalize_match_url(value: str) -> str:
-    parsed = urlsplit(value.strip())
+    raw = value.strip()
+    try:
+        scheme = urlsplit(raw).scheme
+    except ValueError:
+        scheme = ""
+    if not scheme:
+        # Comparison key only, never stored: a source URL written as a bare domain needs
+        # a scheme here so its host lands in netloc rather than being read as a path.
+        raw = "https://" + raw.lstrip("/")
+    parsed = urlsplit(raw)
     hostname = (parsed.hostname or "").casefold()
     if hostname.startswith("www."):
         hostname = hostname[4:]

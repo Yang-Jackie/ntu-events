@@ -2,18 +2,28 @@ from __future__ import annotations
 
 from datetime import date, time
 from enum import StrEnum
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
 
 CANDIDATE_SCHEMA_VERSION = "event-candidate-v3"
 SCREENING_SCHEMA_VERSION = "telegram-screening-v2"
-EXTRACTION_SCHEMA_VERSION = "telegram-extraction-v3"
+EXTRACTION_SCHEMA_VERSION = "telegram-extraction-v4"
 CANONICALIZATION_SCHEMA_VERSION = "canonicalization-plan-v2"
 
 
 class StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
+
+def _require_singapore_wall_clock(value: time | None) -> time | None:
+    """Reject offsets rather than converting a time without its associated date."""
+    if value is not None and value.tzinfo is not None:
+        raise ValueError("Times must be Singapore local wall-clock values without a UTC offset.")
+    return value
+
+
+LocalTime = Annotated[time | None, AfterValidator(_require_singapore_wall_clock)]
 
 
 class TimePrecision(StrEnum):
@@ -69,9 +79,9 @@ class CandidateOccurrence(StrictModel):
     local_ref: str = Field(min_length=1, max_length=100)
     label: str | None = None
     start_date: date | None = None
-    start_time: time | None = None
+    start_time: LocalTime = None
     end_date: date | None = None
-    end_time: time | None = None
+    end_time: LocalTime = None
     time_precision: TimePrecision = TimePrecision.UNKNOWN
     is_all_day: bool = False
     attendance_mode: AttendanceMode = AttendanceMode.UNKNOWN
@@ -93,9 +103,9 @@ class CandidateRegistration(StrictModel):
     name: str | None = None
     url: str | None = None
     opens_date: date | None = None
-    opens_time: time | None = None
+    opens_time: LocalTime = None
     closes_date: date | None = None
-    closes_time: time | None = None
+    closes_time: LocalTime = None
     instructions: str | None = None
 
 
@@ -114,7 +124,22 @@ class EventCandidatePayload(StrictModel):
     schema_version: Literal["event-candidate-v3"] = CANDIDATE_SCHEMA_VERSION
     observation_type: ObservationType = ObservationType.UNKNOWN
     title: str | None = Field(default=None, max_length=500)
-    description: str | None = None
+    description: str | None = Field(
+        default=None,
+        description=(
+            "Dense summary for a student deciding whether to attend. At most three sentences "
+            "and 60 words. Lead with what happens, then what attendees get: food, prizes, "
+            "certificates, swag, funding, fees, prerequisites, what to bring, capacity limits. "
+            "State recurrence in prose when the source gives a cadence rather than dates, for "
+            "example 'every Thursday during term', since occurrences holds only explicitly "
+            "dated sessions. Never restate the title, or dates, times, venues, and registration "
+            "deadlines already carried by other fields. Never mention what the source omits; "
+            "write nothing instead, and leave genuine uncertainty to ambiguities. Pack related "
+            "facts into one clause or a comma list rather than a sentence each, stay in active "
+            "voice, and cut filler such as 'will be provided' or 'participants can'. Write only "
+            "what the source supports; never invent, pad, or infer."
+        ),
+    )
     occurrences: list[CandidateOccurrence] = Field(default_factory=list)
     organizers: list[CandidateOrganizer] = Field(default_factory=list)
     registrations: list[CandidateRegistration] = Field(default_factory=list)
@@ -258,9 +283,9 @@ class CanonicalOccurrenceValue(StrictModel):
     label: str | None
     sequence: int | None
     start_date: date | None
-    start_time: time | None
+    start_time: LocalTime
     end_date: date | None
-    end_time: time | None
+    end_time: LocalTime
     time_precision: TimePrecision | None
     is_all_day: bool | None
     attendance_mode: AttendanceMode | None
@@ -284,9 +309,9 @@ class CanonicalRegistrationValue(StrictModel):
     occurrence_client_ref: str | None
     url: str | None
     opens_date: date | None
-    opens_time: time | None
+    opens_time: LocalTime
     closes_date: date | None
-    closes_time: time | None
+    closes_time: LocalTime
     instructions: str | None
 
 

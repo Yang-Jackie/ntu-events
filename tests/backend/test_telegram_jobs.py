@@ -31,6 +31,7 @@ from ingestion.models import (
     CandidateStatus,
     EventCandidate,
     ExtractionRun,
+    ExtractionStatus,
     IngestionJob,
     IngestionRequest,
     IngestionTrigger,
@@ -570,6 +571,16 @@ def test_unexpected_canonicalization_failure_leaves_candidate_ready(tmp_path) ->
         candidate_index=0,
         extraction_run__raw_source_document__source_representation__external_identifier="2",
     )
+    original_issues = [
+        {
+            "code": "SOURCE_AMBIGUITY",
+            "path": "ambiguities",
+            "message": "Preserve this candidate issue.",
+            "severity": "WARNING",
+            "blocks_canonicalization": False,
+        }
+    ]
+    EventCandidate.objects.filter(pk=candidate.pk).update(validation_issues=original_issues)
     models.decide = Mock(side_effect=RuntimeError("unexpected canonicalization failure"))
 
     with pytest.raises(RuntimeError, match="unexpected canonicalization failure"):
@@ -577,10 +588,47 @@ def test_unexpected_canonicalization_failure_leaves_candidate_ready(tmp_path) ->
 
     candidate.refresh_from_db()
     assert candidate.status == CandidateStatus.READY
+    assert candidate.validation_issues == original_issues
     assert not hasattr(candidate, "canonicalization_plan")
     invocation = ModelInvocation.objects.get(stage="CANONICALIZATION")
     assert invocation.status == "FAILED"
     assert invocation.error_type == "RuntimeError"
+
+
+def test_pre_invocation_canonicalization_failure_propagates_and_leaves_candidate_ready(
+    tmp_path,
+) -> None:
+    source = make_source()
+    enqueue = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
+    job = claim_job(enqueue.jobs[0].pk, "ingestion-worker")
+    assert job is not None
+    models = FakeModels()
+    storage = LocalRawContentStorage(tmp_path)
+    TelegramTextPipeline(
+        fetcher=FakeFetcher(fixture_messages()[:2]),
+        models=models,
+        storage=storage,
+    ).execute(job)
+    runtime = CanonicalizationWorkerRuntime(decision_provider=models, storage=storage)
+    assert runtime.run_next_candidate() is not None
+    candidate = EventCandidate.objects.get(
+        candidate_index=0,
+        extraction_run__raw_source_document__source_representation__external_identifier="2",
+    )
+    broken_storage = Mock()
+    broken_storage.load.side_effect = OSError("raw evidence unavailable")
+    runtime = CanonicalizationWorkerRuntime(
+        decision_provider=models,
+        storage=broken_storage,
+    )
+
+    with pytest.raises(OSError, match="raw evidence unavailable"):
+        runtime.run_next_candidate()
+
+    candidate.refresh_from_db()
+    assert candidate.status == CandidateStatus.READY
+    assert not hasattr(candidate, "canonicalization_plan")
+    assert ModelInvocation.objects.filter(stage="CANONICALIZATION").count() == 0
 
 
 def test_worker_plan_uses_the_event_snapshot_seen_by_the_model(tmp_path) -> None:
@@ -717,6 +765,39 @@ def test_reference_catalog_changes_do_not_invalidate_cached_extraction(tmp_path)
     assert second_models.screening_batch_sizes == []
     assert second_models.extraction_batch_sizes == []
     assert EventCandidate.objects.count() == 12
+
+
+def test_extraction_contract_version_changes_invalidate_cached_extraction(tmp_path) -> None:
+    source = make_source()
+    messages = fixture_messages()
+    first = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
+    first_job = claim_job(first.jobs[0].pk, "test-worker")
+    assert first_job is not None
+    TelegramTextPipeline(
+        fetcher=FakeFetcher(messages),
+        models=FakeModels(),
+        storage=LocalRawContentStorage(tmp_path),
+    ).execute(first_job)
+    ExtractionRun.objects.filter(status=ExtractionStatus.SUCCEEDED).update(
+        prompt_version="telegram-extraction-v4"
+    )
+    ModelInvocation.objects.filter(stage="EXTRACTION").update(
+        prompt_version="telegram-extraction-v4",
+        schema_version="telegram-extraction-v3",
+    )
+
+    second = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
+    second_job = claim_job(second.jobs[0].pk, "test-worker")
+    assert second_job is not None
+    second_models = FakeModels()
+    TelegramTextPipeline(
+        fetcher=FakeFetcher(messages),
+        models=second_models,
+        storage=LocalRawContentStorage(tmp_path),
+    ).execute(second_job)
+
+    assert sorted(second_models.extraction_batch_sizes) == [2, 5, 5]
+    assert EventCandidate.objects.count() == 24
 
 
 def test_edited_message_creates_a_new_raw_document_and_candidate_revision(tmp_path) -> None:
