@@ -152,10 +152,16 @@ The product should:
 - Make ambiguity and conflicts reviewable
 - Withhold unreliable items from discovery
 - Support manual corrections
-- Keep reruns from creating accidental duplicates or silently undoing manual
-  decisions
+- Keep reruns from creating accidental duplicates or applying changes against
+  stale event data
 - Keep important source material linked to the resulting event
 - Direct users to the original source for final verification and registration
+
+For the owner-operated product, a manual correction to source-derived event
+information is an immediate edit rather than a durable override. A later
+automatic update may replace it after considering the current event data and
+new source evidence. Owner-controlled publication and verification decisions
+remain outside automatic canonicalization.
 
 The processing milestones that introduce and harden canonicalization should
 decide how new, changed, conflicting, and duplicate candidates are handled. The

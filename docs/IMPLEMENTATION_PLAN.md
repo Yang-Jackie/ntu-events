@@ -12,7 +12,9 @@ preserve its provenance, produce a reviewable candidate, resolve its location,
 create canonical event data, expose it through the generated API client, and
 show it in a local map/list interface.
 
-Reruns must not create accidental duplicates or silently undo manual decisions.
+Reruns must not create accidental duplicates or apply changes against a stale
+Event graph. Manual corrections to source-derived fields may be replaced by a
+later automatic update that considers the current graph and new evidence.
 Public deployment remains a separate later gate.
 
 ## 2. Milestones
@@ -162,6 +164,10 @@ The implemented foundation now:
   any write; domain and grounding concerns remain flags.
 - Applies plans transactionally and idempotently with graph-level staleness
   checks, source links, immutable observations, and EventRevision snapshots.
+- Builds reconciliation decisions from the latest committed Event graph.
+  Source-derived manual edits are not durable overrides and may be replaced by
+  later automatic UPDATE plans; publication and verification controls remain
+  owner-owned and outside those proposals.
 - Exposes BLOCKED candidate repairs and unapplied plans in Django Admin while
   keeping extracted payloads, PROCESSED candidates, generated proposals, and
   applied plans immutable.
@@ -175,14 +181,12 @@ The remaining milestone work is:
 - Continue evaluating the implemented matching weights and thresholds against
   representative duplicate, follow-up, separate-edition, and false-match
   fixtures; the GitHub workshop reminder is now a focused regression case.
-- Finalize automatic-update protection for fields or children that an owner has
-  manually edited and the corresponding manual audit policy.
 - Exercise failed model calls, rejected-plan repair, stale-plan regeneration,
   and ingestion retry behavior in repeated owner operation.
 
 Complete Milestone 4A only when those remaining behaviors are repeatable,
-explainable, protect canonical and manual data, and have focused coverage for
-reruns and the agreed difficult cases.
+explainable, avoid stale writes, and have focused coverage for reruns and the
+agreed difficult cases.
 
 ## 6. Later milestone prompts
 
@@ -200,7 +204,7 @@ useful map/list/detail flow. Preserve shareable filter state and accessibility.
 ### Personal-use hardening
 
 Use repeated owner operation to decide source cadence, edit handling, recovery,
-manual override behavior, and operational tooling.
+and operational tooling.
 
 ### Source expansion
 

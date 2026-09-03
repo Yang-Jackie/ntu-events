@@ -28,7 +28,7 @@ The system should:
 - Convert source observations into reviewable event candidates
 - Maintain normalized event, occurrence, organizer, classification, and
   location data
-- Prevent unsafe duplicate creation and protect manual decisions
+- Prevent unsafe duplicate creation and stale writes to canonical events
 - Support building-level geographic discovery
 - Expose a stable contract to the web application
 - Make ingestion and processing failures inspectable
@@ -353,9 +353,16 @@ LINK_ONLY plans carry a hash of the complete target graph and become STALE if
 the Event changes before application. Successful actions create or reuse an
 `EventSourceLink`, append an immutable `EventObservation`, and ADD/UPDATE actions
 record `EventRevision` before/after snapshots. Applied plans and PROCESSED
-candidates are immutable through this workflow. Manual Event editing is
-allowed, while detailed automatic-overwrite protection and manual audit policy
-remain the next Milestone 4A design task.
+candidates are immutable through this workflow.
+
+Reconciliation receives a snapshot of the latest committed Event graph. Manual
+edits made before that snapshot are therefore visible to the decision provider,
+but source-derived canonical fields are not manual overrides: a valid later
+automatic UPDATE may replace them. The graph hash prevents a plan from applying
+if the Event changes after its snapshot. The current owner-operated scope does
+not add an application-owned manual-edit audit trail or field-level protection.
+Publication and verification state remain owner-controlled and are not writable
+through canonicalization proposals.
 
 ### Publication
 
@@ -447,8 +454,7 @@ Testing should follow implemented behavior and risk. Important areas include:
 - Ingestion reruns and failure recovery
 - Source adapters using saved or mocked inputs
 - Candidate interpretation and validation cases
-- Deduplication decisions, false matches, revisions, reruns, and manual
-  overrides
+- Deduplication decisions, false matches, revisions, reruns, and stale writes
 - API visibility, filters, and spatial queries
 - Web map/list synchronization and detail rendering
 - Critical end-to-end discovery paths
@@ -484,8 +490,8 @@ The following remain deferred until the product demonstrates a need:
   query behavior
 - **Discovery interface:** map provider, rendering boundaries, interaction
   details, and accessibility behavior
-- **Personal-use hardening:** change handling, manual override protection,
-  recovery behavior, and operational cadence
+- **Personal-use hardening:** change handling, recovery behavior, and
+  operational cadence
 - **Source expansion:** access method, retention policy, and source-specific
   quality controls
 - **Public readiness:** hosting, authentication, monitoring, privacy, security,

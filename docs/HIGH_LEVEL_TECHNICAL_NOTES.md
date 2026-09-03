@@ -31,8 +31,11 @@ is authoritative for progress.
 - Plan application is atomic, idempotent, referentially strict, and protected
   against stale target graphs. Source links, observations, and EventRevision
   snapshots preserve provenance and applied history.
-- Milestone 4A remains active for matching evaluation and manual-edit
-  protection before the canonical event API begins in Milestone 5.
+- Reconciliation sees the latest committed Event graph. Manual edits to
+  source-derived fields are not durable overrides and may be replaced by a later
+  automatic UPDATE; publication and verification controls remain owner-owned.
+- Milestone 4A remains active for matching evaluation and recovery behavior
+  before the canonical event API begins in Milestone 5.
 
 ## Durable guardrails
 
@@ -41,16 +44,13 @@ is authoritative for progress.
 - Treat source content and provider output as untrusted.
 - Keep user-visible decisions in backend-owned workflows.
 - Never guess missing event or location facts.
-- Make reruns safe and protect manual decisions.
+- Make reruns safe and reject writes based on stale Event graphs.
 - Do not expose the product publicly before the readiness gate.
 
 ## Remaining Milestone 4A questions
 
 - Which additional true-duplicate, follow-up, separate-edition, and false-match
   cases should calibrate the implemented shortlist weights and threshold
-- How automatic UPDATE protects manually edited canonical fields and children
-- What manual Event edits must record beyond the automated before/after revision
-  snapshots already implemented
 - How rejected, failed, and stale plans are retried or regenerated during
   repeated owner operation
 

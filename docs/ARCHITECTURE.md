@@ -190,7 +190,9 @@ Within the backend:
 - Entry points invoke shared owning workflows.
 - Source and provider adapters do not own canonical-event or publication
   policy.
-- Manual decisions remain distinguishable from automated output.
+- Manual review, publication, and verification decisions remain distinguishable
+  from automated output. Manual edits to source-derived Event fields are not
+  durable overrides and may be replaced by later canonicalization.
 - Python and TypeScript share an API contract, not domain source files.
 
 ## 8. Runtime boundaries
@@ -206,8 +208,7 @@ response to measured workflow or operational needs.
 ## 9. Deliberately open architecture details
 
 - Internal file-versus-folder layout as domains grow
-- Matching evaluation thresholds, manual-edit protection, and broader
-  source-update policy
+- Matching evaluation thresholds and broader source-update policy
 - Search and map-query organization
 - Production raw-content storage
 - Scheduler and queue evolution
