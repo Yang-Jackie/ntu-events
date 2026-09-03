@@ -10,6 +10,7 @@ from ingestion.canonicalization.decision_provider import (
     OpenAICanonicalizationDecisionProvider,
 )
 from ingestion.contracts import (
+    CANONICALIZATION_SCHEMA_VERSION,
     EXTRACTION_SCHEMA_VERSION,
     SCREENING_SCHEMA_VERSION,
     CanonicalizationAction,
@@ -235,7 +236,7 @@ def test_changed_prompt_and_schema_versions_do_not_reuse_previous_cache_routes()
         stage="event-canonicalization",
         model="gpt-5-mini",
         prompt_version=CANONICALIZATION_PROMPT_VERSION,
-        schema_version="canonicalization-plan-v2",
+        schema_version=CANONICALIZATION_SCHEMA_VERSION,
     )
     previous_canonicalization = prompt_cache_key(
         stage="event-canonicalization",

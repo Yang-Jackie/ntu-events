@@ -60,6 +60,10 @@ def test_crossing_midnight_occurrence_is_one_valid_occurrence() -> None:
             {"scope": "EVENT", "opens_time": "23:00:00-05:00"},
         ),
         (
+            CandidateOccurrence,
+            {"local_ref": "occurrence-1", "start_time": "19:00:00-23:30"},
+        ),
+        (
             CanonicalOccurrenceValue,
             {
                 "client_ref": None,
@@ -95,9 +99,69 @@ def test_crossing_midnight_occurrence_is_one_valid_occurrence() -> None:
         ),
     ],
 )
-def test_time_contracts_reject_timezone_qualified_values(model, values) -> None:
-    with pytest.raises(ValidationError, match="Singapore local wall-clock"):
+def test_time_contracts_reject_non_singapore_offsets(model, values) -> None:
+    with pytest.raises(ValidationError, match="offset-free Singapore wall-clock"):
         model.model_validate(values)
+
+
+@pytest.mark.parametrize(
+    ("model", "values", "field"),
+    [
+        (
+            CandidateOccurrence,
+            {"local_ref": "occurrence-1", "start_time": "01:00:00+08:00"},
+            "start_time",
+        ),
+        (
+            CandidateRegistration,
+            {"scope": "EVENT", "opens_time": "23:00:00+08:00"},
+            "opens_time",
+        ),
+        (
+            CanonicalOccurrenceValue,
+            {
+                "client_ref": None,
+                "label": None,
+                "sequence": None,
+                "start_date": None,
+                "start_time": "01:00:00+08:00",
+                "end_date": None,
+                "end_time": None,
+                "time_precision": None,
+                "is_all_day": None,
+                "attendance_mode": None,
+                "raw_location_text": None,
+                "meeting_url": None,
+                "occurrence_status": None,
+                "venue_ids": None,
+            },
+            "start_time",
+        ),
+        (
+            CanonicalRegistrationValue,
+            {
+                "name": None,
+                "scope": None,
+                "occurrence_id": None,
+                "occurrence_client_ref": None,
+                "url": None,
+                "opens_date": None,
+                "opens_time": None,
+                "closes_date": None,
+                "closes_time": "23:00:00+08:00",
+                "instructions": None,
+            },
+            "closes_time",
+        ),
+    ],
+)
+def test_time_contracts_normalize_singapore_offsets(model, values, field) -> None:
+    parsed = model.model_validate(values)
+
+    normalized = getattr(parsed, field)
+    assert normalized is not None
+    assert normalized.tzinfo is None
+    assert normalized == time.fromisoformat(values[field]).replace(tzinfo=None)
 
 
 def test_extraction_schema_exposes_urls_as_plain_strings() -> None:

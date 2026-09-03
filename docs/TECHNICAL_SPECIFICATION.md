@@ -394,12 +394,14 @@ The implementation must preserve date-only and ambiguous source information
 without inventing precision. Attendance mode and public meeting access belong
 to the occurrence because different sessions of one event may differ.
 
-Extracted candidate times and canonicalization-proposal times are Singapore
-local wall-clock values without a UTC offset or timezone suffix. Offset-bearing
-times are structurally invalid and are rejected rather than converted without
-their associated date, because time-only conversion can silently cross a date
-boundary. Cross-midnight activities remain representable through their
-separate start and end dates.
+Extracted candidate times and canonicalization-proposal times are stored as
+Singapore local wall-clock values without a UTC offset or timezone suffix. At
+the model-output boundary, an exact `+08:00` offset is accepted and stripped
+because it represents the same Singapore clock value without changing the
+associated date. Other offsets are structurally invalid and are rejected
+rather than converted without their associated date, because time-only
+conversion can silently cross a date boundary. Cross-midnight activities
+remain representable through their separate start and end dates.
 
 The current model can retain multiple occurrences and registration windows.
 Further edge-case behavior for recurrence, overnight events, and timezone

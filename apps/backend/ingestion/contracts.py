@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, time
+from datetime import date, time, timedelta
 from enum import StrEnum
 from typing import Annotated, Literal
 
@@ -8,22 +8,35 @@ from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validat
 
 CANDIDATE_SCHEMA_VERSION = "event-candidate-v3"
 SCREENING_SCHEMA_VERSION = "telegram-screening-v2"
-EXTRACTION_SCHEMA_VERSION = "telegram-extraction-v4"
-CANONICALIZATION_SCHEMA_VERSION = "canonicalization-plan-v2"
+EXTRACTION_SCHEMA_VERSION = "telegram-extraction-v5"
+CANONICALIZATION_SCHEMA_VERSION = "canonicalization-plan-v3"
 
 
 class StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-def _require_singapore_wall_clock(value: time | None) -> time | None:
-    """Reject offsets rather than converting a time without its associated date."""
-    if value is not None and value.tzinfo is not None:
-        raise ValueError("Times must be Singapore local wall-clock values without a UTC offset.")
+def _normalize_singapore_wall_clock(value: time | None) -> time | None:
+    """Canonicalize an explicit Singapore offset without changing clock or date."""
+    if value is not None and value.utcoffset() == timedelta(hours=8):
+        return value.replace(tzinfo=None)
     return value
 
 
-LocalTime = Annotated[time | None, AfterValidator(_require_singapore_wall_clock)]
+def _require_singapore_wall_clock(value: time | None) -> time | None:
+    """Reject non-Singapore offsets that cannot be converted without a date."""
+    if value is not None and value.tzinfo is not None:
+        raise ValueError(
+            "Times must be offset-free Singapore wall-clock values or use the +08:00 offset."
+        )
+    return value
+
+
+LocalTime = Annotated[
+    time | None,
+    AfterValidator(_normalize_singapore_wall_clock),
+    AfterValidator(_require_singapore_wall_clock),
+]
 
 
 class TimePrecision(StrEnum):
@@ -337,7 +350,7 @@ class CanonicalEventCreate(StrictModel):
 
 
 class CanonicalizationProposal(StrictModel):
-    schema_version: Literal["canonicalization-plan-v2"] = CANONICALIZATION_SCHEMA_VERSION
+    schema_version: Literal["canonicalization-plan-v3"] = CANONICALIZATION_SCHEMA_VERSION
     action: CanonicalizationAction
     target_event_id: int | None
     reasoning: str
