@@ -190,16 +190,16 @@ Within the backend:
 - Entry points invoke shared owning workflows.
 - Source and provider adapters do not own canonical-event or publication
   policy.
-- Manual review, publication, and verification decisions remain distinguishable
-  from automated output. Manual edits to source-derived Event fields are not
-  durable overrides and may be replaced by later canonicalization.
+- Automated workflows may update source-derived Event fields but cannot change
+  owner-controlled publication or verification state.
 - Python and TypeScript share an API contract, not domain source files.
 
 ## 8. Runtime boundaries
 
 Docker Compose provides PostgreSQL/PostGIS, the Django backend, and the
-ingestion worker. The backend and worker share the same image and dependency
-configuration. The web application runs on the host during development.
+ingestion and canonicalization workers. The backend and workers share the same
+image and dependency configuration. The web application runs on the host during
+development.
 
 The current worker uses database-backed jobs. Scheduler, concurrency, provider
 resource lifetime, and future queue infrastructure should be changed only in

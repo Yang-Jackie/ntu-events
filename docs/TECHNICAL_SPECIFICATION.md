@@ -91,24 +91,14 @@ demonstrates the need. In particular, the initial product does not require
 microservices, Kubernetes, streaming infrastructure, a vector database, or a
 dedicated search engine.
 
-## 5. System responsibilities
+## 5. System boundaries
 
-The system is divided into:
-
-- A Django backend that owns domain data, ingestion workflows, internal review,
-  and the API
-- A Next.js application that owns discovery presentation and browser
-  interaction
-- A generated API-client package that carries the backend contract into
-  TypeScript
-- Background ingestion and canonicalization execution using backend workflows
-- PostgreSQL/PostGIS for relational and geographic data
-- Raw-content storage behind an application interface
-
-The initial Django backend and database run through Docker Compose. Next.js runs
-on the host during development. Application raw content uses ignored
-`var/raw/`; Telegram sessions and research-harness output use ignored
-`storage/`.
+`ARCHITECTURE.md` is authoritative for repository ownership and dependency
+direction. In summary, Django owns domain data, workflows, internal review, and
+the API; Next.js owns presentation; the generated client carries the API
+contract; and PostgreSQL/PostGIS owns normalized relational and geographic
+state. Raw content remains behind an application interface rather than becoming
+canonical product data.
 
 ## 6. High-level data flow
 
@@ -134,33 +124,20 @@ being implemented rather than being fixed by this overview.
 
 ## 7. Core concepts
 
-The following distinctions are important even though their exact schemas may
-change:
+Preserve these distinctions:
 
-- **Source:** an approved place from which content is collected.
-- **Source representation:** one logical published item from a source, such as
-  a Telegram message or webpage entry.
-- **Raw source document:** a preserved retrieval observation or artifact.
-- **Ingestion request and job:** durable records used to trigger, execute, and
-  inspect source processing.
-- **Extraction attempt and candidate:** the interpretation history plus a
-  provisional event record containing an immutable extracted payload, an
-  initially copied effective payload, and its BLOCKED/READY/PROCESSED gate.
-- **Event and occurrence:** the conceptual activity and the attendable time and
-  place information presented to users. One event may have multiple labeled
-  occurrences with different dates, locations, attendance modes, meeting
-  access, or registration details.
-- **Organizer and classification facets:** normalized discovery metadata.
-- **Building and venue:** canonical location data kept separate from raw
-  source wording.
-- **Registration:** external participation information associated with the
-  appropriate event or occurrence.
-- **Provenance and workflow state:** links and decisions needed to explain
-  canonical data and later changes.
+- A source representation identifies one logical published item; raw source
+  documents preserve individual retrieval observations of it.
+- An EventCandidate is a provisional interpretation, while Event and occurrence
+  records are canonical product data.
+- One Event may have several attendable occurrences with different schedules,
+  locations, attendance modes, meeting access, or registration details.
+- Raw location wording remains separate from normalized buildings and venues.
+- Provenance and workflow records explain how source evidence affected the
+  canonical Event graph.
 
-When implementing a concept, decide its fields, cardinality, constraints, and
-state model from the real workflow. Preserve the distinctions above unless
-implementation evidence shows that a boundary is unnecessary or incorrect.
+Exact fields, cardinality, constraints, and state transitions follow the
+implemented workflow rather than this summary.
 
 ## 8. Ingestion direction
 
@@ -469,30 +446,13 @@ the documented root commands.
 
 ## 15. Deferred capabilities
 
-The following remain deferred until the product demonstrates a need:
+`BUSINESS_REQUIREMENTS.md` owns the deferred product scope. Corresponding
+technical infrastructure, including dedicated search, distributed services,
+streaming, and public hosting, remains deferred until an approved capability
+demonstrates the need.
 
-- Public accounts, bookmarks, notifications, and personalization
-- Calendar or timetable integration
-- Natural-language search and recommendations
-- Organizer portals, internal registration, and payments
-- Indoor navigation
-- Dedicated search or vector infrastructure
-- Automatic source discovery
-- Private-source ingestion
-- Distributed services or streaming infrastructure
-- Production hosting and public operations
+## 16. Pending decisions
 
-## 16. Decisions to make in current and later milestones
-
-- **Deduplication hardening:** match evidence, candidate generation, decision
-  outcomes, reviewer controls, thresholds, and evaluation cases
-- **API:** resource shapes, filter semantics, identifiers, ordering, and map
-  query behavior
-- **Discovery interface:** map provider, rendering boundaries, interaction
-  details, and accessibility behavior
-- **Personal-use hardening:** change handling, recovery behavior, and
-  operational cadence
-- **Source expansion:** access method, retention policy, and source-specific
-  quality controls
-- **Public readiness:** hosting, authentication, monitoring, privacy, security,
-  quality thresholds, and rollout plan
+`IMPLEMENTATION_PLAN.md` owns milestone sequencing and pending decisions.
+Durable technical outcomes return here only after implementation and
+verification.

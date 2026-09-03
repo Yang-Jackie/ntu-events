@@ -68,8 +68,8 @@ The personal product should provide:
 - An internal review and correction workflow
 - Building-level display on an interactive campus map
 - A synchronized event list
-- Date, time, location, interest, format, and audience filtering
-- Attendance-mode filtering
+- Date, time, location, interest, format, audience, and attendance-mode
+  filtering
 - Keyword search
 - Event details with precise source-provided venue information where available
 - Links to the original source and external registration page
@@ -157,11 +157,9 @@ The product should:
 - Keep important source material linked to the resulting event
 - Direct users to the original source for final verification and registration
 
-For the owner-operated product, a manual correction to source-derived event
-information is an immediate edit rather than a durable override. A later
-automatic update may replace it after considering the current event data and
-new source evidence. Owner-controlled publication and verification decisions
-remain outside automatic canonicalization.
+Manual corrections to source-derived event information are immediate edits, not
+durable overrides. Later source updates may replace them. Publication and
+verification decisions remain owner-controlled.
 
 The processing milestones that introduce and harden canonicalization should
 decide how new, changed, conflicting, and duplicate candidates are handled. The

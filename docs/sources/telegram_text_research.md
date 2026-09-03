@@ -46,16 +46,17 @@ Current setup, commands, provider configuration, and operational limits are
 documented in the root `README.md`. Avoid duplicating those values here because
 they may change with the implementation.
 
-The production pipeline creates reviewable candidates. Canonicalization and
-publication behavior belong to later milestones.
+The production pipeline creates reviewable candidates. A separate source-neutral
+worker matches and canonicalizes READY candidates; publication remains a later
+milestone.
 
-## Implementation questions still open
+## Current limitations
 
 - Safe Telethon client and session ownership across worker and command paths
-- Correct resumption after a partially completed or reclaimed job
-- Reprocessing behavior for edited messages
-- Candidate and validation behavior needed for canonicalization
+- Safe resumption of a reclaimed job after an earlier attempt persisted only
+  part of its work
+- Detection of edited messages older than the configured retrieval overlap
 - Future treatment of media and poster content
 
-These questions should be resolved in the owning implementation milestone and
-covered by focused tests.
+Cross-cutting operational concerns are tracked in `docs/TODO.md`. Resolve each
+limitation in its owning milestone and add focused coverage with the behavior.

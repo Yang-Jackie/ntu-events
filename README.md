@@ -109,44 +109,27 @@ corepack pnpm ingest:schedule
 ```
 
 Django Admin exposes the same enqueue operation as “Ingest selected Telegram
-sources”. Screening sends up to 20 messages per `gpt-5-nano` request; extraction
-sends up to five relevant or uncertain messages per `gpt-5.6-luna` request. Up to
-ten OpenAI calls run concurrently inside the single worker process.
+sources”. Screening sends up to 20 messages per request, extraction sends up to
+five relevant or uncertain messages per request, and up to ten OpenAI calls run
+concurrently inside the single worker process.
 
 Relevant, uncertain, and failed message content is preserved under ignored
 `var/raw/`. Confirmed non-event bodies are discarded after their identity, hash,
-decision, and model versions are recorded. The pipeline creates event candidates
-containing immutable extracted payloads and effective logical-gate payloads.
-Only BLOCKED candidates are editable; a valid repair becomes READY and therefore
-authorizes the same downstream processing as a newly extracted READY candidate.
-The globally singleton canonicalization worker deterministically matches READY
-candidates against an indexed canonical-Event pool. A fixed additive score led
-by 65% title weight, a 30% threshold, and a five-match cap determine which
-possible Events reach reconciliation. No match creates a draft Event automatically;
-possible matches are reconciled through a versioned structured-output plan that
-can add, update, or only link the observation. Invalid references reject the
-whole plan, and successful changes retain source observations and before/after
-Event revisions. Nothing is published automatically. The ingestion process
-resolves each job's stable `pipeline_key` through an explicit in-process
-catalog. The catalog currently contains the Telegram text pipeline; future
-pipelines may use different retrieval and interpretation strategies without
-changing the worker. Canonicalization is source-neutral and runs serially in its
-own process under a PostgreSQL advisory lock.
+decision, and model versions are recorded. Ingestion creates reviewable
+candidates; the separate canonicalization worker matches and applies validated
+ADD, UPDATE, or LINK_ONLY plans while retaining provenance and Event revisions.
+Nothing is published automatically.
+
+See `docs/TECHNICAL_SPECIFICATION.md` for durable workflow behavior and
+`docs/sources/telegram_text_research.md` for the source boundary.
 
 ## Telegram research harness
 
-The Telegram research entry point remains host-operated. Install its Python
-environment when needed:
+The Telegram research entry point remains host-operated:
 
 ```powershell
 python -m uv sync
 python -m uv run telegram-ingestion
-```
-
-If `uv` is available directly on `PATH`, the shorter equivalent is:
-
-```powershell
-uv run telegram-ingestion
 ```
 
 Research-run content remains under ignored `storage/`; application raw content
