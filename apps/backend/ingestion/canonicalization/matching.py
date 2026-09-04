@@ -12,10 +12,10 @@ from events.models import (
     EventSourceLink,
 )
 
-from ingestion.candidate_validation import is_valid_http_url
 from ingestion.contracts import (
     EventCandidatePayload,
 )
+from ingestion.http_urls import is_valid_http_url
 from ingestion.models import (
     CandidateMatch,
     EventCandidate,

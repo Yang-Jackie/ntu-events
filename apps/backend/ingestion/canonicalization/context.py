@@ -4,7 +4,7 @@ from typing import Any
 
 from organizers.models import Organizer
 
-from ingestion.canonicalization.application import event_snapshot
+from ingestion.canonicalization.snapshots import event_snapshot
 from ingestion.contracts import (
     EventCandidatePayload,
 )

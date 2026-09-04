@@ -1,8 +1,7 @@
 from datetime import date, time
 
 from django.utils import timezone
-from ingestion.candidate_validation import validate_candidate
-from ingestion.candidates import candidate_status_for_issues
+from ingestion.candidates import candidate_status_for_issues, validate_candidate
 from ingestion.canonicalization import canonicalize_candidate
 from ingestion.contracts import (
     AttendanceMode,

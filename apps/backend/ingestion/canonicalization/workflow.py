@@ -13,21 +13,19 @@ from events.models import (
 from pydantic import ValidationError as PydanticValidationError
 
 from ingestion.candidates import CandidateVersionConflict, parse_and_validate_candidate_payload
-from ingestion.canonicalization.application import (
-    apply_canonicalization_plan,
-    event_snapshot_hash,
-    event_snapshot_payload_hash,
-)
+from ingestion.canonicalization.application import apply_canonicalization_plan
 from ingestion.canonicalization.context import build_canonicalization_context, match_record
 from ingestion.canonicalization.decision_provider import (
     CANONICALIZATION_PROMPT_VERSION,
     CanonicalizationDecisionProvider,
 )
+from ingestion.canonicalization.grounding import synthesis_flags
 from ingestion.canonicalization.matching import find_candidate_matches
-from ingestion.canonicalization.proposals import (
-    automatic_add_proposal,
-    synthesis_flags,
-    validate_proposal,
+from ingestion.canonicalization.projection import automatic_add_proposal
+from ingestion.canonicalization.proposal_validation import validate_proposal
+from ingestion.canonicalization.snapshots import (
+    event_snapshot_hash,
+    event_snapshot_payload_hash,
 )
 from ingestion.contracts import (
     CANONICALIZATION_SCHEMA_VERSION,

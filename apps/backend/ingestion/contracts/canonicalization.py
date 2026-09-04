@@ -1,179 +1,21 @@
 from __future__ import annotations
 
-from datetime import date, time, timedelta
+from datetime import date
 from enum import StrEnum
-from typing import Annotated, Literal
+from typing import Literal
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
+from pydantic import Field, model_validator
 
-CANDIDATE_SCHEMA_VERSION = "event-candidate-v3"
-SCREENING_SCHEMA_VERSION = "telegram-screening-v2"
-EXTRACTION_SCHEMA_VERSION = "telegram-extraction-v5"
+from .common import (
+    AttendanceMode,
+    LocalTime,
+    OccurrenceStatus,
+    RegistrationScope,
+    StrictModel,
+    TimePrecision,
+)
+
 CANONICALIZATION_SCHEMA_VERSION = "canonicalization-plan-v3"
-
-
-class StrictModel(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-
-def _normalize_singapore_wall_clock(value: time | None) -> time | None:
-    """Canonicalize an explicit Singapore offset without changing clock or date."""
-    if value is not None and value.utcoffset() == timedelta(hours=8):
-        return value.replace(tzinfo=None)
-    return value
-
-
-def _require_singapore_wall_clock(value: time | None) -> time | None:
-    """Reject non-Singapore offsets that cannot be converted without a date."""
-    if value is not None and value.tzinfo is not None:
-        raise ValueError(
-            "Times must be offset-free Singapore wall-clock values or use the +08:00 offset."
-        )
-    return value
-
-
-LocalTime = Annotated[
-    time | None,
-    AfterValidator(_normalize_singapore_wall_clock),
-    AfterValidator(_require_singapore_wall_clock),
-]
-
-
-class TimePrecision(StrEnum):
-    EXACT = "EXACT"
-    APPROXIMATE = "APPROXIMATE"
-    DATE_ONLY = "DATE_ONLY"
-    UNKNOWN = "UNKNOWN"
-
-
-class OccurrenceStatus(StrEnum):
-    SCHEDULED = "SCHEDULED"
-    POSTPONED = "POSTPONED"
-    CANCELLED = "CANCELLED"
-    UNKNOWN = "UNKNOWN"
-
-
-class AttendanceMode(StrEnum):
-    IN_PERSON = "IN_PERSON"
-    ONLINE = "ONLINE"
-    HYBRID = "HYBRID"
-    UNKNOWN = "UNKNOWN"
-
-
-class RegistrationScope(StrEnum):
-    EVENT = "EVENT"
-    OCCURRENCE = "OCCURRENCE"
-
-
-class ObservationType(StrEnum):
-    EVENT_ANNOUNCEMENT = "EVENT_ANNOUNCEMENT"
-    EVENT_FOLLOW_UP = "EVENT_FOLLOW_UP"
-    UNKNOWN = "UNKNOWN"
-
-
-class ScreeningLabel(StrEnum):
-    EVENT = "EVENT"
-    UNCERTAIN = "UNCERTAIN"
-    NOT_EVENT = "NOT_EVENT"
-
-
-class ScreeningItem(StrictModel):
-    message_identity: str = Field(min_length=1)
-    decision: ScreeningLabel
-    reason: str = Field(max_length=500)
-    confidence: float = Field(ge=0, le=1)
-
-
-class ScreeningBatch(StrictModel):
-    results: list[ScreeningItem]
-
-
-class CandidateOccurrence(StrictModel):
-    local_ref: str = Field(min_length=1, max_length=100)
-    label: str | None = None
-    start_date: date | None = None
-    start_time: LocalTime = None
-    end_date: date | None = None
-    end_time: LocalTime = None
-    time_precision: TimePrecision = TimePrecision.UNKNOWN
-    is_all_day: bool = False
-    attendance_mode: AttendanceMode = AttendanceMode.UNKNOWN
-    raw_location: str | None = None
-    suggested_venue_ids: list[int] = Field(default_factory=list)
-    meeting_url: str | None = None
-    status: OccurrenceStatus = OccurrenceStatus.SCHEDULED
-
-
-class CandidateOrganizer(StrictModel):
-    name: str | None = None
-    role: str | None = None
-    is_primary: bool = False
-
-
-class CandidateRegistration(StrictModel):
-    scope: RegistrationScope
-    occurrence_ref: str | None = None
-    name: str | None = None
-    url: str | None = None
-    opens_date: date | None = None
-    opens_time: LocalTime = None
-    closes_date: date | None = None
-    closes_time: LocalTime = None
-    instructions: str | None = None
-
-
-class CandidateEvidence(StrictModel):
-    field: str
-    source_path: str
-    value: str
-
-
-class CandidateControlledValues(StrictModel):
-    supported_codes: list[str] = Field(default_factory=list)
-    other_values: list[str] = Field(default_factory=list)
-
-
-class EventCandidatePayload(StrictModel):
-    schema_version: Literal["event-candidate-v3"] = CANDIDATE_SCHEMA_VERSION
-    observation_type: ObservationType = ObservationType.UNKNOWN
-    title: str | None = Field(default=None, max_length=500)
-    description: str | None = Field(
-        default=None,
-        description=(
-            "Dense summary for a student deciding whether to attend. At most three sentences "
-            "and 60 words. Lead with what happens, then what attendees get: food, prizes, "
-            "certificates, swag, funding, fees, prerequisites, what to bring, capacity limits. "
-            "State recurrence in prose when the source gives a cadence rather than dates, for "
-            "example 'every Thursday during term', since occurrences holds only explicitly "
-            "dated sessions. Never restate the title, or dates, times, venues, and registration "
-            "deadlines already carried by other fields. Never mention what the source omits; "
-            "write nothing instead, and leave genuine uncertainty to ambiguities. Pack related "
-            "facts into one clause or a comma list rather than a sentence each, stay in active "
-            "voice, and cut filler such as 'will be provided' or 'participants can'. Write only "
-            "what the source supports; never invent, pad, or infer."
-        ),
-    )
-    occurrences: list[CandidateOccurrence] = Field(default_factory=list)
-    organizers: list[CandidateOrganizer] = Field(default_factory=list)
-    registrations: list[CandidateRegistration] = Field(default_factory=list)
-    formats: CandidateControlledValues = Field(default_factory=CandidateControlledValues)
-    topics: CandidateControlledValues = Field(default_factory=CandidateControlledValues)
-    purposes: CandidateControlledValues = Field(default_factory=CandidateControlledValues)
-    audiences: CandidateControlledValues = Field(default_factory=CandidateControlledValues)
-    image_url: str | None = None
-    source_url: str | None = None
-    evidence: list[CandidateEvidence] = Field(default_factory=list)
-    ambiguities: list[str] = Field(default_factory=list)
-    overall_confidence: float | None = Field(default=None, ge=0, le=1)
-
-
-class ExtractedMessage(StrictModel):
-    message_identity: str = Field(min_length=1)
-    events: list[EventCandidatePayload] = Field(default_factory=list)
-
-
-class ExtractionBatch(StrictModel):
-    results: list[ExtractedMessage]
 
 
 class CanonicalizationAction(StrEnum):

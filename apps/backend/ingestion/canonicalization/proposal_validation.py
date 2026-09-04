@@ -17,31 +17,28 @@ from organizers.models import Organizer
 from pydantic import ValidationError as PydanticValidationError
 from venues.models import Venue
 
-from ingestion.candidate_validation import is_valid_http_url
-from ingestion.canonicalization.matching import normalize_match_text
 from ingestion.contracts import (
     CanonicalEventCreate,
     CanonicalizationAction,
     CanonicalizationProposal,
-    CanonicalOccurrenceChange,
-    CanonicalOccurrenceValue,
-    CanonicalOrganizerValue,
-    CanonicalRegistrationChange,
-    CanonicalRegistrationValue,
     ClassificationKind,
     ClassificationOperation,
-    EventCandidatePayload,
     EventField,
-    FieldOperation,
     ObjectOperation,
-    OccurrenceField,
-    RegistrationField,
     RegistrationScope,
-    TimePrecision,
 )
+from ingestion.http_urls import is_valid_http_url
 from ingestion.models import (
     CandidateMatch,
     EventCandidate,
+)
+
+from .proposal_issues import hard_issue as _hard_issue
+from .resulting_state import (
+    merged_occurrence_value,
+    merged_registration_value,
+    validate_final_occurrence_sequences,
+    validate_final_organizers,
 )
 
 
@@ -97,122 +94,6 @@ def validate_proposal(
     elif target is not None and proposal.action == CanonicalizationAction.UPDATE:
         _validate_update(target, proposal, issues)
     return issues
-
-
-def automatic_add_proposal(payload: EventCandidatePayload) -> CanonicalizationProposal:
-    organizers: list[CanonicalOrganizerValue] = []
-    seen_organizers: set[int] = set()
-    for position, source in enumerate(payload.organizers):
-        if not source.name:
-            continue
-        matches = list(
-            Organizer.objects.filter(normalized_name=normalize_match_text(source.name))[:2]
-        )
-        if len(matches) != 1 or matches[0].pk in seen_organizers:
-            continue
-        seen_organizers.add(matches[0].pk)
-        organizers.append(
-            CanonicalOrganizerValue(
-                organizer_id=matches[0].pk,
-                role=source.role,
-                is_primary=source.is_primary,
-                position=position,
-            )
-        )
-    occurrences = []
-    projected_occurrence_refs: set[str] = set()
-    for item in payload.occurrences:
-        if item.start_date is None:
-            continue
-        start_time = item.start_time
-        end_time = item.end_time
-        time_precision = item.time_precision
-        if item.is_all_day or time_precision == TimePrecision.DATE_ONLY:
-            start_time = None
-            end_time = None
-        if time_precision == TimePrecision.EXACT and start_time is None:
-            time_precision = TimePrecision.UNKNOWN
-        if start_time is None or item.end_date is None:
-            end_time = None
-        occurrences.append(
-            CanonicalOccurrenceValue(
-                client_ref=item.local_ref,
-                label=item.label,
-                sequence=len(occurrences) + 1,
-                start_date=item.start_date,
-                start_time=start_time,
-                end_date=item.end_date,
-                end_time=end_time,
-                time_precision=time_precision,
-                is_all_day=item.is_all_day,
-                attendance_mode=item.attendance_mode,
-                raw_location_text=item.raw_location,
-                meeting_url=(item.meeting_url if is_valid_http_url(item.meeting_url) else None),
-                occurrence_status=item.status,
-                venue_ids=item.suggested_venue_ids,
-            )
-        )
-        projected_occurrence_refs.add(item.local_ref)
-
-    registrations = []
-    for item in payload.registrations:
-        if (
-            item.scope == RegistrationScope.OCCURRENCE
-            and item.occurrence_ref not in projected_occurrence_refs
-        ):
-            continue
-        url = item.url if is_valid_http_url(item.url) else None
-        opens_time = item.opens_time if item.opens_date is not None else None
-        closes_time = item.closes_time if item.closes_date is not None else None
-        if not any(
-            (
-                bool(item.name and item.name.strip()),
-                bool(url),
-                bool(item.instructions and item.instructions.strip()),
-                item.opens_date is not None,
-                item.closes_date is not None,
-            )
-        ):
-            continue
-        registrations.append(
-            CanonicalRegistrationValue(
-                name=item.name,
-                scope=item.scope,
-                occurrence_id=None,
-                occurrence_client_ref=(
-                    item.occurrence_ref if item.scope == RegistrationScope.OCCURRENCE else None
-                ),
-                url=url,
-                opens_date=item.opens_date,
-                opens_time=opens_time,
-                closes_date=item.closes_date,
-                closes_time=closes_time,
-                instructions=item.instructions,
-            )
-        )
-    return CanonicalizationProposal(
-        action=CanonicalizationAction.ADD,
-        target_event_id=None,
-        reasoning="No deterministic canonical Event match was found.",
-        add_event=CanonicalEventCreate(
-            title=(payload.title or "").strip(),
-            description=payload.description,
-            image_reference=(payload.image_url if is_valid_http_url(payload.image_url) else None),
-            audience_notes=None,
-            formats=payload.formats.supported_codes,
-            topics=payload.topics.supported_codes,
-            purposes=payload.purposes.supported_codes,
-            audiences=payload.audiences.supported_codes,
-            organizers=organizers,
-            occurrences=occurrences,
-            registrations=registrations,
-        ),
-        event_changes=[],
-        classification_changes=[],
-        organizer_changes=[],
-        occurrence_changes=[],
-        registration_changes=[],
-    )
 
 
 def _validate_add_event(value: CanonicalEventCreate, issues: list[dict[str, Any]]) -> None:
@@ -359,7 +240,7 @@ def _validate_update(
         if change.value is not None:
             value = change.value
             if change.operation == ObjectOperation.UPDATE and change.id is not None:
-                value = _merged_occurrence_value(
+                value = merged_occurrence_value(
                     event.occurrences.filter(pk=change.id).first(),
                     change,
                 )
@@ -373,7 +254,7 @@ def _validate_update(
         if change.value is not None:
             value = change.value
             if change.operation == ObjectOperation.UPDATE and change.id is not None:
-                value = _merged_registration_value(
+                value = merged_registration_value(
                     Registration.objects.filter(pk=change.id).first(),
                     change,
                 )
@@ -384,8 +265,8 @@ def _validate_update(
                 event=event,
                 added_occurrence_refs={value for value in added_refs if value},
             )
-    _validate_final_occurrence_sequences(event, proposal.occurrence_changes, issues)
-    _validate_final_organizers(event, proposal.organizer_changes, issues)
+    validate_final_occurrence_sequences(event, proposal.occurrence_changes, issues)
+    validate_final_organizers(event, proposal.organizer_changes, issues)
 
 
 def _validate_catalogs(formats, topics, purposes, audiences, issues) -> None:
@@ -648,156 +529,3 @@ def _unique_change_fields(changes, path, issues) -> None:
         issues.append(
             _hard_issue("FIELD_CHANGE_DUPLICATE", path, "A field is changed more than once.")
         )
-
-
-def _merged_occurrence_value(
-    occurrence: EventOccurrence | None,
-    change: CanonicalOccurrenceChange,
-) -> CanonicalOccurrenceValue:
-    if occurrence is None or change.value is None:
-        return change.value
-    values = {
-        "client_ref": None,
-        "label": occurrence.label,
-        "sequence": occurrence.sequence,
-        "start_date": occurrence.start_date,
-        "start_time": occurrence.start_time,
-        "end_date": occurrence.end_date,
-        "end_time": occurrence.end_time,
-        "time_precision": occurrence.time_precision,
-        "is_all_day": occurrence.is_all_day,
-        "attendance_mode": occurrence.attendance_mode,
-        "raw_location_text": occurrence.raw_location_text,
-        "meeting_url": occurrence.meeting_url,
-        "occurrence_status": occurrence.occurrence_status,
-        "venue_ids": list(occurrence.venues.values_list("pk", flat=True)),
-    }
-    for field in change.changed_fields:
-        values[field.value.lower()] = getattr(change.value, field.value.lower())
-    return CanonicalOccurrenceValue.model_validate(values)
-
-
-def _merged_registration_value(
-    registration: Registration | None,
-    change: CanonicalRegistrationChange,
-) -> CanonicalRegistrationValue:
-    if registration is None or change.value is None:
-        return change.value
-    values = {
-        "name": registration.name,
-        "scope": "EVENT" if registration.event_id else "OCCURRENCE",
-        "occurrence_id": registration.occurrence_id,
-        "occurrence_client_ref": None,
-        "url": registration.url,
-        "opens_date": registration.opens_date,
-        "opens_time": registration.opens_time,
-        "closes_date": registration.closes_date,
-        "closes_time": registration.closes_time,
-        "instructions": registration.instructions,
-    }
-    for field in change.changed_fields:
-        if field == RegistrationField.OWNER:
-            for name in ("scope", "occurrence_id", "occurrence_client_ref"):
-                values[name] = getattr(change.value, name)
-        else:
-            values[field.value.lower()] = getattr(change.value, field.value.lower())
-    return CanonicalRegistrationValue.model_validate(values)
-
-
-def _validate_final_occurrence_sequences(event, changes, issues) -> None:
-    sequences = {item.pk: item.sequence for item in event.occurrences.all()}
-    next_temporary_id = -1
-    for change in changes:
-        if change.operation == ObjectOperation.REMOVE:
-            sequences.pop(change.id, None)
-        elif change.operation == ObjectOperation.ADD:
-            sequences[next_temporary_id] = change.value.sequence
-            next_temporary_id -= 1
-        elif OccurrenceField.SEQUENCE in change.changed_fields:
-            sequences[change.id] = change.value.sequence
-    values = list(sequences.values())
-    if None in values or len(values) != len(set(values)):
-        issues.append(
-            _hard_issue(
-                "OCCURRENCE_SEQUENCE_INVALID",
-                "occurrence_changes",
-                "The resulting occurrence sequences must be present and unique.",
-            )
-        )
-
-
-def _validate_final_organizers(event, changes, issues) -> None:
-    values = {
-        item.pk: {
-            "organizer_id": item.organizer_id,
-            "role": item.role,
-            "is_primary": item.is_primary,
-            "position": item.position,
-        }
-        for item in event.eventorganizer_set.all()
-    }
-    next_temporary_id = -1
-    for change in changes:
-        if change.operation == ObjectOperation.REMOVE:
-            values.pop(change.id, None)
-        elif change.operation == ObjectOperation.ADD:
-            values[next_temporary_id] = change.value.model_dump()
-            next_temporary_id -= 1
-        else:
-            current = values.get(change.id)
-            if current is None:
-                continue
-            for field in change.changed_fields:
-                current[field.value.lower()] = getattr(change.value, field.value.lower())
-    organizer_ids = [item["organizer_id"] for item in values.values()]
-    if len(organizer_ids) != len(set(organizer_ids)):
-        issues.append(
-            _hard_issue(
-                "ORGANIZER_DUPLICATE",
-                "organizer_changes",
-                "The resulting Event cannot reference one Organizer more than once.",
-            )
-        )
-    if sum(1 for item in values.values() if item["is_primary"]) > 1:
-        issues.append(
-            _hard_issue(
-                "MULTIPLE_PRIMARY_ORGANIZERS",
-                "organizer_changes",
-                "The resulting Event can have at most one primary Organizer.",
-            )
-        )
-
-
-def synthesis_flags(payload, proposal) -> list[dict[str, Any]]:
-    descriptions: list[str] = []
-    if proposal.add_event and proposal.add_event.description:
-        descriptions.append(proposal.add_event.description)
-    descriptions.extend(
-        change.value
-        for change in proposal.event_changes
-        if change.field == EventField.DESCRIPTION
-        and change.operation == FieldOperation.SET
-        and change.value
-    )
-    source_description = (payload.description or "").strip()
-    return [
-        {
-            "code": "SYNTHESIZED_DESCRIPTION",
-            "path": "description",
-            "message": (
-                "The proposed description is synthesized rather than copied from the candidate."
-            ),
-        }
-        for description in descriptions
-        if description.strip() != source_description
-    ]
-
-
-def _hard_issue(code: str, path: str, message: str) -> dict[str, Any]:
-    return {
-        "code": code,
-        "path": path,
-        "message": message,
-        "severity": "ERROR",
-        "blocks_application": True,
-    }

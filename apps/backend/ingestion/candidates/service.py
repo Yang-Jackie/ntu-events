@@ -7,10 +7,11 @@ from django.utils import timezone
 from pydantic import ValidationError as PydanticValidationError
 from sources.models import SourceRepresentation
 
-from ingestion.candidate_validation import validate_candidate
 from ingestion.contracts import EventCandidatePayload
 from ingestion.models import CandidateStatus, EventCandidate, ExtractionRun
 from ingestion.reference_data import build_candidate_reference_data
+
+from .validation import validate_candidate
 
 
 class CandidateVersionConflict(RuntimeError):

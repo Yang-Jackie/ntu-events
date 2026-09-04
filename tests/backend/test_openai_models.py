@@ -11,18 +11,20 @@ from ingestion.canonicalization.decision_provider import (
 )
 from ingestion.contracts import (
     CANONICALIZATION_SCHEMA_VERSION,
-    EXTRACTION_SCHEMA_VERSION,
-    SCREENING_SCHEMA_VERSION,
     CanonicalizationAction,
     CanonicalizationProposal,
+)
+from ingestion.model_outputs import ModelOutputError, prompt_cache_key
+from ingestion.pipelines.telegram.adapter import TelegramLink, TelegramMessage
+from ingestion.pipelines.telegram.contracts import (
+    EXTRACTION_SCHEMA_VERSION,
+    SCREENING_SCHEMA_VERSION,
     ExtractedMessage,
     ExtractionBatch,
     ScreeningBatch,
     ScreeningItem,
     ScreeningLabel,
 )
-from ingestion.model_outputs import ModelOutputError, prompt_cache_key
-from ingestion.pipelines.telegram.adapter import TelegramLink, TelegramMessage
 from ingestion.pipelines.telegram.model_client import (
     EXTRACTION_PROMPT_VERSION,
     SCREENING_PROMPT_VERSION,

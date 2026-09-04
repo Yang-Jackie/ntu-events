@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-from ingestion.contracts import (
-    SCREENING_SCHEMA_VERSION,
-    ScreeningBatch,
-    ScreeningLabel,
-)
 from ingestion.models import (
     IngestionJob,
     MessageScreening,
     ModelInvocation,
     ModelInvocationStage,
     ScreeningDecision,
+)
+from ingestion.pipelines.telegram.contracts import (
+    SCREENING_SCHEMA_VERSION,
+    ScreeningBatch,
+    ScreeningLabel,
 )
 from ingestion.pipelines.telegram.documents import MessageWork, ensure_raw_document
 from ingestion.pipelines.telegram.model_client import (

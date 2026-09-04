@@ -7,12 +7,6 @@ from typing import Any
 from openai import OpenAI
 from pydantic import BaseModel
 
-from ingestion.contracts import (
-    EXTRACTION_SCHEMA_VERSION,
-    SCREENING_SCHEMA_VERSION,
-    ExtractionBatch,
-    ScreeningBatch,
-)
 from ingestion.model_outputs import (
     ModelResult,
     model_output_error,
@@ -20,6 +14,12 @@ from ingestion.model_outputs import (
     prompt_cache_key,
 )
 from ingestion.pipelines.telegram.adapter import TelegramMessage
+from ingestion.pipelines.telegram.contracts import (
+    EXTRACTION_SCHEMA_VERSION,
+    SCREENING_SCHEMA_VERSION,
+    ExtractionBatch,
+    ScreeningBatch,
+)
 from ingestion.reference_data import candidate_reference_data_hash, canonical_json
 
 SCREENING_PROMPT_VERSION = "telegram-screening-v3"

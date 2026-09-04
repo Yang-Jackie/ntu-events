@@ -11,15 +11,17 @@ from ingestion.contracts import (
     CanonicalizationAction,
     CanonicalizationProposal,
     EventCandidatePayload,
+    TimePrecision,
+)
+from ingestion.model_outputs import ModelOutputError, ModelResult
+from ingestion.pipelines.telegram.adapter import TelegramFetchResult, TelegramMessage
+from ingestion.pipelines.telegram.contracts import (
     ExtractedMessage,
     ExtractionBatch,
     ScreeningBatch,
     ScreeningItem,
     ScreeningLabel,
-    TimePrecision,
 )
-from ingestion.model_outputs import ModelOutputError, ModelResult
-from ingestion.pipelines.telegram.adapter import TelegramFetchResult, TelegramMessage
 from sources.models import Source, SourceType
 
 FIXTURE_PATH = Path(__file__).parents[2] / "fixtures" / "sources" / "telegram" / "messages.json"

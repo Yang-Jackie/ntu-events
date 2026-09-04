@@ -6,11 +6,7 @@ from django.db import transaction
 from sources.models import ProcessingStatus
 
 from ingestion.candidates import create_extracted_candidate
-from ingestion.contracts import (
-    EXTRACTION_SCHEMA_VERSION,
-    EventCandidatePayload,
-    ExtractionBatch,
-)
+from ingestion.contracts import EventCandidatePayload
 from ingestion.models import (
     ExtractionRun,
     ExtractionStatus,
@@ -18,6 +14,7 @@ from ingestion.models import (
     ModelInvocation,
     ModelInvocationStage,
 )
+from ingestion.pipelines.telegram.contracts import EXTRACTION_SCHEMA_VERSION, ExtractionBatch
 from ingestion.pipelines.telegram.documents import MessageWork
 from ingestion.pipelines.telegram.model_client import (
     EXTRACTION_PROMPT_VERSION,

@@ -1,6 +1,6 @@
 from datetime import date, time
 
-from ingestion.candidate_validation import validate_candidate
+from ingestion.candidates import validate_candidate
 from ingestion.contracts import (
     AttendanceMode,
     CandidateControlledValues,

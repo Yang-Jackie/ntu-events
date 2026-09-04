@@ -8,9 +8,9 @@ from ingestion.contracts import (
     CanonicalOccurrenceValue,
     CanonicalRegistrationValue,
     EventCandidatePayload,
-    ExtractionBatch,
     TimePrecision,
 )
+from ingestion.pipelines.telegram.contracts import ExtractionBatch
 from pydantic import ValidationError
 
 
