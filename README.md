@@ -56,10 +56,14 @@ corepack pnpm dev:web
 ```
 
 - Django Admin: `http://localhost:8000/admin/`
+- Published Event API: `http://localhost:8000/api/v1/events/`
 - Django health: `http://localhost:8000/api/v1/health/`
 - OpenAPI schema: `http://localhost:8000/api/schema/`
 - Next.js: `http://localhost:3000/`
 - Next.js health: `http://localhost:3000/api/health`
+
+Docker Compose binds the Django and PostgreSQL host ports to `127.0.0.1`, so
+the local owner-operated services are not published to other network devices.
 
 Run all non-mutating checks with:
 

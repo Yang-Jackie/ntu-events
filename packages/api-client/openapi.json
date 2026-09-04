@@ -6,6 +6,188 @@
         "description": "Personal-first event ingestion and discovery API."
     },
     "paths": {
+        "/api/v1/events/": {
+            "get": {
+                "operationId": "v1_events_list",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "attendance_mode",
+                        "schema": {
+                            "enum": [
+                                "IN_PERSON",
+                                "ONLINE",
+                                "HYBRID",
+                                "UNKNOWN"
+                            ],
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "description": "Return occurrences with this attendance mode.\n\n* `IN_PERSON` - In person\n* `ONLINE` - Online\n* `HYBRID` - Hybrid\n* `UNKNOWN` - Unknown"
+                    },
+                    {
+                        "in": "query",
+                        "name": "audience",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 80,
+                            "minLength": 1
+                        },
+                        "description": "Return events with this audience code."
+                    },
+                    {
+                        "in": "query",
+                        "name": "bbox",
+                        "schema": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "description": "WGS84 bounds formatted as west,south,east,north."
+                    },
+                    {
+                        "in": "query",
+                        "name": "building",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "description": "Return occurrences linked to a venue in this building ID."
+                    },
+                    {
+                        "in": "query",
+                        "name": "date_from",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "description": "Return occurrences whose effective end date is on or after this date."
+                    },
+                    {
+                        "in": "query",
+                        "name": "date_to",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "description": "Return occurrences whose start date is on or before this date."
+                    },
+                    {
+                        "in": "query",
+                        "name": "format",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 80,
+                            "minLength": 1
+                        },
+                        "description": "Return events with this format code."
+                    },
+                    {
+                        "in": "query",
+                        "name": "ordering",
+                        "schema": {
+                            "enum": [
+                                "start_date",
+                                "-start_date"
+                            ],
+                            "type": "string",
+                            "default": "start_date",
+                            "minLength": 1
+                        },
+                        "description": "Order by the earliest or latest matching occurrence date.\n\n* `start_date` - start_date\n* `-start_date` - -start_date"
+                    },
+                    {
+                        "name": "page",
+                        "required": false,
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "purpose",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 80,
+                            "minLength": 1
+                        },
+                        "description": "Return events with this purpose code."
+                    },
+                    {
+                        "in": "query",
+                        "name": "q",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 200,
+                            "minLength": 1
+                        },
+                        "description": "Case-insensitive search across event text and organizer names."
+                    },
+                    {
+                        "in": "query",
+                        "name": "topic",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 80,
+                            "minLength": 1
+                        },
+                        "description": "Return events with this topic code."
+                    }
+                ],
+                "tags": [
+                    "events"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedEventListList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/events/{id}/": {
+            "get": {
+                "operationId": "v1_events_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "events"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EventDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/health/": {
             "get": {
                 "operationId": "v1_health_retrieve",
@@ -32,23 +214,733 @@
     },
     "components": {
         "schemas": {
+            "AttendanceModeEnum": {
+                "enum": [
+                    "IN_PERSON",
+                    "ONLINE",
+                    "HYBRID",
+                    "UNKNOWN"
+                ],
+                "type": "string",
+                "description": "* `IN_PERSON` - In person\n* `ONLINE` - Online\n* `HYBRID` - Hybrid\n* `UNKNOWN` - Unknown"
+            },
+            "Building": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "code": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "campus_area": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "campus_area",
+                    "code",
+                    "id",
+                    "name"
+                ]
+            },
+            "CapacityStatusEnum": {
+                "enum": [
+                    "UNKNOWN",
+                    "AVAILABLE",
+                    "LIMITED",
+                    "FULL",
+                    "WAITLIST"
+                ],
+                "type": "string",
+                "description": "* `UNKNOWN` - Unknown\n* `AVAILABLE` - Available\n* `LIMITED` - Limited\n* `FULL` - Full\n* `WAITLIST` - Waitlist"
+            },
+            "Classification": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "code",
+                    "label"
+                ]
+            },
+            "EventDetail": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "slug": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "image_reference": {
+                        "type": "string",
+                        "maxLength": 1000
+                    },
+                    "audience_notes": {
+                        "type": "string"
+                    },
+                    "publication_status": {
+                        "$ref": "#/components/schemas/PublicationStatusEnum"
+                    },
+                    "verification_status": {
+                        "$ref": "#/components/schemas/VerificationStatusEnum"
+                    },
+                    "last_verified_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "formats": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Classification"
+                        }
+                    },
+                    "topics": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Classification"
+                        }
+                    },
+                    "purposes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Classification"
+                        }
+                    },
+                    "audiences": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Classification"
+                        }
+                    },
+                    "organizers": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Organizer"
+                        }
+                    },
+                    "occurrences": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EventOccurrenceDetail"
+                        }
+                    },
+                    "registrations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Registration"
+                        }
+                    },
+                    "sources": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EventSource"
+                        }
+                    }
+                },
+                "required": [
+                    "audiences",
+                    "created_at",
+                    "formats",
+                    "id",
+                    "occurrences",
+                    "organizers",
+                    "purposes",
+                    "registrations",
+                    "slug",
+                    "sources",
+                    "title",
+                    "topics",
+                    "updated_at"
+                ]
+            },
+            "EventList": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "slug": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "image_reference": {
+                        "type": "string",
+                        "maxLength": 1000
+                    },
+                    "verification_status": {
+                        "$ref": "#/components/schemas/VerificationStatusEnum"
+                    },
+                    "last_verified_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "formats": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Classification"
+                        }
+                    },
+                    "topics": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Classification"
+                        }
+                    },
+                    "purposes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Classification"
+                        }
+                    },
+                    "audiences": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Classification"
+                        }
+                    },
+                    "organizers": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Organizer"
+                        }
+                    },
+                    "occurrences": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EventOccurrenceList"
+                        }
+                    }
+                },
+                "required": [
+                    "audiences",
+                    "formats",
+                    "id",
+                    "occurrences",
+                    "organizers",
+                    "purposes",
+                    "slug",
+                    "title",
+                    "topics",
+                    "updated_at"
+                ]
+            },
+            "EventOccurrenceDetail": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "label": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "sequence": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "start_time": {
+                        "type": "string",
+                        "format": "time",
+                        "nullable": true
+                    },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "end_time": {
+                        "type": "string",
+                        "format": "time",
+                        "nullable": true
+                    },
+                    "time_precision": {
+                        "$ref": "#/components/schemas/TimePrecisionEnum"
+                    },
+                    "is_all_day": {
+                        "type": "boolean"
+                    },
+                    "attendance_mode": {
+                        "$ref": "#/components/schemas/AttendanceModeEnum"
+                    },
+                    "raw_location_text": {
+                        "type": "string"
+                    },
+                    "occurrence_status": {
+                        "$ref": "#/components/schemas/OccurrenceStatusEnum"
+                    },
+                    "capacity_status": {
+                        "$ref": "#/components/schemas/CapacityStatusEnum"
+                    },
+                    "venues": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OccurrenceVenue"
+                        }
+                    },
+                    "meeting_url": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "uri",
+                                "maxLength": 2000
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "registrations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Registration"
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "registrations",
+                    "sequence",
+                    "start_date",
+                    "time_precision",
+                    "venues"
+                ]
+            },
+            "EventOccurrenceList": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "label": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "sequence": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "start_time": {
+                        "type": "string",
+                        "format": "time",
+                        "nullable": true
+                    },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "end_time": {
+                        "type": "string",
+                        "format": "time",
+                        "nullable": true
+                    },
+                    "time_precision": {
+                        "$ref": "#/components/schemas/TimePrecisionEnum"
+                    },
+                    "is_all_day": {
+                        "type": "boolean"
+                    },
+                    "attendance_mode": {
+                        "$ref": "#/components/schemas/AttendanceModeEnum"
+                    },
+                    "raw_location_text": {
+                        "type": "string"
+                    },
+                    "occurrence_status": {
+                        "$ref": "#/components/schemas/OccurrenceStatusEnum"
+                    },
+                    "capacity_status": {
+                        "$ref": "#/components/schemas/CapacityStatusEnum"
+                    },
+                    "venues": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OccurrenceVenue"
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "sequence",
+                    "start_date",
+                    "time_precision",
+                    "venues"
+                ]
+            },
+            "EventSource": {
+                "type": "object",
+                "properties": {
+                    "source_name": {
+                        "type": "string"
+                    },
+                    "source_type": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string",
+                        "format": "uri",
+                        "readOnly": true
+                    },
+                    "is_primary_source": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "source_name",
+                    "source_type",
+                    "url"
+                ]
+            },
             "Health": {
                 "type": "object",
                 "properties": {
                     "status": {
-                        "$ref": "#/components/schemas/StatusEnum"
+                        "$ref": "#/components/schemas/HealthStatusEnum"
                     }
                 },
                 "required": [
                     "status"
                 ]
             },
-            "StatusEnum": {
+            "HealthStatusEnum": {
                 "enum": [
                     "ok"
                 ],
                 "type": "string",
                 "description": "* `ok` - ok"
+            },
+            "MapPoint": {
+                "type": "object",
+                "properties": {
+                    "latitude": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "longitude": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "required": [
+                    "latitude",
+                    "longitude"
+                ]
+            },
+            "OccurrenceStatusEnum": {
+                "enum": [
+                    "UNKNOWN",
+                    "SCHEDULED",
+                    "POSTPONED",
+                    "CANCELLED",
+                    "COMPLETED"
+                ],
+                "type": "string",
+                "description": "* `UNKNOWN` - Unknown\n* `SCHEDULED` - Scheduled\n* `POSTPONED` - Postponed\n* `CANCELLED` - Cancelled\n* `COMPLETED` - Completed"
+            },
+            "OccurrenceVenue": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "floor": {
+                        "type": "string"
+                    },
+                    "room_code": {
+                        "type": "string"
+                    },
+                    "venue_type": {
+                        "type": "string"
+                    },
+                    "building": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Building"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "map_point": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MapPoint"
+                            }
+                        ],
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "is_primary": {
+                        "type": "boolean"
+                    },
+                    "position": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    }
+                },
+                "required": [
+                    "building",
+                    "floor",
+                    "id",
+                    "map_point",
+                    "name",
+                    "room_code",
+                    "venue_type"
+                ]
+            },
+            "Organizer": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "organization_type": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "school_or_unit": {
+                        "type": "string"
+                    },
+                    "website_url": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "is_official": {
+                        "type": "boolean"
+                    },
+                    "role": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "is_primary": {
+                        "type": "boolean"
+                    },
+                    "position": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    }
+                },
+                "required": [
+                    "id",
+                    "is_official",
+                    "name",
+                    "organization_type",
+                    "school_or_unit",
+                    "website_url"
+                ]
+            },
+            "PaginatedEventListList": {
+                "type": "object",
+                "required": [
+                    "count",
+                    "results"
+                ],
+                "properties": {
+                    "count": {
+                        "type": "integer",
+                        "example": 123
+                    },
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?page=4"
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?page=2"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EventList"
+                        }
+                    }
+                }
+            },
+            "PublicationStatusEnum": {
+                "enum": [
+                    "DRAFT",
+                    "PENDING_REVIEW",
+                    "PUBLISHED",
+                    "WITHHELD",
+                    "ARCHIVED"
+                ],
+                "type": "string",
+                "description": "* `DRAFT` - Draft\n* `PENDING_REVIEW` - Pending review\n* `PUBLISHED` - Published\n* `WITHHELD` - Withheld\n* `ARCHIVED` - Archived"
+            },
+            "Registration": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "registration_type": {
+                        "$ref": "#/components/schemas/RegistrationTypeEnum"
+                    },
+                    "url": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "uri",
+                                "maxLength": 2000
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "opens_date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "opens_time": {
+                        "type": "string",
+                        "format": "time",
+                        "nullable": true
+                    },
+                    "closes_date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "closes_time": {
+                        "type": "string",
+                        "format": "time",
+                        "nullable": true
+                    },
+                    "time_precision": {
+                        "$ref": "#/components/schemas/TimePrecisionEnum"
+                    },
+                    "instructions": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/RegistrationStatusEnum"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "registration_type"
+                ]
+            },
+            "RegistrationStatusEnum": {
+                "enum": [
+                    "UNKNOWN",
+                    "NOT_OPEN",
+                    "OPEN",
+                    "CLOSED",
+                    "FULL",
+                    "CANCELLED"
+                ],
+                "type": "string",
+                "description": "* `UNKNOWN` - Unknown\n* `NOT_OPEN` - Not open\n* `OPEN` - Open\n* `CLOSED` - Closed\n* `FULL` - Full\n* `CANCELLED` - Cancelled"
+            },
+            "RegistrationTypeEnum": {
+                "enum": [
+                    "ATTENDEE",
+                    "VOLUNTEER",
+                    "COMPETITOR",
+                    "PRESENTER",
+                    "OTHER"
+                ],
+                "type": "string",
+                "description": "* `ATTENDEE` - Attendee\n* `VOLUNTEER` - Volunteer\n* `COMPETITOR` - Competitor\n* `PRESENTER` - Presenter\n* `OTHER` - Other"
+            },
+            "TimePrecisionEnum": {
+                "enum": [
+                    "EXACT",
+                    "APPROXIMATE",
+                    "DATE_ONLY",
+                    "UNKNOWN"
+                ],
+                "type": "string",
+                "description": "* `EXACT` - Exact\n* `APPROXIMATE` - Approximate\n* `DATE_ONLY` - Date only\n* `UNKNOWN` - Unknown"
+            },
+            "VerificationStatusEnum": {
+                "enum": [
+                    "UNVERIFIED",
+                    "AUTOMATICALLY_VERIFIED",
+                    "MANUALLY_VERIFIED",
+                    "CONFLICTING"
+                ],
+                "type": "string",
+                "description": "* `UNVERIFIED` - Unverified\n* `AUTOMATICALLY_VERIFIED` - Automatically verified\n* `MANUALLY_VERIFIED` - Manually verified\n* `CONFLICTING` - Conflicting"
             }
         }
     }

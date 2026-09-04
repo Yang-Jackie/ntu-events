@@ -18,14 +18,6 @@ canonicalization. Normal Telegram retrieval revisits only a bounded overlap, so
 edits older than that window may not be observed. Broader edit-discovery cadence
 belongs to personal-use hardening.
 
-## Local runtime network boundary (Milestone 5)
-
-Docker Compose currently publishes PostgreSQL and Django through host port
-mappings while also providing development defaults. Before the event API exposes
-canonical data, make the owner-only boundary explicit by binding development
-services to loopback or implementing an approved private-access control. Django
-`ALLOWED_HOSTS` alone is not a network access boundary.
-
 ## Django 6 URL form transition (dependency upgrade)
 
 The current Admin tests pass with `RemovedInDjango60Warning` messages because

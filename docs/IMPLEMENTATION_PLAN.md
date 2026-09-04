@@ -1,9 +1,9 @@
 # NTU Events Implementation Plan
 
 **Document status:** Active implementation plan
-**Current milestone:** 5 — API contract
-**Next delivery goal:** Define and implement the first owner-facing Event list
-and detail contract through the generated client
+**Current milestone:** 6 — Personal discovery interface
+**Next delivery goal:** Render published Events through the generated client in
+a synchronized local list, map, and detail flow
 
 ## 1. Delivery target
 
@@ -27,8 +27,8 @@ Public deployment remains a separate later gate.
 | 3. First-source ingestion       | Telegram content can be processed repeatedly with retained provenance and inspectable results    | Complete    |
 | 4. Processing workflow          | A reviewable candidate can become canonical event data through a safe, repeatable workflow       | Complete    |
 | 4A. Deduplication hardening     | Likely duplicates and revisions are identified and resolved using reviewable evidence            | Complete    |
-| 5. API contract                 | The web application can retrieve typed event data through the generated client                   | In progress |
-| 6. Personal discovery interface | The owner can find the ingested event through a local map, list, and detail view                 | Not started |
+| 5. API contract                 | The web application can retrieve typed event data through the generated client                   | Complete    |
+| 6. Personal discovery interface | The owner can find the ingested event through a local map, list, and detail view                 | In progress |
 | 7. Personal-use hardening       | Corrections, reruns, failures, and source changes are handled reliably                           | Not started |
 | 8. Controlled source expansion  | Additional approved sources reuse the shared workflow                                            | Not started |
 | 9. Public-readiness gate        | The owner approves evidence, quality, security, privacy, accessibility, and rollout readiness    | Not started |
@@ -48,17 +48,26 @@ slice using existing focused coverage. Additional fixture calibration is not an
 API milestone prerequisite; revisit it when observed duplicate or false-match
 behavior provides evidence for a change.
 
-## 4. Current milestone: API contract
+## 4. Completed milestone: API contract
 
-Milestone 5 will define the first owner-facing event list and detail resources,
-visibility rules, filters, ordering, pagination, identifiers, and map-query
-semantics. Every contract change must regenerate and verify OpenAPI and the
-TypeScript client.
+The read-only API exposes published Event list and detail resources by numeric
+identifier. It includes the occurrence, venue, organizer, classification,
+registration, source-link, verification, and map data required by the discovery
+interface. The list supports bounded search, date, classification, attendance,
+building, map-bounds, ordering, and page-number queries. OpenAPI and the
+TypeScript client are generated and verified from this contract.
 
-The first step is to settle the smallest list/detail response shape and make
-the owner-only local network boundary explicit before adding endpoints.
+Docker Compose publishes Django and PostgreSQL only on host loopback during the
+owner-operated local phase.
 
-## 5. Progress and completion rules
+## 5. Current milestone: personal discovery interface
+
+Build the first useful web vertical slice through the generated client: a map
+and synchronized event list, URL-backed filters, and an Event detail route.
+Online-only occurrences remain in the list without map markers unless a
+physical-location filter is active.
+
+## 6. Progress and completion rules
 
 - Keep one milestone active at a time.
 - Complete the current vertical path before broadening coverage or polishing

@@ -17,12 +17,13 @@ is authoritative for progress.
 
 ## Current focus
 
-Milestone 5 is active:
+Milestone 6 is active:
 
-- Define the smallest owner-facing Event list and detail response shape
-- Set visibility, filters, ordering, pagination, identifiers, and map-query
-  semantics
-- Make the owner-only local runtime network boundary explicit
+- Consume the generated Event API client rather than duplicating its contract
+- Select the map library and render reviewed building or standalone venue points
+- Keep map bounds, list results, filters, and URL state synchronized
+- Keep online-only and unresolved-location occurrences visible in the list when
+  no physical-location filter is active
 
 ## Durable guardrails
 

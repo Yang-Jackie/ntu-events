@@ -35,7 +35,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-ntu_events}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ntu_events}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - ntu_events_postgres_data:/var/lib/postgresql
     healthcheck:
@@ -52,7 +52,7 @@ services:
   backend:
     <<: *backend-service
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     healthcheck:
       test:
         [

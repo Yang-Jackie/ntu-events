@@ -366,16 +366,35 @@ committed schema generates the TypeScript contract used by the web
 application. Generated files are changed through the repository generation
 workflow rather than edited manually.
 
-The event API should eventually support:
+The read-only discovery contract exposes `GET /api/v1/events/` and
+`GET /api/v1/events/{id}/`. Numeric IDs are stable API identifiers; slugs are
+presentation data. Both endpoints expose only PUBLISHED Events, so draft,
+pending-review, withheld, and archived records remain internal and detail
+lookups for them return not found. Verification state is returned as
+information and does not independently grant visibility.
 
-- Event list and detail retrieval
-- Time, location, classification, and audience filtering
-- Keyword search
-- Map-oriented geographic queries
-- Clear separation between internal and discoverable data
+The list response contains compact Event metadata, classifications, organizers,
+and matching occurrences with schedule, attendance, raw location, venue,
+building, and resolved map-point data. Detail adds descriptive fields, meeting
+links, registrations, and public source links. It never exposes raw documents,
+candidate payloads, model output, or internal workflow records. A venue's own
+point is returned when present; otherwise its building point is used.
 
-Exact endpoint shapes, identifiers, filter names, pagination, ordering, and map
-payloads should be decided during the API milestone and captured in OpenAPI.
+The list accepts `q`, `date_from`, `date_to`, `attendance_mode`, `format`,
+`topic`, `purpose`, `audience`, `building`, `bbox`, `ordering`, and `page`.
+Date bounds use occurrence overlap semantics. Occurrence-level filters restrict
+the nested occurrences returned by the list, while detail always returns the
+complete Event. `bbox` uses WGS84 `west,south,east,north` bounds and, like the
+building filter, excludes online-only or unresolved locations. Without a
+physical-location filter, those occurrences remain visible. Ordering is by the
+earliest or latest matching occurrence date with undated Events last, and
+page-number pagination returns 50 Events per page.
+
+The current discovery API requires no application login because it is limited
+to published data and Docker Compose binds both Django and PostgreSQL host ports
+to `127.0.0.1`. This is a local network boundary, not identity authentication;
+remote access requires a separate approved private-access or authentication
+decision.
 
 The web application should provide the map, synchronized list, filters, and
 event details defined in the business requirements. URL state, server/client

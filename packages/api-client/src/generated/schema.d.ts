@@ -4,6 +4,38 @@
  */
 
 export interface paths {
+    "/api/v1/events/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["v1_events_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/events/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["v1_events_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health/": {
         parameters: {
             query?: never;
@@ -24,14 +56,245 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * @description * `IN_PERSON` - In person
+         *     * `ONLINE` - Online
+         *     * `HYBRID` - Hybrid
+         *     * `UNKNOWN` - Unknown
+         * @enum {string}
+         */
+        AttendanceModeEnum: "IN_PERSON" | "ONLINE" | "HYBRID" | "UNKNOWN";
+        Building: {
+            id: number;
+            code: string | null;
+            name: string;
+            campus_area: string;
+        };
+        /**
+         * @description * `UNKNOWN` - Unknown
+         *     * `AVAILABLE` - Available
+         *     * `LIMITED` - Limited
+         *     * `FULL` - Full
+         *     * `WAITLIST` - Waitlist
+         * @enum {string}
+         */
+        CapacityStatusEnum: "UNKNOWN" | "AVAILABLE" | "LIMITED" | "FULL" | "WAITLIST";
+        Classification: {
+            code: string;
+            label: string;
+        };
+        EventDetail: {
+            readonly id: number;
+            slug: string;
+            title: string;
+            description?: string;
+            image_reference?: string;
+            audience_notes?: string;
+            publication_status?: components["schemas"]["PublicationStatusEnum"];
+            verification_status?: components["schemas"]["VerificationStatusEnum"];
+            /** Format: date-time */
+            last_verified_at?: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+            formats: components["schemas"]["Classification"][];
+            topics: components["schemas"]["Classification"][];
+            purposes: components["schemas"]["Classification"][];
+            audiences: components["schemas"]["Classification"][];
+            organizers: components["schemas"]["Organizer"][];
+            occurrences: components["schemas"]["EventOccurrenceDetail"][];
+            registrations: components["schemas"]["Registration"][];
+            sources: components["schemas"]["EventSource"][];
+        };
+        EventList: {
+            readonly id: number;
+            slug: string;
+            title: string;
+            image_reference?: string;
+            verification_status?: components["schemas"]["VerificationStatusEnum"];
+            /** Format: date-time */
+            last_verified_at?: string | null;
+            /** Format: date-time */
+            readonly updated_at: string;
+            formats: components["schemas"]["Classification"][];
+            topics: components["schemas"]["Classification"][];
+            purposes: components["schemas"]["Classification"][];
+            audiences: components["schemas"]["Classification"][];
+            organizers: components["schemas"]["Organizer"][];
+            occurrences: components["schemas"]["EventOccurrenceList"][];
+        };
+        EventOccurrenceDetail: {
+            readonly id: number;
+            label?: string;
+            sequence: number;
+            /** Format: date */
+            start_date: string;
+            /** Format: time */
+            start_time?: string | null;
+            /** Format: date */
+            end_date?: string | null;
+            /** Format: time */
+            end_time?: string | null;
+            time_precision: components["schemas"]["TimePrecisionEnum"];
+            is_all_day?: boolean;
+            attendance_mode?: components["schemas"]["AttendanceModeEnum"];
+            raw_location_text?: string;
+            occurrence_status?: components["schemas"]["OccurrenceStatusEnum"];
+            capacity_status?: components["schemas"]["CapacityStatusEnum"];
+            venues: components["schemas"]["OccurrenceVenue"][];
+            meeting_url?: string;
+            registrations: components["schemas"]["Registration"][];
+        };
+        EventOccurrenceList: {
+            readonly id: number;
+            label?: string;
+            sequence: number;
+            /** Format: date */
+            start_date: string;
+            /** Format: time */
+            start_time?: string | null;
+            /** Format: date */
+            end_date?: string | null;
+            /** Format: time */
+            end_time?: string | null;
+            time_precision: components["schemas"]["TimePrecisionEnum"];
+            is_all_day?: boolean;
+            attendance_mode?: components["schemas"]["AttendanceModeEnum"];
+            raw_location_text?: string;
+            occurrence_status?: components["schemas"]["OccurrenceStatusEnum"];
+            capacity_status?: components["schemas"]["CapacityStatusEnum"];
+            venues: components["schemas"]["OccurrenceVenue"][];
+        };
+        EventSource: {
+            source_name: string;
+            source_type: string;
+            /** Format: uri */
+            readonly url: string;
+            is_primary_source?: boolean;
+        };
         Health: {
-            status: components["schemas"]["StatusEnum"];
+            status: components["schemas"]["HealthStatusEnum"];
         };
         /**
          * @description * `ok` - ok
          * @enum {string}
          */
-        StatusEnum: "ok";
+        HealthStatusEnum: "ok";
+        MapPoint: {
+            /** Format: double */
+            latitude: number;
+            /** Format: double */
+            longitude: number;
+        };
+        /**
+         * @description * `UNKNOWN` - Unknown
+         *     * `SCHEDULED` - Scheduled
+         *     * `POSTPONED` - Postponed
+         *     * `CANCELLED` - Cancelled
+         *     * `COMPLETED` - Completed
+         * @enum {string}
+         */
+        OccurrenceStatusEnum: "UNKNOWN" | "SCHEDULED" | "POSTPONED" | "CANCELLED" | "COMPLETED";
+        OccurrenceVenue: {
+            id: number;
+            name: string;
+            floor: string;
+            room_code: string;
+            venue_type: string;
+            building: components["schemas"]["Building"] | null;
+            readonly map_point: components["schemas"]["MapPoint"] | null;
+            is_primary?: boolean;
+            position?: number;
+        };
+        Organizer: {
+            id: number;
+            name: string;
+            organization_type: string | null;
+            school_or_unit: string;
+            /** Format: uri */
+            website_url: string;
+            is_official: boolean;
+            role?: string;
+            is_primary?: boolean;
+            position?: number;
+        };
+        PaginatedEventListList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["EventList"][];
+        };
+        /**
+         * @description * `DRAFT` - Draft
+         *     * `PENDING_REVIEW` - Pending review
+         *     * `PUBLISHED` - Published
+         *     * `WITHHELD` - Withheld
+         *     * `ARCHIVED` - Archived
+         * @enum {string}
+         */
+        PublicationStatusEnum: "DRAFT" | "PENDING_REVIEW" | "PUBLISHED" | "WITHHELD" | "ARCHIVED";
+        Registration: {
+            readonly id: number;
+            name: string;
+            registration_type: components["schemas"]["RegistrationTypeEnum"];
+            url?: string;
+            /** Format: date */
+            opens_date?: string | null;
+            /** Format: time */
+            opens_time?: string | null;
+            /** Format: date */
+            closes_date?: string | null;
+            /** Format: time */
+            closes_time?: string | null;
+            time_precision?: components["schemas"]["TimePrecisionEnum"];
+            instructions?: string;
+            status?: components["schemas"]["RegistrationStatusEnum"];
+        };
+        /**
+         * @description * `UNKNOWN` - Unknown
+         *     * `NOT_OPEN` - Not open
+         *     * `OPEN` - Open
+         *     * `CLOSED` - Closed
+         *     * `FULL` - Full
+         *     * `CANCELLED` - Cancelled
+         * @enum {string}
+         */
+        RegistrationStatusEnum: "UNKNOWN" | "NOT_OPEN" | "OPEN" | "CLOSED" | "FULL" | "CANCELLED";
+        /**
+         * @description * `ATTENDEE` - Attendee
+         *     * `VOLUNTEER` - Volunteer
+         *     * `COMPETITOR` - Competitor
+         *     * `PRESENTER` - Presenter
+         *     * `OTHER` - Other
+         * @enum {string}
+         */
+        RegistrationTypeEnum: "ATTENDEE" | "VOLUNTEER" | "COMPETITOR" | "PRESENTER" | "OTHER";
+        /**
+         * @description * `EXACT` - Exact
+         *     * `APPROXIMATE` - Approximate
+         *     * `DATE_ONLY` - Date only
+         *     * `UNKNOWN` - Unknown
+         * @enum {string}
+         */
+        TimePrecisionEnum: "EXACT" | "APPROXIMATE" | "DATE_ONLY" | "UNKNOWN";
+        /**
+         * @description * `UNVERIFIED` - Unverified
+         *     * `AUTOMATICALLY_VERIFIED` - Automatically verified
+         *     * `MANUALLY_VERIFIED` - Manually verified
+         *     * `CONFLICTING` - Conflicting
+         * @enum {string}
+         */
+        VerificationStatusEnum: "UNVERIFIED" | "AUTOMATICALLY_VERIFIED" | "MANUALLY_VERIFIED" | "CONFLICTING";
     };
     responses: never;
     parameters: never;
@@ -41,6 +304,83 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    v1_events_list: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Return occurrences with this attendance mode.
+                 *
+                 *     * `IN_PERSON` - In person
+                 *     * `ONLINE` - Online
+                 *     * `HYBRID` - Hybrid
+                 *     * `UNKNOWN` - Unknown
+                 */
+                attendance_mode?: "IN_PERSON" | "ONLINE" | "HYBRID" | "UNKNOWN";
+                /** @description Return events with this audience code. */
+                audience?: string;
+                /** @description WGS84 bounds formatted as west,south,east,north. */
+                bbox?: string;
+                /** @description Return occurrences linked to a venue in this building ID. */
+                building?: number;
+                /** @description Return occurrences whose effective end date is on or after this date. */
+                date_from?: string;
+                /** @description Return occurrences whose start date is on or before this date. */
+                date_to?: string;
+                /** @description Return events with this format code. */
+                format?: string;
+                /**
+                 * @description Order by the earliest or latest matching occurrence date.
+                 *
+                 *     * `start_date` - start_date
+                 *     * `-start_date` - -start_date
+                 */
+                ordering?: "start_date" | "-start_date";
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Return events with this purpose code. */
+                purpose?: string;
+                /** @description Case-insensitive search across event text and organizer names. */
+                q?: string;
+                /** @description Return events with this topic code. */
+                topic?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedEventListList"];
+                };
+            };
+        };
+    };
+    v1_events_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventDetail"];
+                };
+            };
+        };
+    };
     v1_health_retrieve: {
         parameters: {
             query?: never;
