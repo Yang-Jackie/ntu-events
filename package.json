@@ -21,6 +21,7 @@
     "telegram:channels": "docker compose run --rm backend python apps/backend/manage.py telegram_channels",
     "ingest:telegram": "docker compose run --rm backend python apps/backend/manage.py ingest_telegram",
     "ingest:schedule": "docker compose run --rm backend python apps/backend/manage.py enqueue_scheduled_ingestion",
+    "ingestion:clear": "docker compose run --rm backend python scripts/clear_ingestion_cache.py",
     "api:schema": "docker compose run --rm backend python apps/backend/manage.py spectacular --file packages/api-client/openapi.json --format openapi-json --validate --fail-on-warn",
     "api:types": "corepack pnpm --filter @ntu-events/api-client generate",
     "api:generate": "corepack pnpm api:schema && corepack pnpm api:types",
