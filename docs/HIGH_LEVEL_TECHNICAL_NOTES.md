@@ -17,12 +17,12 @@ is authoritative for progress.
 
 ## Current focus
 
-Milestone 4A remains active before the canonical Event API begins:
+Milestone 5 is active:
 
-- Which additional true-duplicate, follow-up, separate-edition, and false-match
-  cases should calibrate the implemented shortlist weights and threshold
-- How rejected, failed, and stale plans are retried or regenerated during
-  repeated owner operation
+- Define the smallest owner-facing Event list and detail response shape
+- Set visibility, filters, ordering, pagination, identifiers, and map-query
+  semantics
+- Make the owner-only local runtime network boundary explicit
 
 ## Durable guardrails
 

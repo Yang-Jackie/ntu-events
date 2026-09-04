@@ -10,13 +10,6 @@ separate commands can touch the same saved session file. Decide and test a
 resource-lifetime and mutual-exclusion approach that works for the worker,
 login, channel discovery, and inline troubleshooting paths.
 
-## Reclaimed job persistence (Milestone 4A)
-
-A stale RUNNING job is requeued with the same identity and may encounter records
-written by its earlier attempt. Verify that the reclaimed attempt resumes
-without uniqueness failures or duplicated work. This is separate from PARTIAL
-jobs, whose failed message IDs are already retained for a later ingestion job.
-
 ## Source revisions and older Telegram edits (Milestone 7)
 
 When edited content is fetched, its changed content produces a new raw document,

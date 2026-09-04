@@ -163,6 +163,12 @@ such as client lifetime, retry behavior, batching, and cache keys belong to the
 implementation and tests; when they affect durable behavior, document the
 outcome after it is verified.
 
+A stale RUNNING ingestion job is requeued with the same identity and a new
+attempt number. For Telegram screening, a later attempt replaces the job's
+per-message screening result, while each model invocation remains retained as
+attempt history. This lets a reclaimed attempt continue without a uniqueness
+failure after an earlier attempt persisted a failed screening result.
+
 ### Other sources
 
 The NTU CCDS events site was used as structured-source research and remains a
@@ -300,6 +306,11 @@ weight, similarity, signed contribution, retrieval reason, and evidence
 signals. The score is matching evidence, not a probability. The plan snapshot
 presents it as a percentage and copies the complete candidate Event snapshots
 used by reconciliation.
+
+The owner-operated slice accepts the current weights and threshold with the
+existing focused coverage. Additional fixture calibration is evidence-driven,
+not a prerequisite for the Event API; revisit it when observed duplicates or
+false matches show that adjustment is needed.
 
 No qualifying match creates an ADD plan automatically, including for sparse
 follow-ups. When matches exist, the reconciliation model receives the candidate

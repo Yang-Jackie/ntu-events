@@ -68,29 +68,34 @@ def screen_messages(
                 raw_document = ensure_raw_document(item, job, storage)
                 item.raw_document = raw_document
                 relevant[item.representation.pk] = item
-            MessageScreening.objects.create(
+            MessageScreening.objects.update_or_create(
                 job=job,
-                model_invocation=invocation,
                 source_representation=item.representation,
-                raw_source_document=raw_document,
-                content_hash=item.message.content_hash,
-                decision=result.decision.value,
-                reason=result.reason,
-                confidence=result.confidence,
+                defaults={
+                    "model_invocation": invocation,
+                    "raw_source_document": raw_document,
+                    "content_hash": item.message.content_hash,
+                    "decision": result.decision.value,
+                    "reason": result.reason,
+                    "confidence": result.confidence,
+                },
             )
 
     def failed(outcome: BatchOutcome[ScreeningBatch], invocation: ModelInvocation) -> None:
         for message in outcome.messages:
             item = by_identity[message.identity]
             raw_document = ensure_raw_document(item, job, storage)
-            MessageScreening.objects.create(
+            MessageScreening.objects.update_or_create(
                 job=job,
-                model_invocation=invocation,
                 source_representation=item.representation,
-                raw_source_document=raw_document,
-                content_hash=item.message.content_hash,
-                decision=ScreeningDecision.FAILED,
-                reason=str(outcome.error)[:500],
+                defaults={
+                    "model_invocation": invocation,
+                    "raw_source_document": raw_document,
+                    "content_hash": item.message.content_hash,
+                    "decision": ScreeningDecision.FAILED,
+                    "reason": str(outcome.error)[:500],
+                    "confidence": None,
+                },
             )
             failure_ids.add(message.identity)
 

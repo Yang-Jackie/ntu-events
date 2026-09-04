@@ -53,8 +53,6 @@ milestone.
 ## Current limitations
 
 - Safe Telethon client and session ownership across worker and command paths
-- Safe resumption of a reclaimed job after an earlier attempt persisted only
-  part of its work
 - Detection of edited messages older than the configured retrieval overlap
 - Future treatment of media and poster content
 

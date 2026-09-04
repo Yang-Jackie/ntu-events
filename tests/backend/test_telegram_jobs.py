@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import replace
-from datetime import UTC, date, datetime, time
+from datetime import UTC, date, datetime, time, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock, patch
@@ -25,7 +25,7 @@ from ingestion.contracts import (
     TimePrecision,
 )
 from ingestion.errors import RetryableIngestionError
-from ingestion.jobs import claim_job, enqueue_sources
+from ingestion.jobs import claim_job, enqueue_sources, recover_stale_jobs
 from ingestion.model_outputs import ModelOutputError, ModelResult
 from ingestion.models import (
     CandidateStatus,
@@ -46,6 +46,7 @@ from ingestion.pipelines.telegram.adapter import (
     _normalize_message,
 )
 from ingestion.pipelines.telegram.pipeline import TelegramTextPipeline
+from ingestion.pipelines.telegram.processing import process_telegram_messages
 from ingestion.raw_storage import LocalRawContentStorage
 from ingestion.reference_data import build_candidate_reference_data
 from sources.models import RawSourceDocument, Source, SourceType
@@ -191,6 +192,12 @@ class FirstExtractionBatchFails(FakeModels):
             self.extraction_batch_sizes.append(len(messages))
             raise RuntimeError("temporary provider failure")
         return super().extract(messages, reference_data=reference_data)
+
+
+class ScreeningFails(FakeModels):
+    def screen(self, messages: list[TelegramMessage]) -> ModelResult[ScreeningBatch]:
+        self.screening_batch_sizes.append(len(messages))
+        raise RuntimeError("temporary screening failure")
 
 
 class BusinessIssueModels(FakeModels):
@@ -888,6 +895,48 @@ def test_media_only_fetch_advances_cursor_without_model_calls(tmp_path) -> None:
     assert source.configuration["last_message_id"] == 99
     assert models.screening_batch_sizes == []
     assert models.extraction_batch_sizes == []
+
+
+def test_reclaimed_job_replaces_failed_screening_without_duplicate_work(tmp_path) -> None:
+    source = make_source()
+    enqueue = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
+    job = claim_job(enqueue.jobs[0].pk, "interrupted-worker")
+    assert job is not None
+    messages = fixture_messages()[:1]
+    storage = LocalRawContentStorage(tmp_path)
+
+    first_result = process_telegram_messages(
+        job=job,
+        messages=messages,
+        models=ScreeningFails(),
+        storage=storage,
+        options=TelegramTextPipeline().normalize_options({"message_limit": 1}),
+    )
+
+    assert first_result.failure_ids == {"1"}
+    assert job.status == JobStatus.RUNNING
+    assert MessageScreening.objects.get(job=job).decision == "FAILED"
+    job.heartbeat_at = datetime.now(UTC) - timedelta(minutes=11)
+    job.save(update_fields=("heartbeat_at",))
+    assert recover_stale_jobs() == 1
+
+    reclaimed = claim_job(job.pk, "replacement-worker")
+    assert reclaimed is not None
+    assert reclaimed.attempt_count == 2
+    TelegramTextPipeline(
+        fetcher=FakeFetcher(messages),
+        models=FakeModels(),
+        storage=storage,
+    ).execute(reclaimed)
+
+    reclaimed.refresh_from_db()
+    screening = MessageScreening.objects.get(job=reclaimed)
+    assert reclaimed.status == JobStatus.SUCCEEDED
+    assert screening.decision == "EVENT"
+    assert screening.model_invocation.attempt_number == 2
+    assert MessageScreening.objects.filter(job=reclaimed).count() == 1
+    assert ModelInvocation.objects.filter(job=reclaimed, stage="SCREENING").count() == 2
+    assert EventCandidate.objects.count() == 1
 
 
 def test_partial_job_advances_cursor_and_retries_recorded_failed_messages(tmp_path) -> None:

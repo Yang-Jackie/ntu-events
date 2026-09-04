@@ -1,9 +1,9 @@
 # NTU Events Implementation Plan
 
 **Document status:** Active implementation plan
-**Current milestone:** 4A — Deduplication hardening
-**Next delivery goal:** Validate matching against representative cases and
-prove recovery paths before exposing canonical events through the API
+**Current milestone:** 5 — API contract
+**Next delivery goal:** Define and implement the first owner-facing Event list
+and detail contract through the generated client
 
 ## 1. Delivery target
 
@@ -26,40 +26,37 @@ Public deployment remains a separate later gate.
 | 2. Domain foundation            | Core source, ingestion, event, organizer, classification, and venue records are reviewable       | Complete    |
 | 3. First-source ingestion       | Telegram content can be processed repeatedly with retained provenance and inspectable results    | Complete    |
 | 4. Processing workflow          | A reviewable candidate can become canonical event data through a safe, repeatable workflow       | Complete    |
-| 4A. Deduplication hardening     | Likely duplicates and revisions are identified and resolved using reviewable evidence            | In progress |
-| 5. API contract                 | The web application can retrieve typed event data through the generated client                   | Not started |
+| 4A. Deduplication hardening     | Likely duplicates and revisions are identified and resolved using reviewable evidence            | Complete    |
+| 5. API contract                 | The web application can retrieve typed event data through the generated client                   | In progress |
 | 6. Personal discovery interface | The owner can find the ingested event through a local map, list, and detail view                 | Not started |
 | 7. Personal-use hardening       | Corrections, reruns, failures, and source changes are handled reliably                           | Not started |
 | 8. Controlled source expansion  | Additional approved sources reuse the shared workflow                                            | Not started |
 | 9. Public-readiness gate        | The owner approves evidence, quality, security, privacy, accessibility, and rollout readiness    | Not started |
 | 10. Public deployment           | The approved audience can reliably access the product                                            | Not started |
 
-## 3. Current milestone: deduplication hardening
+## 3. Completed milestone: deduplication hardening
 
 The implemented baseline includes a separate, globally serial canonicalization
 worker; bounded candidate matching with stored evidence; structured ADD,
 UPDATE, and LINK_ONLY plans; transactional application; stale-graph detection;
-and immutable observations and Event revisions. The technical specification is
-authoritative for this behavior.
+and immutable observations and Event revisions. Reclaimed ingestion jobs safely
+replace an earlier failed screening result while retaining invocation history.
+The technical specification is authoritative for this behavior.
 
-Remaining work:
+The current matching weights and threshold are accepted for the owner-operated
+slice using existing focused coverage. Additional fixture calibration is not an
+API milestone prerequisite; revisit it when observed duplicate or false-match
+behavior provides evidence for a change.
 
-- Continue evaluating the implemented matching weights and thresholds against
-  representative duplicate, follow-up, separate-edition, and false-match
-  fixtures; the GitHub workshop reminder is now a focused regression case.
-- Exercise failed model calls, rejected-plan repair, stale-plan regeneration,
-  and ingestion retry behavior in repeated owner operation.
-
-Complete Milestone 4A when matching and recovery are repeatable, explainable,
-avoid stale writes, and have focused coverage for reruns and the agreed
-difficult cases.
-
-## 4. Next milestone: API contract
+## 4. Current milestone: API contract
 
 Milestone 5 will define the first owner-facing event list and detail resources,
 visibility rules, filters, ordering, pagination, identifiers, and map-query
 semantics. Every contract change must regenerate and verify OpenAPI and the
 TypeScript client.
+
+The first step is to settle the smallest list/detail response shape and make
+the owner-only local network boundary explicit before adding endpoints.
 
 ## 5. Progress and completion rules
 
