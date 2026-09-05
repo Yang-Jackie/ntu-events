@@ -1,14 +1,9 @@
-import json
-
-from django import forms
 from django.contrib import admin, messages
-from django.core.exceptions import ValidationError
-from django.utils.html import format_html
-from pydantic import ValidationError as PydanticValidationError
 
+from . import admin_presenters
+from .admin_forms import CanonicalizationPlanAdminForm, EventCandidateAdminForm
 from .candidates import CandidateVersionConflict, update_event_candidate
 from .canonicalization import update_canonicalization_plan
-from .contracts import CanonicalizationProposal, EventCandidatePayload
 from .models import (
     CandidateMatch,
     CandidateStatus,
@@ -20,110 +15,6 @@ from .models import (
     MessageScreening,
     ModelInvocation,
 )
-
-
-class EventCandidateAdminForm(forms.ModelForm):
-    expected_version = forms.IntegerField(widget=forms.HiddenInput)
-
-    class Meta:
-        model = EventCandidate
-        fields = ("effective_payload", "reviewer_notes")
-        widgets = {"effective_payload": forms.Textarea(attrs={"rows": 32, "cols": 120})}
-
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        if self.instance.pk:
-            self.fields["expected_version"].initial = self.instance.edit_version
-
-    def clean_effective_payload(self) -> dict:
-        value = self.cleaned_data["effective_payload"]
-        try:
-            EventCandidatePayload.model_validate(value)
-        except PydanticValidationError as exc:
-            raise forms.ValidationError(
-                "The payload does not match the event-candidate schema: "
-                f"{exc.errors(include_url=False)}"
-            ) from exc
-        return value
-
-    def clean(self) -> dict:
-        cleaned_data = super().clean()
-        if not self.instance.pk or "expected_version" not in cleaned_data:
-            return cleaned_data
-        current_version = (
-            EventCandidate.objects.filter(pk=self.instance.pk)
-            .values_list("edit_version", flat=True)
-            .first()
-        )
-        if current_version != cleaned_data["expected_version"]:
-            raise ValidationError(
-                "This candidate changed after the page was loaded. Reload and retry."
-            )
-
-        return cleaned_data
-
-
-class CanonicalizationPlanAdminForm(forms.ModelForm):
-    expected_version = forms.IntegerField(widget=forms.HiddenInput)
-
-    class Meta:
-        model = CanonicalizationPlan
-        fields = ("effective_proposal",)
-        widgets = {"effective_proposal": forms.Textarea(attrs={"rows": 36, "cols": 120})}
-
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        if self.instance.pk:
-            self.fields["expected_version"].initial = self.instance.plan_version
-
-    def clean_effective_proposal(self) -> dict:
-        value = self.cleaned_data["effective_proposal"]
-        try:
-            CanonicalizationProposal.model_validate(value)
-        except PydanticValidationError as exc:
-            raise forms.ValidationError(
-                "The proposal does not match the canonicalization schema: "
-                f"{exc.errors(include_url=False)}"
-            ) from exc
-        return value
-
-    def clean(self) -> dict:
-        cleaned_data = super().clean()
-        if not self.instance.pk or "expected_version" not in cleaned_data:
-            return cleaned_data
-        current = (
-            CanonicalizationPlan.objects.filter(pk=self.instance.pk)
-            .values_list("plan_version", flat=True)
-            .first()
-        )
-        if current != cleaned_data["expected_version"]:
-            raise ValidationError("This plan changed after the page was loaded. Reload and retry.")
-        return cleaned_data
-
-
-def _payload_summary(payload: object) -> str:
-    payload = payload if isinstance(payload, dict) else {}
-    lines = [f"Title: {payload.get('title') or 'Unknown'}"]
-    description = payload.get("description")
-    if description:
-        lines.append(f"Description: {description}")
-    occurrences = payload.get("occurrences")
-    if isinstance(occurrences, list):
-        for index, occurrence in enumerate(occurrences, start=1):
-            if not isinstance(occurrence, dict):
-                continue
-            date = occurrence.get("start_date") or "date unknown"
-            start_time = occurrence.get("start_time") or "time unknown"
-            mode = occurrence.get("attendance_mode") or "mode unknown"
-            location = occurrence.get("raw_location") or "no physical location"
-            lines.append(f"Occurrence {index}: {date} {start_time}; {mode}; {location}")
-    registrations = payload.get("registrations")
-    if isinstance(registrations, list) and registrations:
-        lines.append(f"Registrations: {len(registrations)}")
-    ambiguities = payload.get("ambiguities")
-    if isinstance(ambiguities, list) and ambiguities:
-        lines.append(f"Ambiguities: {len(ambiguities)}")
-    return format_html('<pre style="white-space: pre-wrap">{}</pre>', "\n".join(lines))
 
 
 class IngestionJobInline(admin.TabularInline):
@@ -305,29 +196,15 @@ class EventCandidateAdmin(admin.ModelAdmin):
 
     @admin.display(description="Candidate overview")
     def candidate_summary(self, obj: EventCandidate) -> str:
-        return _payload_summary(obj.effective_payload)
+        return admin_presenters.payload_summary(obj.effective_payload)
 
     @admin.display(description="Validation issues")
     def validation_issue_summary(self, obj: EventCandidate) -> str:
-        if not obj.validation_issues:
-            return "No validation issues"
-        lines = []
-        for issue in obj.validation_issues:
-            if not isinstance(issue, dict):
-                lines.append(str(issue))
-                continue
-            blocking = "blocking" if issue.get("blocks_canonicalization") else "review"
-            lines.append(
-                f"[{issue.get('severity', 'WARNING')}/{blocking}] "
-                f"{issue.get('code', 'UNKNOWN')} at {issue.get('path', '')}: "
-                f"{issue.get('message', '')}"
-            )
-        return format_html('<pre style="white-space: pre-wrap">{}</pre>', "\n".join(lines))
+        return admin_presenters.validation_issue_summary(obj)
 
     @admin.display(description="Original extracted payload")
     def raw_payload(self, obj: EventCandidate) -> str:
-        rendered = json.dumps(obj.extracted_payload, ensure_ascii=False, indent=2, sort_keys=True)
-        return format_html('<pre style="white-space: pre-wrap">{}</pre>', rendered)
+        return admin_presenters.raw_payload(obj)
 
     def has_add_permission(self, request) -> bool:
         return False
