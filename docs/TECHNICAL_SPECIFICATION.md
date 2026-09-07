@@ -396,10 +396,18 @@ to `127.0.0.1`. This is a local network boundary, not identity authentication;
 remote access requires a separate approved private-access or authentication
 decision.
 
-The web application should provide the map, synchronized list, filters, and
-event details defined in the business requirements. URL state, server/client
-rendering boundaries, and map-provider choice should be decided while building
-that interface.
+The web application server-renders published Event list and detail data through
+the generated client. Discovery filters, pagination, the selected mobile view,
+and map bounds are URL-backed so navigation and detail-page returns preserve the
+current context. The default list begins with the current Singapore date and
+orders the next occurrence first; past Events remain available explicitly.
+
+The interactive map uses Leaflet in a client-only boundary with OpenStreetMap
+tiles for the local personal-use phase. Occurrences at the same reviewed
+building share one count marker, while standalone venue points remain separate.
+Settled map movement updates the API `bbox` filter, and mobile presentation is
+list-first with an explicit List/Map switch. A different tile provider and its
+usage terms must be selected before any approved public deployment.
 
 ## 11. Time and location direction
 

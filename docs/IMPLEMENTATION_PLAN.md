@@ -62,10 +62,14 @@ owner-operated local phase.
 
 ## 5. Current milestone: personal discovery interface
 
-Build the first useful web vertical slice through the generated client: a map
-and synchronized event list, URL-backed filters, and an Event detail route.
+The first web vertical slice now uses the generated client to render a map and
+synchronized event list, URL-backed filters, and an Event detail route.
 Online-only occurrences remain in the list without map markers unless a
 physical-location filter is active.
+
+The milestone remains in progress until the owner can exercise the complete
+flow with a real published Event, including a reviewed physical venue on the
+map and an online-only or unresolved-location occurrence in the list.
 
 ## 6. Progress and completion rules
 

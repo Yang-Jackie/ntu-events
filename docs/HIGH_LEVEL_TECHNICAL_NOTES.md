@@ -19,11 +19,10 @@ is authoritative for progress.
 
 Milestone 6 is active:
 
-- Consume the generated Event API client rather than duplicating its contract
-- Select the map library and render reviewed building or standalone venue points
-- Keep map bounds, list results, filters, and URL state synchronized
-- Keep online-only and unresolved-location occurrences visible in the list when
-  no physical-location filter is active
+- Exercise the map, list, filters, and detail flow with a real published Event
+- Confirm reviewed physical venues receive markers while online-only and
+  unresolved-location occurrences remain discoverable in the list
+- Fix only usability or data-contract issues observed during that acceptance run
 
 ## Durable guardrails
 
