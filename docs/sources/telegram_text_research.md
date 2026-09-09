@@ -1,7 +1,7 @@
 # Telegram Text Source Notes
 
-**Status:** First production ingestion source, with an earlier standalone
-research harness
+**Status:** First implemented ingestion source and intended first source for the
+retained personal-use trial, with an earlier standalone research harness
 
 ## Source boundary
 
@@ -17,7 +17,7 @@ by Git.
 
 ## Research harness
 
-The host-operated research harness predates the Django production pipeline. It
+The host-operated research harness predates the Django application pipeline. It
 remains useful for isolated source exploration and does not canonicalize or
 publish events.
 
@@ -35,9 +35,9 @@ runs write JSON artifacts under ignored `storage/telegram/runs/`.
 The harness retains text and captions, skips media-only posts, and limits access
 to public broadcast channels visible to the authorized account.
 
-## Production path
+## Application path
 
-The Django pipeline is the implemented first production source. It provides
+The Django pipeline is the implemented first application source. It provides
 durable jobs, incremental retrieval, model-assisted screening and extraction,
 selective raw-content retention, provenance, candidate persistence, and Admin
 inspection.
@@ -46,7 +46,7 @@ Current setup, commands, provider configuration, and operational limits are
 documented in the root `README.md`. Avoid duplicating those values here because
 they may change with the implementation.
 
-The production pipeline creates reviewable candidates. A separate source-neutral
+The application pipeline creates reviewable candidates. A separate source-neutral
 worker matches and canonicalizes READY candidates; publication remains a later
 milestone.
 

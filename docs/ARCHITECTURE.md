@@ -152,8 +152,9 @@ to demonstrate the same isolation rather than being rejected solely for
 organizing files differently. The worker is currently a separate process in
 the same modular Django application, not a separate service or data owner.
 
-The first production pipeline is Telegram text ingestion. Future pipelines may
-use structured mapping, model-assisted extraction, OCR, managed retrieval, or
+The first implemented pipeline, and the first intended for the retained
+personal-use trial, is Telegram text ingestion. Future pipelines may use
+structured mapping, model-assisted extraction, OCR, managed retrieval, or
 bounded browser interaction without changing the worker's general ownership.
 Each source may split its adapter, documents, model client, screening,
 extraction, and orchestration as its implemented complexity requires without
@@ -171,6 +172,15 @@ sessions. Neither directory is canonical product data.
 
 PostgreSQL/PostGIS owns normalized product state and metadata that links it to
 raw evidence.
+
+Through Milestone 8, the local database and `var/raw/` are disposable
+development state and may be rebuilt instead of migrated or backfilled across
+implementation changes. Required catalogs and setup cannot rely on those stores
+as their only copy; they must be reconstructible through repository-owned
+migrations, catalogs or fixtures plus documented configuration and repeatable
+source setup. Milestone 9 establishes a clean retained personal-use state. From
+that boundary onward, PostgreSQL and its linked evidence are durable product
+state that later changes must preserve or deliberately transform.
 
 ## 7. Dependency direction
 

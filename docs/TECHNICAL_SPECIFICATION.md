@@ -86,6 +86,23 @@ event, diagnose failures, and support later reprocessing. Retention may differ
 by source and outcome when privacy, volume, or platform constraints require it;
 decide that policy with each source integration.
 
+### Development data lifecycle
+
+Through Milestone 8, local database rows and application raw storage are
+disposable development state. A change may require a clean rebuild rather than
+a data migration or backfill for rows produced by an older implementation.
+Schema migrations must still build and validate a fresh database, and all
+behavioral guarantees must hold for data created and processed by the current
+version.
+
+State required to enter the retained personal-use trial must be reproducible
+from version-controlled migrations, catalogs or fixtures, documented
+configuration, and repeatable source registration or ingestion. Manually
+curated database-only state cannot be the sole copy of required catalog or
+configuration data. Milestone 9 is the durability boundary: after its clean
+starting state is established, later changes must account for existing retained
+data through compatible changes, migrations, or explicit reviewed backfills.
+
 ### Source-appropriate processing
 
 Prefer reliable structured source data when it exists. Use model-assisted
@@ -150,11 +167,11 @@ implemented workflow rather than this summary.
 
 ## 8. Current ingestion behavior and source direction
 
-### Current first production source
+### Current first ingestion source
 
-The first production ingestion source is selected public Telegram broadcast
-channels accessed through the owner's authenticated Telethon session. The
-current pipeline:
+The first implemented ingestion source, and the first intended for the retained
+personal-use trial, is selected public Telegram broadcast channels accessed
+through the owner's authenticated Telethon session. The current pipeline:
 
 - Registers channels as independent sources
 - Retrieves text, captions, and URL metadata attached to message entities and
@@ -182,7 +199,7 @@ failure after an earlier attempt persisted a failed screening result.
 
 The NTU CCDS events site was used as structured-source research and remains a
 candidate for later official-site ingestion. It is not the implemented first
-production pipeline.
+ingestion pipeline.
 
 Each future source should choose the least complex reliable retrieval and
 interpretation method. Shared workflow rules should remain source-neutral,
@@ -494,7 +511,11 @@ the source material can be retained appropriately.
 
 Schema changes require migrations. Public API changes require regenerated
 OpenAPI and client artifacts. Repository checks should remain runnable through
-the documented root commands.
+the documented root commands. Before the Milestone 9 durability boundary,
+migrations need not preserve disposable rows from older development versions,
+but they must produce the intended schema and required reproducible setup from
+a clean database. From Milestone 9 onward, migrations and data changes must also
+preserve or explicitly transform retained personal-use state.
 
 ## 15. Deferred capabilities
 

@@ -1,6 +1,6 @@
 # NTU CCDS Events Source Research
 
-**Status:** Structured-source research; not the first production pipeline
+**Status:** Structured-source research; not the first implemented pipeline
 **Listing:** `https://www.ntu.edu.sg/computing/news-events/events`
 **Initial observation:** 2026-07-22, Asia/Singapore
 
@@ -8,7 +8,7 @@
 
 The NTU College of Computing and Data Science events site was studied to expose
 structured-source cases before the core domain was scaffolded. Public Telegram
-broadcast channels were later selected and implemented as the first production
+broadcast channels were later selected and implemented as the first application
 ingestion source.
 
 CCDS remains a useful candidate for later official-site ingestion because it

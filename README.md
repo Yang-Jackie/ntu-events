@@ -77,7 +77,7 @@ Run Django management commands inside the backend container:
 docker compose run --rm backend python apps/backend/manage.py <command>
 ```
 
-## Telegram production ingestion
+## Telegram ingestion
 
 Set `TELEGRAM_API_ID`, `TELEGRAM_API_HASH`, and `OPENAI_API_KEY` in the ignored
 `.env`. Authenticate once in an interactive terminal; the reusable Telethon

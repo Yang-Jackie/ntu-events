@@ -25,9 +25,9 @@ building-level venue for every location so an occurrence can resolve to a
 building before a room is known. It also creates only explicitly reviewed
 aliases such as `NS`, `SS`, `LHS`, `LHN`, and `ABS`.
 
-Rooms are added incrementally when production event sources require them and an
-authoritative directory confirms their identity. Raw extracted location text
-never creates a building, venue, or verified alias.
+Rooms are added incrementally when representative or retained-trial source
+evidence requires them and an authoritative directory confirms their identity.
+Raw extracted location text never creates a building, venue, or verified alias.
 
 ## Coordinate limitation
 

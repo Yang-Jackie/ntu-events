@@ -28,6 +28,20 @@ The project first runs as an owner-operated personal product using the complete
 ingestion and discovery workflow. This phase is intended to prove usefulness,
 coverage, data quality, and maintainability before public exposure.
 
+Development through Milestone 8 uses disposable local application data. Those
+milestones may reset and rebuild the database instead of preserving or
+backfilling rows created by an earlier implementation. Milestone 9 starts the
+retained owner-operated personal-use trial. From that boundary onward, changes
+must preserve or deliberately migrate the trial's canonical data, provenance,
+review decisions, and history.
+
+Disposable development data does not weaken the behavior being built. Each
+version must still enforce its current provenance, rerun, duplicate, review,
+and stale-write rules, and a fresh environment must be reproducible from the
+repository, documented configuration, and approved source setup. Data that is
+only useful for development may be replaced by representative fixtures or
+fresh ingestion.
+
 The intended audience for a later public release is NTU undergraduate students.
 Postgraduate students, staff, visitors, and events outside NTU may be considered
 later, but they do not drive the initial product.
@@ -81,10 +95,10 @@ The personal product should provide:
 - Retention of past events as a historical archive
 - Owner access in a local or otherwise non-public environment
 
-The first production ingestion source is selected public Telegram broadcast
-channels. Official NTU websites, including the CCDS events site already studied
-during domain research, remain expected source types for later controlled
-expansion.
+The first implemented ingestion source, and the first intended for the retained
+personal-use trial, is selected public Telegram broadcast channels. Official
+NTU websites, including the CCDS events site already studied during domain
+research, remain expected source types for later controlled expansion.
 
 ## 5. Discovery experience
 
@@ -179,7 +193,8 @@ Event.
 
 ## 9. Success and public-release gate
 
-The personal phase succeeds when repeated use demonstrates:
+The retained personal-use trial that starts at Milestone 9 succeeds when
+repeated use demonstrates:
 
 - Useful event coverage
 - Reliable dates and locations
