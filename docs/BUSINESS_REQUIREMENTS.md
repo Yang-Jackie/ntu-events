@@ -3,6 +3,10 @@
 **Document status:** Active product direction
 **Primary audience:** Project owner, contributors, and reviewers
 
+This document defines product outcomes, scope, and approved trust constraints.
+It does not prescribe technical mechanisms; possible implementations belong to
+technical planning and remain open until evaluated in the relevant milestone.
+
 ## 1. Product purpose
 
 NTU Events is a map-first discovery product for publicly advertised activities

@@ -5,10 +5,12 @@
 
 ## 1. Purpose
 
-This document defines where responsibilities belong and the dependency
-direction between them. It intentionally leaves internal class structure,
-algorithms, schemas, and provider mechanics to the milestone that implements
-them.
+This document describes current responsibility boundaries and the preferred
+dependency direction. These defaults help new work fit the repository without
+turning today's folder structure into a permanent design. Product, safety, and
+data-ownership boundaries are firm where stated; internal class structure,
+algorithms, schemas, provider mechanics, and future service boundaries remain
+open to evidence from the milestone that needs them.
 
 ## 2. Repository shape
 
@@ -37,7 +39,7 @@ ntu-events/
 New top-level directories should be added only when they have a clear owner and
 current use.
 
-## 3. Application boundaries
+## 3. Current application boundaries
 
 ### Backend
 
@@ -134,18 +136,21 @@ BLOCKED/READY/PROCESSED logical gate; no separate review aggregate exists.
 its source associations, and applied history. The canonicalization workflow is
 the only automated writer across that boundary.
 
-Within `ingestion`, source-specific access, screening, extraction, document
-handling, and stage runtime live under `pipelines/<source>/`. Their durable
+Within the current `ingestion` implementation, source-specific access,
+screening, extraction, document handling, and stage runtime live under
+`pipelines/<source>/`. Their durable
 handoff is a persisted `EventCandidate`; shared candidate creation and repair
-rules remain source-neutral. The `canonicalization` package owns everything
-from a READY candidate through matching, reconciliation context, proposal
-validation, plan creation, Event application, and provenance. It accepts a
-source-neutral decision-provider interface, so canonicalization model calls do
-not belong to any source pipeline. Source pipelines stop after persisting their
-EventCandidates. A separate source-neutral worker consumes unplanned READY
-candidates, including manually repaired ones, and the canonicalization package
-must never import a source pipeline. The worker is a separate process in the
-same modular Django application, not a separate service or data owner.
+rules remain source-neutral. The `canonicalization` package currently contains
+the workflow from a READY candidate through matching, reconciliation context,
+proposal validation, plan creation, Event application, and provenance. It
+accepts a source-neutral decision-provider interface, so canonicalization model
+calls do not belong to any source pipeline. Source pipelines stop after
+persisting their EventCandidates. A separate source-neutral worker consumes
+unplanned READY candidates, including manually repaired ones. Preserving that
+source-neutral dependency is the default; another package structure would need
+to demonstrate the same isolation rather than being rejected solely for
+organizing files differently. The worker is currently a separate process in
+the same modular Django application, not a separate service or data owner.
 
 The first production pipeline is Telegram text ingestion. Future pipelines may
 use structured mapping, model-assisted extraction, OCR, managed retrieval, or
@@ -185,8 +190,8 @@ Database, storage, and provider implementations
 
 Within the backend:
 
-- Domain behavior must not depend on API views, commands, workers, or frontend
-  code.
+- Domain behavior should not depend on API views, commands, workers, or frontend
+  code without a demonstrated reason to revise the boundary.
 - Entry points invoke shared owning workflows.
 - Source and provider adapters do not own canonical-event or publication
   policy.

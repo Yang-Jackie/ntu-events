@@ -3,14 +3,14 @@
 This is a short list of known implementation concerns, not a second roadmap.
 Milestone ownership and completion status belong in `IMPLEMENTATION_PLAN.md`.
 
-## Telegram client and session lifecycle (Milestone 7)
+## Telegram client and session lifecycle (Milestone 9)
 
 The worker currently rebuilds the underlying Telethon client for each job, and
 separate commands can touch the same saved session file. Decide and test a
 resource-lifetime and mutual-exclusion approach that works for the worker,
 login, channel discovery, and inline troubleshooting paths.
 
-## Source revisions and older Telegram edits (Milestone 7)
+## Source revisions and older Telegram edits (Milestone 9)
 
 When edited content is fetched, its changed content produces a new raw document,
 extraction, and candidate observation that now enters matching and

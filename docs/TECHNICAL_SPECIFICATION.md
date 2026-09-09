@@ -6,17 +6,26 @@
 
 ## 1. Purpose and level of detail
 
-This document translates the product direction into durable technical goals and
-system boundaries. It intentionally avoids deciding field lists, exact schemas,
-matching algorithms, status machines, endpoint parameters, provider settings,
-and workflow thresholds before the relevant feature is implemented.
+This document translates product direction into technical goals, guardrails,
+and a description of the current system. It guides later implementation without
+preselecting field lists, exact schemas, matching algorithms, status machines,
+endpoint parameters, provider settings, or workflow thresholds before the
+relevant feature is investigated.
 
-Those details should be decided during the owning milestone using real inputs,
-tests, and the existing implementation. Once verified, durable behavior may be
-recorded here at the level needed to guide later work.
+Technical statements have three different strengths:
 
-The implementation plan is authoritative for progress and sequencing. The
-architecture document is authoritative for repository ownership and dependency
+- **Guardrail:** an approved product, safety, security, or data-integrity
+  constraint that implementations need to preserve.
+- **Current behavior:** a factual description of the repository today. It may
+  change when evidence supports a better design.
+- **Candidate direction:** a preferred or plausible approach to evaluate during
+  the owning milestone, not an implementation decision.
+
+Detailed choices should be made during the owning milestone using real inputs,
+tests, and the existing implementation. Once verified, important current
+behavior may be summarized here without implying that its mechanism is
+permanent. The implementation plan records progress and sequencing; the
+architecture document describes current ownership and preferred dependency
 direction.
 
 ## 2. Technical goals
@@ -52,9 +61,9 @@ The repository currently uses:
 - Ruff, pytest, Prettier, ESLint, TypeScript checks, Vitest, Django checks, and
   API-contract drift checks
 
-These are current implementation facts, not a requirement that later
-capabilities must be forced into an unsuitable tool. Material changes should be
-justified against an observed need and reflected in the architecture.
+These are current implementation facts, not requirements for later
+capabilities. Material changes should be justified against an observed need and
+reflected in the relevant documentation.
 
 ## 4. Engineering principles
 
@@ -93,12 +102,12 @@ dedicated search engine.
 
 ## 5. System boundaries
 
-`ARCHITECTURE.md` is authoritative for repository ownership and dependency
-direction. In summary, Django owns domain data, workflows, internal review, and
-the API; Next.js owns presentation; the generated client carries the API
-contract; and PostgreSQL/PostGIS owns normalized relational and geographic
-state. Raw content remains behind an application interface rather than becoming
-canonical product data.
+`ARCHITECTURE.md` describes current repository ownership and the preferred
+dependency direction. In summary, Django owns domain data, workflows, internal
+review, and the API; Next.js owns presentation; the generated client carries
+the API contract; and PostgreSQL/PostGIS owns normalized relational and
+geographic state. Raw content remains behind an application interface rather
+than becoming canonical product data.
 
 ## 6. High-level data flow
 
@@ -139,7 +148,7 @@ Preserve these distinctions:
 Exact fields, cardinality, constraints, and state transitions follow the
 implemented workflow rather than this summary.
 
-## 8. Ingestion direction
+## 8. Current ingestion behavior and source direction
 
 ### Current first production source
 
@@ -188,7 +197,12 @@ authorization and are outside ordinary ingestion.
 
 Treat source content and provider output as untrusted.
 
-## 9. Processing workflow
+## 9. Current processing behavior
+
+This section summarizes the implemented workflow and the trust properties it
+currently provides. Exact thresholds, status transitions, and payload mechanics
+remain implementation details that may be revised with tests and observed
+evidence while preserving the stated trust properties.
 
 ### Candidate contract
 
@@ -359,7 +373,7 @@ should keep automatically processed data reviewable and non-public by default.
 Automatic publication, if ever introduced, requires evidence-based thresholds
 and an explicit later decision.
 
-## 10. API and web direction
+## 10. Current API and web behavior
 
 The backend exposes versioned API endpoints documented through OpenAPI. The
 committed schema generates the TypeScript contract used by the web
@@ -409,7 +423,7 @@ Settled map movement updates the API `bbox` filter, and mobile presentation is
 list-first with an explicit List/Map switch. A different tile provider and its
 usage terms must be selected before any approved public deployment.
 
-## 11. Time and location direction
+## 11. Time and location behavior and direction
 
 The current product interprets event schedules in the NTU Singapore context.
 The implementation must preserve date-only and ambiguous source information
@@ -433,7 +447,7 @@ The map initially uses reviewed building-level locations. Precise venue text
 can be shown before room-level geometry exists. Coordinates must come from an
 approved authoritative source and must not be guessed.
 
-## 12. Internal operations
+## 12. Internal operations direction
 
 Django Admin is the initial internal interface. It should make the current
 workflow inspectable and provide review or correction actions as those
@@ -491,6 +505,7 @@ demonstrates the need.
 
 ## 16. Pending decisions
 
-`IMPLEMENTATION_PLAN.md` owns milestone sequencing and pending decisions.
-Durable technical outcomes return here only after implementation and
-verification.
+`IMPLEMENTATION_PLAN.md` records milestone sequencing and decision checkpoints.
+Important technical outcomes return here only after implementation and
+verification, expressed as current behavior or an explicit guardrail rather
+than as an assumed permanent mechanism.

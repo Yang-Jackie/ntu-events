@@ -10,16 +10,21 @@ Before making changes, inspect the relevant repository documentation and existin
 - `docs/TECHNICAL_SPECIFICATION.md` — technical direction and system behavior
 - `docs/ARCHITECTURE.md` — repository boundaries, ownership and dependency direction
 - `docs/IMPLEMENTATION_PLAN.md` — current milestone, next goals and progress
-- `docs/HIGH_LEVEL_TECHNICAL_NOTES.md` — concise unresolved technical priorities
 - Relevant source notes, fixtures, tests and code when they exist
 
 Read-only inspection is allowed and expected before the alignment check. Do not assume that the latest task is isolated from earlier decisions.
+
+Interpret documentation according to what it is describing:
+
+- Approved product, safety, security, data-integrity, and scope constraints are firm.
+- Descriptions of implemented behavior are facts about the current repository, not promises that the implementation can never change.
+- Future designs, likely approaches, and examples are guidance to evaluate during the relevant milestone, not approved implementation decisions unless they are explicitly identified as such.
 
 ## 2. Perform an Alignment Check
 
 Compare every task against:
 
-1. The applicable repository documentation and current implementation
+1. The applicable repository documentation and current implementation, while distinguishing firm constraints from candidate approaches
 2. Established best practices and standard conventions for the selected technologies
 3. The active milestone and intended vertical slice
 
@@ -82,15 +87,15 @@ Do not report a task or milestone as complete when required verification has not
 Update documentation when the completed work changes its truth:
 
 - Update `IMPLEMENTATION_PLAN.md` for task, goal and milestone progress.
-- Update `TECHNICAL_SPECIFICATION.md` for durable system behavior or technical decisions.
-- Update `ARCHITECTURE.md` for repository boundaries, ownership or dependency changes.
+- Update `TECHNICAL_SPECIFICATION.md` for important current behavior, agreed guardrails, or explicitly approved technical decisions.
+- Update `ARCHITECTURE.md` when current repository boundaries, ownership, or preferred dependency direction changes.
 - Update `BUSINESS_REQUIREMENTS.md` only for approved product-scope or product-direction changes.
-- Do not create decision-history or ADR files. Keep only the current approved direction in the authoritative documents, replacing superseded text instead of preserving its history.
+- Do not create decision-history or ADR files. Keep only the current approved direction in the owning documents, replacing superseded text instead of preserving its history.
 - Update source notes, setup instructions and fixtures when their corresponding implementation changes.
 
 Do not update progress based only on scaffolding or partial implementation. Mark a milestone complete only when its documented exit condition is satisfied.
 
-Avoid duplicating the same rule across several documents. Update the authoritative document and add references elsewhere when useful.
+Avoid duplicating the same rule across several documents. Update the document that owns it and add references elsewhere when useful.
 
 ## 7. Communicate the Handoff
 
