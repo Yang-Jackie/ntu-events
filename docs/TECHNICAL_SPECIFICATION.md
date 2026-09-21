@@ -440,6 +440,81 @@ Settled map movement updates the API `bbox` filter, and mobile presentation is
 list-first with an explicit List/Map switch. A different tile provider and its
 usage terms must be selected before any approved public deployment.
 
+### Working note: possible map-data evolution
+
+The following describes the current intention for evolving the map, not an
+implemented contract or a promise that either provider combination will remain
+the best choice. Re-evaluate it against observed NTU coverage, available data,
+licensing, institutional approval, operational reliability, and the needs of
+the milestone that actually introduces the change.
+
+The likely first direction is a MapLibre-based map using an OSM-derived vector
+basemap, initially OpenFreeMap, with a deliberately small reviewed overlay for
+Events and NTU-specific information that the basemap does not represent well.
+Examples include canonical building or venue references, entrances, subunits,
+and eventually room-specific information. OSM remains the underlying geographic
+data source; the public tile provider is replaceable infrastructure and should
+not be treated as authoritative product data or as guaranteed production
+infrastructure.
+
+A possible later direction is to use institution-authorized NTU/MazeMap data
+for buildings, floors, rooms, POIs, and possibly routing. If NTU and MazeMap
+permit a structured export or read API, the existing MapLibre renderer could be
+retained while adding the authorized campus layers. A OneMap raster basemap
+could be substituted beneath those layers, with masks where its baked-in campus
+content conflicts with the authorized data. OneMap is not intrinsically
+required: if most of its NTU content would be hidden, an OSM-derived or other
+neutral basemap may remain the clearer background.
+
+MazeMap integration depends on what is actually authorized. A licensed data
+export can enter the project's normalized map-data path. A MazeMap iframe or JS
+SDK is instead a separately hosted map experience and should be treated as an
+integration, not as permission to extract or cache its underlying data. Current
+[MazeMap end-user terms](https://www.mazemap.com/terms) prohibit using or
+extracting its map data to produce a separate service without a written
+agreement, and the publicly documented [Data API
+v1](https://github.com/MazeMap/Data-API) is archived and marked deprecated.
+Obtain current documentation and explicit rights from NTU/MazeMap before
+designing against provider endpoints.
+
+Useful seams to preserve during direction one, without assuming the later data
+shape, include:
+
+- Keeping basemap configuration separate from canonical Event and venue data,
+  without spreading provider URLs or OpenFreeMap style-layer identifiers
+  through product behavior.
+- Keeping project-owned stable building, venue, and future space identifiers,
+  with OSM, NTU, MazeMap, OneMap, or other identifiers represented as source
+  cross-references rather than primary product identities.
+- Normalizing provider output before it reaches public API responses or map
+  components, while preserving source-specific payloads and adapters at the
+  boundary instead of making the canonical schema mirror one vendor.
+- Tracking provenance, applicable usage terms, retrieval or verification time,
+  and confidence separately for identity, naming, and geometry. A directory
+  may establish a room name without establishing its polygon or entrance.
+- Using WGS84 GeoJSON at the application boundary unless real integration
+  evidence supports another contract, with coordinate order, geometry type,
+  alignment, and polygon validity validated during import.
+- If floor data becomes in scope, keeping machine ordering, displayed floor
+  label, and provider-specific level or z-value distinct, while allowing room
+  geometry to be absent, a point, or a polygon rather than inventing precision.
+- Keeping visual layers conceptually separable: basemap, optional masks, campus
+  outdoor context, buildings, selected floor, rooms or POIs, and Events, and
+  restoring project-owned layers after a basemap-style change without relying
+  on a provider's internal layer ordering where avoidable.
+- Defining refresh and failure behavior after learning whether an authorized
+  source supplies snapshots, deltas, deletions, versions, or webhooks, and
+  retaining a last-known-good copy only when the applicable agreement permits
+  caching.
+- Preserving required attribution for every displayed source and applying
+  access controls before serving non-public or sensitive indoor information.
+  Hiding a client-side layer is not an authorization boundary.
+
+These considerations do not require building a general map-provider framework
+in advance. A reasonable starting point is the smallest practical separation,
+adapted later when real MazeMap access terms, schemas, update behavior, and NTU
+requirements are known.
+
 ## 11. Time and location behavior and direction
 
 The current product interprets event schedules in the NTU Singapore context.

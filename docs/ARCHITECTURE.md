@@ -225,6 +225,10 @@ response to measured workflow or operational needs.
 - Internal file-versus-folder layout as domains grow
 - Matching evaluation thresholds and broader source-update policy
 - Search and map-query organization
+- Basemap provider and renderer evolution after the current Leaflet slice
+- Delivery of possible institutional map data as an export, API, SDK, or embed
+- Indoor floor, room, and routing boundaries if representative authorized data
+  brings them into scope
 - Production raw-content storage
 - Scheduler and queue evolution
 - Public deployment topology

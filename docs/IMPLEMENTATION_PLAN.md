@@ -129,6 +129,26 @@ separate from normalized location data and unresolved wording is not guessed.
   based on representative source evidence and observed review volume rather
   than building all three.
 
+### Map evolution note (not a milestone exit condition)
+
+The present intention is to try an OSM-derived vector basemap with MapLibre and
+a small reviewed NTU overlay before pursuing deeper institutional map access.
+If NTU later authorizes structured MazeMap data, the likely next experiment is
+to retain the renderer and add normalized campus, floor, room, or POI layers;
+OneMap raster could replace the basemap where it proves useful. If authorization
+only permits the MazeMap iframe or JS SDK, treat that as a separate integration
+rather than assuming its underlying data can enter the venue registry.
+
+This sequence is a planning note, not additional Milestone 7 scope. The current
+milestone still needs only trustworthy building-level anchors and observed
+venue resolution. While implementing that slice, prefer project-owned stable
+identities, field-level provenance, replaceable basemap configuration, and a
+clear boundary between normalized location data and provider responses. Avoid
+speculative indoor schemas or a general provider framework until actual NTU or
+MazeMap data demonstrates what is needed. Revisit the sequence if coverage,
+licensing, cost, performance, or school guidance makes another path more
+appropriate.
+
 ### Exit conditions
 
 - The agreed in-scope building inventory is reviewed for identity, provenance,
