@@ -433,12 +433,15 @@ and map bounds are URL-backed so navigation and detail-page returns preserve the
 current context. The default list begins with the current Singapore date and
 orders the next occurrence first; past Events remain available explicitly.
 
-The interactive map uses Leaflet in a client-only boundary with OpenStreetMap
-tiles for the local personal-use phase. Occurrences at the same reviewed
-building share one count marker, while standalone venue points remain separate.
-Settled map movement updates the API `bbox` filter, and mobile presentation is
-list-first with an explicit List/Map switch. A different tile provider and its
-usage terms must be selected before any approved public deployment.
+The interactive map uses MapLibre GL JS in a client-only boundary with the
+OpenFreeMap Liberty style and its OSM-derived vector basemap for the local
+personal-use phase. The basemap style URL is replaceable configuration rather
+than canonical location data. Occurrences at the same reviewed building share
+one count marker, while standalone venue points remain separate. Settled map
+movement updates the API `bbox` filter, and mobile presentation is list-first
+with an explicit List/Map switch. The hosted basemap and its usage terms and
+operational guarantees must be reassessed before any approved public
+deployment.
 
 ### Working note: possible map-data evolution
 
@@ -448,14 +451,14 @@ the best choice. Re-evaluate it against observed NTU coverage, available data,
 licensing, institutional approval, operational reliability, and the needs of
 the milestone that actually introduces the change.
 
-The likely first direction is a MapLibre-based map using an OSM-derived vector
-basemap, initially OpenFreeMap, with a deliberately small reviewed overlay for
-Events and NTU-specific information that the basemap does not represent well.
-Examples include canonical building or venue references, entrances, subunits,
-and eventually room-specific information. OSM remains the underlying geographic
-data source; the public tile provider is replaceable infrastructure and should
-not be treated as authoritative product data or as guaranteed production
-infrastructure.
+The first renderer step is implemented as a MapLibre-based map using the
+OpenFreeMap OSM-derived vector basemap. A deliberately small reviewed overlay
+for Events and NTU-specific information that the basemap does not represent
+well remains a possible later step. Examples include canonical building or
+venue references, entrances, subunits, and eventually room-specific
+information. OSM remains the underlying geographic data source; the public
+tile provider is replaceable infrastructure and is not authoritative product
+data or guaranteed production infrastructure.
 
 A possible later direction is to use institution-authorized NTU/MazeMap data
 for buildings, floors, rooms, POIs, and possibly routing. If NTU and MazeMap
@@ -474,8 +477,6 @@ integration, not as permission to extract or cache its underlying data. Current
 extracting its map data to produce a separate service without a written
 agreement, and the publicly documented [Data API
 v1](https://github.com/MazeMap/Data-API) is archived and marked deprecated.
-Obtain current documentation and explicit rights from NTU/MazeMap before
-designing against provider endpoints.
 
 Useful seams to preserve during direction one, without assuming the later data
 shape, include:
@@ -537,7 +538,39 @@ exceptions belongs to hardening when representative sources require it.
 
 The map initially uses reviewed building-level locations. Precise venue text
 can be shown before room-level geometry exists. Coordinates must come from an
-approved authoritative source and must not be guessed.
+approved reviewable source and must not be guessed.
+
+The current non-geographic registry is rebuilt from a version-controlled
+reviewed catalog plus a version-controlled snapshot generated from NTU's
+public central and NBS facilities directories. Project-owned stable codes
+identify location anchors and venues. Location anchors can form a shallow
+campus/complex/block hierarchy; every anchor also has a fallback `Venue`, and
+attendable rooms or spaces belong to their most specific known anchor. Venue
+metadata can include standardized room and level codes, capacity, type, and
+the source directories' staff and student-organisation booking flags.
+
+Manual room-code records override generated snapshot rows for the same
+physical room, preventing duplicate venues while retaining richer reviewed
+metadata. Current and former names are represented through verified aliases
+only when globally unambiguous. Buildings, venues, and aliases retain source
+URLs and verification times. Catalog synchronization is idempotent, does not
+alter existing map points, and rejects geographic fields. MazeMap can inform a
+manual coverage review, but MazeMap-only data cannot enter the registry without
+written authorization; a venue first noticed there needs independent official
+NTU confirmation. Raw or ambiguous wording remains separate and unresolved
+rather than creating trusted records.
+
+Building geography is owned by a separate version-controlled WGS84 snapshot.
+It covers all active location anchors using reviewed OpenStreetMap objects and
+stores a source identifier, source URL, verification time, and positioning
+method separately from identity provenance. Most anchors use a mapped point or
+the centre of mapped geometry. Numbered teaching wings that OSM does not
+distinguish share their parent complex marker, multi-block halls may use an
+explicitly labelled derived centre, and temporary relocations remain labelled
+as temporary. Rooms and other indoor subvenues receive no invented point and
+inherit their building marker through the API. Synchronization is transactional
+and repeatable. The retained dataset requires “© OpenStreetMap contributors”
+attribution and notice of the ODbL terms.
 
 ## 12. Internal operations direction
 

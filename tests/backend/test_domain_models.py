@@ -306,9 +306,13 @@ def test_initial_classification_vocabularies_are_seeded() -> None:
 
 def test_core_locations_and_verified_aliases_are_seeded() -> None:
     hive = Building.objects.get(code="LHS")
-    building_venue = Venue.objects.get(building=hive, venue_type=VenueType.BUILDING)
+    building_venue = Venue.objects.get(code="LHS")
 
-    assert hive.map_point is None
+    assert hive.map_point is not None
+    assert hive.map_point.x == pytest.approx(103.6827198)
+    assert hive.map_point.y == pytest.approx(1.3432334)
+    assert hive.map_source_identifier == "way/389084380"
+    assert hive.name == "UOB Innovation Hub"
     assert hive.official_map_url == "https://maps.ntu.edu.sg/"
     assert VenueAlias.objects.filter(
         venue=building_venue,

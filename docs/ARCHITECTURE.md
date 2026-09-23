@@ -81,7 +81,10 @@ The current Django applications are organized by domain or capability:
 
 - `events`: canonical events, occurrences, registrations, and classification
   relationships
-- `venues`: buildings, venues, aliases, and future resolution behavior
+- `venues`: hierarchical location anchors, attendable venues, aliases, the
+  reviewed non-geographic catalog, its generated official-facility snapshot,
+  the separate reviewed building-point snapshot and map provenance, repeatable
+  synchronization, and future resolution behavior
 - `organizers`: organizer data
 - `sources`: registered sources, source representations, and raw-document
   metadata
@@ -225,7 +228,8 @@ response to measured workflow or operational needs.
 - Internal file-versus-folder layout as domains grow
 - Matching evaluation thresholds and broader source-update policy
 - Search and map-query organization
-- Basemap provider and renderer evolution after the current Leaflet slice
+- Basemap provider and project-owned layer evolution after the current
+  MapLibre/OpenFreeMap slice
 - Delivery of possible institutional map data as an export, API, SDK, or embed
 - Indoor floor, room, and routing boundaries if representative authorized data
   brings them into scope

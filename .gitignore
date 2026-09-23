@@ -16,6 +16,7 @@ var/
 node_modules/
 .pnpm-store/
 .next/
+apps/web/public/maplibre/
 coverage/
 *.tsbuildinfo
 .idea/

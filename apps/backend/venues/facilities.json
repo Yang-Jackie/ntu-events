@@ -1,0 +1,7271 @@
+{
+  "snapshot_version": 1,
+  "generated_on": "2026-09-22",
+  "scope": "Official public NTU central and NBS event/teaching facilities",
+  "sources": [
+    "ntu_facilities",
+    "nbs_facilities"
+  ],
+  "venues": [
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_ICC_LAB1_ICC_COLLAB_1",
+      "building_code": "EMB",
+      "name": "ICC-LAB1 ICC ColLAB 1",
+      "venue_type": "LABORATORY",
+      "floor": "05",
+      "level_code": "EMB-05",
+      "room_code": "EMB-05-19",
+      "capacity": 210,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine ICC-LAB1 ICC ColLAB 1",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "EMB-05-19",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_ICC_LAB2_ICC_COLLAB_2",
+      "building_code": "EMB",
+      "name": "ICC-LAB2 ICC ColLAB 2",
+      "venue_type": "LABORATORY",
+      "floor": "05",
+      "level_code": "EMB-05",
+      "room_code": "EMB-05-21",
+      "capacity": 174,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine ICC-LAB2 ICC ColLAB 2",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "EMB-05-21",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_LT",
+      "building_code": "LHN",
+      "name": "LHN-LT",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B1",
+      "level_code": "LHN-B1",
+      "room_code": "LHN-B1-15",
+      "capacity": 108,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-LT",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-B1-15",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_01",
+      "building_code": "LHN",
+      "name": "LHN-TR+01",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHN-B2",
+      "room_code": "LHN-B2-01",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+01",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-B2-01",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_02",
+      "building_code": "LHN",
+      "name": "LHN-TR+02",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHN-B2",
+      "room_code": "LHN-B2-02",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+02",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-B2-02",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_03",
+      "building_code": "LHN",
+      "name": "LHN-TR+03",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHN-B2",
+      "room_code": "LHN-B2-03",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+03",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-B2-03",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_04",
+      "building_code": "LHN",
+      "name": "LHN-TR+04",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHN-B2",
+      "room_code": "LHN-B2-04",
+      "capacity": 60,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+04",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-B2-04",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_05",
+      "building_code": "LHN",
+      "name": "LHN-TR+05",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHN-B2",
+      "room_code": "LHN-B2-05",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+05",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-B2-05",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_06",
+      "building_code": "LHN",
+      "name": "LHN-TR+06",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHN-B2",
+      "room_code": "LHN-B2-06",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+06",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-B2-06",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_07",
+      "building_code": "LHN",
+      "name": "LHN-TR+07",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHN-B2",
+      "room_code": "LHN-B2-07",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+07",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-B2-07",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_08",
+      "building_code": "LHN",
+      "name": "LHN-TR+08",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHN-B2",
+      "room_code": "LHN-B2-08",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+08",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-B2-08",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_09",
+      "building_code": "LHN",
+      "name": "LHN-TR+09",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHN-B2",
+      "room_code": "LHN-B2-09",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+09",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-B2-09",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_10",
+      "building_code": "LHN",
+      "name": "LHN-TR+10",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHN-B2",
+      "room_code": "LHN-B2-10",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+10",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-B2-10",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_11",
+      "building_code": "LHN",
+      "name": "LHN-TR+11",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHN-B2",
+      "room_code": "LHN-B2-11",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+11",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-B2-11",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_12",
+      "building_code": "LHN",
+      "name": "LHN-TR+12",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHN-B2",
+      "room_code": "LHN-B2-12",
+      "capacity": 66,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+12",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-B2-12",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_13",
+      "building_code": "LHN",
+      "name": "LHN-TR+13",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L1",
+      "level_code": "LHN-L1",
+      "room_code": "LHN-L1-01",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+13",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L1-01",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_14",
+      "building_code": "LHN",
+      "name": "LHN-TR+14",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L1",
+      "level_code": "LHN-L1",
+      "room_code": "LHN-L1-02",
+      "capacity": 72,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+14",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L1-02",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_15",
+      "building_code": "LHN",
+      "name": "LHN-TR+15",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L1",
+      "level_code": "LHN-L1",
+      "room_code": "LHN-L1-03",
+      "capacity": 72,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+15",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L1-03",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_16",
+      "building_code": "LHN",
+      "name": "LHN-TR+16",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L1",
+      "level_code": "LHN-L1",
+      "room_code": "LHN-L1-04",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+16",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L1-04",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_17",
+      "building_code": "LHN",
+      "name": "LHN-TR+17",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L1",
+      "level_code": "LHN-L1",
+      "room_code": "LHN-L1-05",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+17",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L1-05",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_18",
+      "building_code": "LHN",
+      "name": "LHN-TR+18",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L1",
+      "level_code": "LHN-L1",
+      "room_code": "LHN-L1-06",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+18",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L1-06",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_19",
+      "building_code": "LHN",
+      "name": "LHN-TR+19",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L1",
+      "level_code": "LHN-L1",
+      "room_code": "LHN-L1-07",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+19",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L1-07",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_20",
+      "building_code": "LHN",
+      "name": "LHN-TR+20",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L1",
+      "level_code": "LHN-L1",
+      "room_code": "LHN-L1-08",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+20",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L1-08",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_21",
+      "building_code": "LHN",
+      "name": "LHN-TR+21",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L1",
+      "level_code": "LHN-L1",
+      "room_code": "LHN-L1-09",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+21",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L1-09",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_22",
+      "building_code": "LHN",
+      "name": "LHN-TR+22",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L1",
+      "level_code": "LHN-L1",
+      "room_code": "LHN-L1-10",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+22",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L1-10",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_23",
+      "building_code": "LHN",
+      "name": "LHN-TR+23",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L1",
+      "level_code": "LHN-L1",
+      "room_code": "LHN-L1-11",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+23",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L1-11",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_24",
+      "building_code": "LHN",
+      "name": "LHN-TR+24",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L1",
+      "level_code": "LHN-L1",
+      "room_code": "LHN-L1-12",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+24",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L1-12",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_25",
+      "building_code": "LHN",
+      "name": "LHN-TR+25",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L1",
+      "level_code": "LHN-L1",
+      "room_code": "LHN-L1-13",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+25",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L1-13",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_26",
+      "building_code": "LHN",
+      "name": "LHN-TR+26",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L1",
+      "level_code": "LHN-L1",
+      "room_code": "LHN-L1-14",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+26",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L1-14",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_27",
+      "building_code": "LHN",
+      "name": "LHN-TR+27",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L1",
+      "level_code": "LHN-L1",
+      "room_code": "LHN-L1-15",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+27",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L1-15",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_28",
+      "building_code": "LHN",
+      "name": "LHN-TR+28",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L1",
+      "level_code": "LHN-L1",
+      "room_code": "LHN-L1-16",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+28",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L1-16",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_29",
+      "building_code": "LHN",
+      "name": "LHN-TR+29",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L1",
+      "level_code": "LHN-L1",
+      "room_code": "LHN-L1-17",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+29",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L1-17",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_30",
+      "building_code": "LHN",
+      "name": "LHN-TR+30",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L1",
+      "level_code": "LHN-L1",
+      "room_code": "LHN-L1-18",
+      "capacity": 60,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+30",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L1-18",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_31",
+      "building_code": "LHN",
+      "name": "LHN-TR+31",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L1",
+      "level_code": "LHN-L1",
+      "room_code": "LHN-L1-19",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+31",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L1-19",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_32",
+      "building_code": "LHN",
+      "name": "LHN-TR+32",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L1",
+      "level_code": "LHN-L1",
+      "room_code": "LHN-L1-20",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+32",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L1-20",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_33",
+      "building_code": "LHN",
+      "name": "LHN-TR+33",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L1",
+      "level_code": "LHN-L1",
+      "room_code": "LHN-L1-21",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+33",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L1-21",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_34",
+      "building_code": "LHN",
+      "name": "LHN-TR+34",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L1",
+      "level_code": "LHN-L1",
+      "room_code": "LHN-L1-22",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+34",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L1-22",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_35",
+      "building_code": "LHN",
+      "name": "LHN-TR+35",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L2",
+      "level_code": "LHN-L2",
+      "room_code": "LHN-L2-01",
+      "capacity": 36,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+35",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L2-01",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_36",
+      "building_code": "LHN",
+      "name": "LHN-TR+36",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L2",
+      "level_code": "LHN-L2",
+      "room_code": "LHN-L2-02",
+      "capacity": 72,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+36",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L2-02",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_37",
+      "building_code": "LHN",
+      "name": "LHN-TR+37",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L2",
+      "level_code": "LHN-L2",
+      "room_code": "LHN-L2-03",
+      "capacity": 72,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+37",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L2-03",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_38",
+      "building_code": "LHN",
+      "name": "LHN-TR+38",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L2",
+      "level_code": "LHN-L2",
+      "room_code": "LHN-L2-04",
+      "capacity": 36,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+38",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L2-04",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_39",
+      "building_code": "LHN",
+      "name": "LHN-TR+39",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L2",
+      "level_code": "LHN-L2",
+      "room_code": "LHN-L2-05",
+      "capacity": 36,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+39",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L2-05",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_40",
+      "building_code": "LHN",
+      "name": "LHN-TR+40",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L2",
+      "level_code": "LHN-L2",
+      "room_code": "LHN-L2-06",
+      "capacity": 36,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+40",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L2-06",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_41",
+      "building_code": "LHN",
+      "name": "LHN-TR+41",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L2",
+      "level_code": "LHN-L2",
+      "room_code": "LHN-L2-07",
+      "capacity": 36,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+41",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L2-07",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_42",
+      "building_code": "LHN",
+      "name": "LHN-TR+42",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L2",
+      "level_code": "LHN-L2",
+      "room_code": "LHN-L2-08",
+      "capacity": 36,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+42",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L2-08",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_43",
+      "building_code": "LHN",
+      "name": "LHN-TR+43",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L2",
+      "level_code": "LHN-L2",
+      "room_code": "LHN-L2-09",
+      "capacity": 36,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+43",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L2-09",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_44_DEDICATED_TO_STUDENTS_USE",
+      "building_code": "LHN",
+      "name": "LHN-TR+44 dedicated to students' use",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L2",
+      "level_code": "LHN-L2",
+      "room_code": "LHN-L2-10",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+44 dedicated to students' use",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L2-10",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_45_DEDICATED_TO_STUDENTS_USE",
+      "building_code": "LHN",
+      "name": "LHN-TR+45 dedicated to students' use",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L2",
+      "level_code": "LHN-L2",
+      "room_code": "LHN-L2-11",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+45 dedicated to students' use",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L2-11",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_46_DEDICATED_TO_STUDENTS_USE",
+      "building_code": "LHN",
+      "name": "LHN-TR+46 dedicated to students' use",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L2",
+      "level_code": "LHN-L2",
+      "room_code": "LHN-L2-12",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+46 dedicated to students' use",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L2-12",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_47_DEDICATED_TO_STUDENTS_USE",
+      "building_code": "LHN",
+      "name": "LHN-TR+47 dedicated to students' use",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L2",
+      "level_code": "LHN-L2",
+      "room_code": "LHN-L2-13",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+47 dedicated to students' use",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L2-13",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_48_DEDICATED_TO_STUDENTS_USE",
+      "building_code": "LHN",
+      "name": "LHN-TR+48 dedicated to students' use",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L2",
+      "level_code": "LHN-L2",
+      "room_code": "LHN-L2-14",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+48 dedicated to students' use",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L2-14",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_49_DEDICATED_TO_STUDENTS_USE",
+      "building_code": "LHN",
+      "name": "LHN-TR+49 dedicated to students' use",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L2",
+      "level_code": "LHN-L2",
+      "room_code": "LHN-L2-15",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+49 dedicated to students' use",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L2-15",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_50",
+      "building_code": "LHN",
+      "name": "LHN-TR+50",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L2",
+      "level_code": "LHN-L2",
+      "room_code": "LHN-L2-16",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+50",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L2-16",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_51_DEDICATED_TO_STUDENTS_USE",
+      "building_code": "LHN",
+      "name": "LHN-TR+51 dedicated to students' use",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L2",
+      "level_code": "LHN-L2",
+      "room_code": "LHN-L2-17",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+51 dedicated to students' use",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L2-17",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_52",
+      "building_code": "LHN",
+      "name": "LHN-TR+52",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L2",
+      "level_code": "LHN-L2",
+      "room_code": "LHN-L2-18",
+      "capacity": 60,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+52",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L2-18",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_53",
+      "building_code": "LHN",
+      "name": "LHN-TR+53",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L2",
+      "level_code": "LHN-L2",
+      "room_code": "LHN-L2-19",
+      "capacity": 36,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+53",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L2-19",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_54_DEDICATED_TO_STUDENTS_USE",
+      "building_code": "LHN",
+      "name": "LHN-TR+54 dedicated to students' use",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L2",
+      "level_code": "LHN-L2",
+      "room_code": "LHN-L2-20",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+54 dedicated to students' use",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L2-20",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_55",
+      "building_code": "LHN",
+      "name": "LHN-TR+55",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L2",
+      "level_code": "LHN-L2",
+      "room_code": "LHN-L2-21",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+55",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L2-21",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_THE_ARC_LHN_TR_56",
+      "building_code": "LHN",
+      "name": "LHN-TR+56",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "L2",
+      "level_code": "LHN-L2",
+      "room_code": "LHN-L2-22",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc LHN-TR+56",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-L2-22",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_LT",
+      "building_code": "LHS",
+      "name": "LHS-LT",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "01",
+      "level_code": "LHS-01",
+      "room_code": "LHS-01-04",
+      "capacity": 111,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-LT",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-01-04",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_46",
+      "building_code": "LHS",
+      "name": "LHS-TR+46",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "LHS-01",
+      "room_code": "LHS-01-05",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+46",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-01-05",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_47",
+      "building_code": "LHS",
+      "name": "LHS-TR+47",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "02",
+      "level_code": "LHS-02",
+      "room_code": "LHS-02-01",
+      "capacity": 60,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+47",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-02-01",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_48",
+      "building_code": "LHS",
+      "name": "LHS-TR+48",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "02",
+      "level_code": "LHS-02",
+      "room_code": "LHS-02-02",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+48",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-02-02",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_49",
+      "building_code": "LHS",
+      "name": "LHS-TR+49",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "02",
+      "level_code": "LHS-02",
+      "room_code": "LHS-02-03",
+      "capacity": 60,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+49",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-02-03",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_50",
+      "building_code": "LHS",
+      "name": "LHS-TR+50",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "02",
+      "level_code": "LHS-02",
+      "room_code": "LHS-02-04",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+50",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-02-04",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_51",
+      "building_code": "LHS",
+      "name": "LHS-TR+51",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "02",
+      "level_code": "LHS-02",
+      "room_code": "LHS-02-05",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+51",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-02-05",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_52",
+      "building_code": "LHS",
+      "name": "LHS-TR+52",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "02",
+      "level_code": "LHS-02",
+      "room_code": "LHS-02-06",
+      "capacity": 60,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+52",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-02-06",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_53",
+      "building_code": "LHS",
+      "name": "LHS-TR+53",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "02",
+      "level_code": "LHS-02",
+      "room_code": "LHS-02-07",
+      "capacity": 60,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+53",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-02-07",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_54",
+      "building_code": "LHS",
+      "name": "LHS-TR+54",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "02",
+      "level_code": "LHS-02",
+      "room_code": "LHS-02-08",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+54",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-02-08",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_55",
+      "building_code": "LHS",
+      "name": "LHS-TR+55",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "03",
+      "level_code": "LHS-03",
+      "room_code": "LHS-03-01",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+55",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-03-01",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_56_DEREK_GOH_BAK_HENG_TUTORIAL_ROOM",
+      "building_code": "LHS",
+      "name": "LHS-TR+56 Derek Goh Bak Heng Tutorial Room",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "03",
+      "level_code": "LHS-03",
+      "room_code": "LHS-03-02",
+      "capacity": 60,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+56 Derek Goh Bak Heng Tutorial Room",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-03-02",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_35",
+      "building_code": "LHS",
+      "name": "LHS-TR+35",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "LHS-B1",
+      "room_code": "LHS-B1-01",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+35",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B1-01",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_36",
+      "building_code": "LHS",
+      "name": "LHS-TR+36",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "LHS-B1",
+      "room_code": "LHS-B1-02",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+36",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B1-02",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_37",
+      "building_code": "LHS",
+      "name": "LHS-TR+37",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "LHS-B1",
+      "room_code": "LHS-B1-03",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+37",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B1-03",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_38",
+      "building_code": "LHS",
+      "name": "LHS-TR+38",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "LHS-B1",
+      "room_code": "LHS-B1-04",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+38",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B1-04",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_39",
+      "building_code": "LHS",
+      "name": "LHS-TR+39",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "LHS-B1",
+      "room_code": "LHS-B1-05",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+39",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B1-05",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_40",
+      "building_code": "LHS",
+      "name": "LHS-TR+40",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "LHS-B1",
+      "room_code": "LHS-B1-06",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+40",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B1-06",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_41",
+      "building_code": "LHS",
+      "name": "LHS-TR+41",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "LHS-B1",
+      "room_code": "LHS-B1-07",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+41",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B1-07",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_42",
+      "building_code": "LHS",
+      "name": "LHS-TR+42",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "LHS-B1",
+      "room_code": "LHS-B1-08",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+42",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B1-08",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_43",
+      "building_code": "LHS",
+      "name": "LHS-TR+43",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "LHS-B1",
+      "room_code": "LHS-B1-09",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+43",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B1-09",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_44",
+      "building_code": "LHS",
+      "name": "LHS-TR+44",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "LHS-B1",
+      "room_code": "LHS-B1-10",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+44",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B1-10",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_45",
+      "building_code": "LHS",
+      "name": "LHS-TR+45",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "LHS-B1",
+      "room_code": "LHS-B1-11",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+45",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B1-11",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_24",
+      "building_code": "LHS",
+      "name": "LHS-TR+24",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHS-B2",
+      "room_code": "LHS-B2-01",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+24",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B2-01",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_25",
+      "building_code": "LHS",
+      "name": "LHS-TR+25",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHS-B2",
+      "room_code": "LHS-B2-02",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+25",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B2-02",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_26",
+      "building_code": "LHS",
+      "name": "LHS-TR+26",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHS-B2",
+      "room_code": "LHS-B2-03",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+26",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B2-03",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_27",
+      "building_code": "LHS",
+      "name": "LHS-TR+27",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHS-B2",
+      "room_code": "LHS-B2-04",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+27",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B2-04",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_28",
+      "building_code": "LHS",
+      "name": "LHS-TR+28",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHS-B2",
+      "room_code": "LHS-B2-05",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+28",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B2-05",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_29",
+      "building_code": "LHS",
+      "name": "LHS-TR+29",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHS-B2",
+      "room_code": "LHS-B2-06",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+29",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B2-06",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_30",
+      "building_code": "LHS",
+      "name": "LHS-TR+30",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHS-B2",
+      "room_code": "LHS-B2-07",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+30",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B2-07",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_31",
+      "building_code": "LHS",
+      "name": "LHS-TR+31",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHS-B2",
+      "room_code": "LHS-B2-08",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+31",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B2-08",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_32",
+      "building_code": "LHS",
+      "name": "LHS-TR+32",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHS-B2",
+      "room_code": "LHS-B2-09",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+32",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B2-09",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_33",
+      "building_code": "LHS",
+      "name": "LHS-TR+33",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHS-B2",
+      "room_code": "LHS-B2-10",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+33",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B2-10",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_34",
+      "building_code": "LHS",
+      "name": "LHS-TR+34",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "level_code": "LHS-B2",
+      "room_code": "LHS-B2-11",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+34",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B2-11",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_13_REPURPOSED_FOR_I_E_USE",
+      "building_code": "LHS",
+      "name": "LHS-TR+13 Repurposed for I&E Use",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B3",
+      "level_code": "LHS-B3",
+      "room_code": "LHS-B3-01",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+13 Repurposed for I&E Use",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B3-01",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_14_REPURPOSED_FOR_I_E_USE",
+      "building_code": "LHS",
+      "name": "LHS-TR+14 Repurposed for I&E Use",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B3",
+      "level_code": "LHS-B3",
+      "room_code": "LHS-B3-02",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+14 Repurposed for I&E Use",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B3-02",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_15_REPURPOSED_FOR_I_E_USE",
+      "building_code": "LHS",
+      "name": "LHS-TR+15 Repurposed for I&E Use",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B3",
+      "level_code": "LHS-B3",
+      "room_code": "LHS-B3-03",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+15 Repurposed for I&E Use",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B3-03",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_16_REPURPOSED_FOR_I_E_USE",
+      "building_code": "LHS",
+      "name": "LHS-TR+16 Repurposed for I&E Use",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B3",
+      "level_code": "LHS-B3",
+      "room_code": "LHS-B3-04",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+16 Repurposed for I&E Use",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B3-04",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_17_REPURPOSED_FOR_I_E_USE",
+      "building_code": "LHS",
+      "name": "LHS-TR+17 Repurposed for I&E Use",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B3",
+      "level_code": "LHS-B3",
+      "room_code": "LHS-B3-05",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+17 Repurposed for I&E Use",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B3-05",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_18_REPURPOSED_FOR_I_E_USE",
+      "building_code": "LHS",
+      "name": "LHS-TR+18 Repurposed for I&E Use",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B3",
+      "level_code": "LHS-B3",
+      "room_code": "LHS-B3-06",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+18 Repurposed for I&E Use",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B3-06",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_19_REPURPOSED_FOR_I_E_USE",
+      "building_code": "LHS",
+      "name": "LHS-TR+19 Repurposed for I&E Use",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B3",
+      "level_code": "LHS-B3",
+      "room_code": "LHS-B3-07",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+19 Repurposed for I&E Use",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B3-07",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_20_BOOKED_BY_TUM_ASIA",
+      "building_code": "LHS",
+      "name": "LHS-TR+20 (Booked by TUM Asia)",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B3",
+      "level_code": "LHS-B3",
+      "room_code": "LHS-B3-08",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+20 (Booked by TUM Asia)",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B3-08",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_21_BOOKED_BY_TUM_ASIA",
+      "building_code": "LHS",
+      "name": "LHS-TR+21 (Booked by TUM Asia)",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B3",
+      "level_code": "LHS-B3",
+      "room_code": "LHS-B3-09",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+21 (Booked by TUM Asia)",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B3-09",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_22_BOOKED_BY_TUM_ASIA",
+      "building_code": "LHS",
+      "name": "LHS-TR+22 (Booked by TUM Asia)",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B3",
+      "level_code": "LHS-B3",
+      "room_code": "LHS-B3-10",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+22 (Booked by TUM Asia)",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B3-10",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_23_BOOKED_BY_TUM_ASIA",
+      "building_code": "LHS",
+      "name": "LHS-TR+23 (Booked by TUM Asia)",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B3",
+      "level_code": "LHS-B3",
+      "room_code": "LHS-B3-11",
+      "capacity": 24,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+23 (Booked by TUM Asia)",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B3-11",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_2_REPURPOSED_FOR_I_E_USE",
+      "building_code": "LHS",
+      "name": "LHS-TR+2 Repurposed for I&E Use",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B4",
+      "level_code": "LHS-B4",
+      "room_code": "LHS-B4-01",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+2 Repurposed for I&E Use",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B4-01",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_3_REPURPOSED_FOR_I_E_USE",
+      "building_code": "LHS",
+      "name": "LHS-TR+3 Repurposed for I&E Use",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B4",
+      "level_code": "LHS-B4",
+      "room_code": "LHS-B4-02",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+3 Repurposed for I&E Use",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B4-02",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_4_REPURPOSED_FOR_I_E_USE",
+      "building_code": "LHS",
+      "name": "LHS-TR+4 Repurposed for I&E Use",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B4",
+      "level_code": "LHS-B4",
+      "room_code": "LHS-B4-03",
+      "capacity": 36,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+4 Repurposed for I&E Use",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B4-03",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_5_REPURPOSED_FOR_I_E_USE",
+      "building_code": "LHS",
+      "name": "LHS-TR+5 Repurposed for I&E Use",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B4",
+      "level_code": "LHS-B4",
+      "room_code": "LHS-B4-04",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+5 Repurposed for I&E Use",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B4-04",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_6_TO_BE_REPURPOSED",
+      "building_code": "LHS",
+      "name": "LHS-TR+6 to be repurposed",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B4",
+      "level_code": "LHS-B4",
+      "room_code": "LHS-B4-05",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+6 to be repurposed",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B4-05",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_7_TO_BE_REPURPOSED",
+      "building_code": "LHS",
+      "name": "LHS-TR+7 to be repurposed",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B4",
+      "level_code": "LHS-B4",
+      "room_code": "LHS-B4-06",
+      "capacity": 36,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+7 to be repurposed",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B4-06",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_8_TO_BE_REPURPOSED",
+      "building_code": "LHS",
+      "name": "LHS-TR+8 to be repurposed",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B4",
+      "level_code": "LHS-B4",
+      "room_code": "LHS-B4-07",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+8 to be repurposed",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B4-07",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_9_TO_BE_REPURPOSED",
+      "building_code": "LHS",
+      "name": "LHS-TR+9 to be repurposed",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B4",
+      "level_code": "LHS-B4",
+      "room_code": "LHS-B4-08",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+9 to be repurposed",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B4-08",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_10_REPURPOSED_FOR_I_E_USE",
+      "building_code": "LHS",
+      "name": "LHS-TR+10 Repurposed for I&E Use",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B4",
+      "level_code": "LHS-B4",
+      "room_code": "LHS-B4-09",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+10 Repurposed for I&E Use",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B4-09",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_11_REPURPOSED_FOR_I_E_USE",
+      "building_code": "LHS",
+      "name": "LHS-TR+11 Repurposed for I&E Use",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B4",
+      "level_code": "LHS-B4",
+      "room_code": "LHS-B4-10",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+11 Repurposed for I&E Use",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B4-10",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_12_REPURPOSED_FOR_I_E_USE",
+      "building_code": "LHS",
+      "name": "LHS-TR+12 Repurposed for I&E Use",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B4",
+      "level_code": "LHS-B4",
+      "room_code": "LHS-B4-11",
+      "capacity": 24,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+12 Repurposed for I&E Use",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B4-11",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LHS_TR_1_BOOKED_BY_TUM_ASIA",
+      "building_code": "LHS",
+      "name": "LHS-TR+1 (Booked by TUM Asia)",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B5",
+      "level_code": "LHS-B5",
+      "room_code": "LHS-B5-03",
+      "capacity": 30,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LHS-TR+1 (Booked by TUM Asia)",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B5-03",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_LT19",
+      "building_code": "N2",
+      "name": "LT19",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B2A",
+      "level_code": "N2-B2A",
+      "room_code": "N2-B2A-01",
+      "capacity": 343,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT19",
+          "match_type": "OBSERVED"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_LT20",
+      "building_code": "N2",
+      "name": "LT20",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B2A",
+      "level_code": "N2-B2A",
+      "room_code": "N2-B2A-01",
+      "capacity": 343,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT20",
+          "match_type": "OBSERVED"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TRX43",
+      "building_code": "N2",
+      "name": "TRX43",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2A",
+      "level_code": "N2-B2A",
+      "room_code": "N2-B2A-05",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TRX43",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "N2-B2A-05",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TRX44",
+      "building_code": "N2",
+      "name": "TRX44",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2A",
+      "level_code": "N2-B2A",
+      "room_code": "N2-B2A-06",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TRX44",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "N2-B2A-06",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_LT19A",
+      "building_code": "NS",
+      "name": "LT19A",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "01",
+      "level_code": "LT19A-01",
+      "room_code": "LT19A-01-01",
+      "capacity": 577,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT19A",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LT19A-01-01",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_LT1A",
+      "building_code": "NS",
+      "name": "LT1A",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "01",
+      "level_code": "LT1A-01",
+      "room_code": "LT1A-01-01",
+      "capacity": 694,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT1A",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LT1A-01-01",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_LT2A",
+      "building_code": "NS",
+      "name": "LT2A",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "01",
+      "level_code": "LT2A-01",
+      "room_code": "LT2A-01-01",
+      "capacity": 602,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT2A",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LT2A-01-01",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_LT8",
+      "building_code": "NS1",
+      "name": "LT8",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "02",
+      "level_code": "NS1-02",
+      "room_code": "NS1-02-01",
+      "capacity": 240,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT8",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS1-02-01",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_LT7",
+      "building_code": "NS1",
+      "name": "LT7",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "02",
+      "level_code": "NS1-02",
+      "room_code": "NS1-02-03",
+      "capacity": 240,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT7",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS1-02-03",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_LT18",
+      "building_code": "NS1",
+      "name": "LT18",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "04",
+      "level_code": "NS1-04",
+      "room_code": "NS1-04-01",
+      "capacity": 122,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT18",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS1-04-01",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_LT17",
+      "building_code": "NS1",
+      "name": "LT17",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "04",
+      "level_code": "NS1-04",
+      "room_code": "NS1-04-03",
+      "capacity": 122,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT17",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS1-04-03",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_LT16",
+      "building_code": "NS1",
+      "name": "LT16",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "04",
+      "level_code": "NS1-04",
+      "room_code": "NS1-04-05",
+      "capacity": 122,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT16",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS1-04-05",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_LT15",
+      "building_code": "NS1",
+      "name": "LT15",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "04",
+      "level_code": "NS1-04",
+      "room_code": "NS1-04-07",
+      "capacity": 122,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT15",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS1-04-07",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_LT6",
+      "building_code": "NS2",
+      "name": "LT6",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "02",
+      "level_code": "NS2-02",
+      "room_code": "NS2-02-05",
+      "capacity": 240,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT6",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS2-02-05",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_LT5",
+      "building_code": "NS2",
+      "name": "LT5",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "02",
+      "level_code": "NS2-02",
+      "room_code": "NS2-02-07",
+      "capacity": 240,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT5",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS2-02-07",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_LT14",
+      "building_code": "NS2",
+      "name": "LT14",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "04",
+      "level_code": "NS2-04",
+      "room_code": "NS2-04-09",
+      "capacity": 122,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT14",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS2-04-09",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_LT13",
+      "building_code": "NS2",
+      "name": "LT13",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "04",
+      "level_code": "NS2-04",
+      "room_code": "NS2-04-11",
+      "capacity": 122,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT13",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS2-04-11",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_LT12",
+      "building_code": "NS2",
+      "name": "LT12",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "04",
+      "level_code": "NS2-04",
+      "room_code": "NS2-04-13",
+      "capacity": 122,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT12",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS2-04-13",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_LT11",
+      "building_code": "NS2",
+      "name": "LT11",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "04",
+      "level_code": "NS2-04",
+      "room_code": "NS2-04-15",
+      "capacity": 122,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT11",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS2-04-15",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_29",
+      "building_code": "NS2",
+      "name": "TR+29",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS2-05",
+      "room_code": "NS2-05-22",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+29",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS2-05-22",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_30",
+      "building_code": "NS2",
+      "name": "TR+30",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS2-05",
+      "room_code": "NS2-05-23",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+30",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS2-05-23",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_31",
+      "building_code": "NS2",
+      "name": "TR+31",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS2-05",
+      "room_code": "NS2-05-24",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+31",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS2-05-24",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_32",
+      "building_code": "NS2",
+      "name": "TR+32",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS2-05",
+      "room_code": "NS2-05-25",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+32",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS2-05-25",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_33",
+      "building_code": "NS2",
+      "name": "TR+33",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS2-05",
+      "room_code": "NS2-05-26",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+33",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS2-05-26",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_34",
+      "building_code": "NS2",
+      "name": "TR+34",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS2-05",
+      "room_code": "NS2-05-27",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+34",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS2-05-27",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_35",
+      "building_code": "NS2",
+      "name": "TR+35",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS2-05",
+      "room_code": "NS2-05-28",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+35",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS2-05-28",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_36",
+      "building_code": "NS2",
+      "name": "TR+36",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS2-05",
+      "room_code": "NS2-05-29",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+36",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS2-05-29",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_37",
+      "building_code": "NS2",
+      "name": "TR+37",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS2-05",
+      "room_code": "NS2-05-30",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+37",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS2-05-30",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_LT1_VON_LEE_YONG_MIANG_LECTURE_THEATRE",
+      "building_code": "NS3",
+      "name": "LT1 (Von Lee Yong Miang Lecture Theatre)",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "02",
+      "level_code": "NS3-02",
+      "room_code": "NS3-02-09",
+      "capacity": 502,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT1 (Von Lee Yong Miang Lecture Theatre)",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS3-02-09",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_LT3",
+      "building_code": "NS4",
+      "name": "LT3",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "02",
+      "level_code": "NS4-02",
+      "room_code": "NS4-02-32",
+      "capacity": 240,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT3",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-02-32",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_LT4",
+      "building_code": "NS4",
+      "name": "LT4",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "02",
+      "level_code": "NS4-02",
+      "room_code": "NS4-02-34",
+      "capacity": 240,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT4",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-02-34",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TCT_LT_TAN_CHIN_TUAN_LECTURE_THEATRE_LT2",
+      "building_code": "NS4",
+      "name": "TCT-LT Tan Chin Tuan Lecture Theatre (LT2)",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "02",
+      "level_code": "NS4-02",
+      "room_code": "NS4-02-36",
+      "capacity": 306,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TCT-LT Tan Chin Tuan Lecture Theatre (LT2)",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-02-36",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_LT9",
+      "building_code": "NS4",
+      "name": "LT9",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "04",
+      "level_code": "NS4-04",
+      "room_code": "NS4-04-39",
+      "capacity": 122,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT9",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-04-39",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_LT10",
+      "building_code": "NS4",
+      "name": "LT10",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "04",
+      "level_code": "NS4-04",
+      "room_code": "NS4-04-41",
+      "capacity": 122,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT10",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-04-41",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_22",
+      "building_code": "NS4",
+      "name": "TR+22",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS4-05",
+      "room_code": "NS4-05-100",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+22",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-05-100",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_23",
+      "building_code": "NS4",
+      "name": "TR+23",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS4-05",
+      "room_code": "NS4-05-101",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+23",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-05-101",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_1",
+      "building_code": "NS4",
+      "name": "TR+1",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS4-05",
+      "room_code": "NS4-05-79",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+1",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-05-79",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_2",
+      "building_code": "NS4",
+      "name": "TR+2",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS4-05",
+      "room_code": "NS4-05-80",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+2",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-05-80",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_3",
+      "building_code": "NS4",
+      "name": "TR+3",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS4-05",
+      "room_code": "NS4-05-81",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+3",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-05-81",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_4",
+      "building_code": "NS4",
+      "name": "TR+4",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS4-05",
+      "room_code": "NS4-05-82",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+4",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-05-82",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_5",
+      "building_code": "NS4",
+      "name": "TR+5",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS4-05",
+      "room_code": "NS4-05-83",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+5",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-05-83",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_6",
+      "building_code": "NS4",
+      "name": "TR+6",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS4-05",
+      "room_code": "NS4-05-84",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+6",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-05-84",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_7",
+      "building_code": "NS4",
+      "name": "TR+7",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS4-05",
+      "room_code": "NS4-05-85",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+7",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-05-85",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_8",
+      "building_code": "NS4",
+      "name": "TR+8",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS4-05",
+      "room_code": "NS4-05-86",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+8",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-05-86",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_9",
+      "building_code": "NS4",
+      "name": "TR+9",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS4-05",
+      "room_code": "NS4-05-87",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+9",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-05-87",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_15",
+      "building_code": "NS4",
+      "name": "TR+15",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS4-05",
+      "room_code": "NS4-05-93",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+15",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-05-93",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_16",
+      "building_code": "NS4",
+      "name": "TR+16",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS4-05",
+      "room_code": "NS4-05-94",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+16",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-05-94",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_17",
+      "building_code": "NS4",
+      "name": "TR+17",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS4-05",
+      "room_code": "NS4-05-95",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+17",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-05-95",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_18",
+      "building_code": "NS4",
+      "name": "TR+18",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS4-05",
+      "room_code": "NS4-05-96",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+18",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-05-96",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_19",
+      "building_code": "NS4",
+      "name": "TR+19",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS4-05",
+      "room_code": "NS4-05-97",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+19",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-05-97",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_20",
+      "building_code": "NS4",
+      "name": "TR+20",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS4-05",
+      "room_code": "NS4-05-98",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+20",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-05-98",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_NORTH_SPINE_TR_21",
+      "building_code": "NS4",
+      "name": "TR+21",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "05",
+      "level_code": "NS4-05",
+      "room_code": "NS4-05-99",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine TR+21",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-05-99",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S3_S3_SR1",
+      "building_code": "S3",
+      "name": "S3 Seminar Room 1",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B3B",
+      "level_code": "S3-B3B",
+      "room_code": "S3-B3B-36",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S3-SR1",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S3-B3B-36",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S3_S3_SR2",
+      "building_code": "S3",
+      "name": "S3 Seminar Room 2",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B3B",
+      "level_code": "S3-B3B",
+      "room_code": "S3-B3B-37",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S3-SR2",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S3-B3B-37",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S3_S3_SR3",
+      "building_code": "S3",
+      "name": "S3 Seminar Room 3",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B3B",
+      "level_code": "S3-B3B",
+      "room_code": "S3-B3B-38",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S3-SR3",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S3-B3B-38",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S3_S3_SR4",
+      "building_code": "S3",
+      "name": "S3 Seminar Room 4",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B3B",
+      "level_code": "S3-B3B",
+      "room_code": "S3-B3B-40",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S3-SR4",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S3-B3B-40",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S3_S3_SR5",
+      "building_code": "S3",
+      "name": "S3 Seminar Room 5",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B3B",
+      "level_code": "S3-B3B",
+      "room_code": "S3-B3B-41",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S3-SR5",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S3-B3B-41",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S3_S3_SR6",
+      "building_code": "S3",
+      "name": "S3 Seminar Room 6",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B3B",
+      "level_code": "S3-B3B",
+      "room_code": "S3-B3B-42",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S3-SR6",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S3-B3B-42",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S3_S3_B3C_CSI",
+      "building_code": "S3",
+      "name": "S3-B3C-CSI Lab",
+      "venue_type": "LABORATORY",
+      "floor": "B3C",
+      "level_code": "S3-B3C",
+      "room_code": "S3-B3C-CSI",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S3-B3C-CSI",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S3-B3C-CSI",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S3_CR1",
+      "building_code": "S3",
+      "name": "Conference Room 1",
+      "venue_type": "MEETING_ROOM",
+      "floor": "B4A",
+      "level_code": "S3-B4A",
+      "room_code": "S3-B4A-02",
+      "capacity": 60,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "CR1",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S3-B4A-02",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S3_CR2",
+      "building_code": "S3",
+      "name": "S3 Conference Room 2",
+      "venue_type": "MEETING_ROOM",
+      "floor": "B4A",
+      "level_code": "S3-B4A",
+      "room_code": "S3-B4A-03",
+      "capacity": 60,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "CR2",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S3-B4A-03",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S3_RR1",
+      "building_code": "S3",
+      "name": "Reading Room 1",
+      "venue_type": "FUNCTION_SPACE",
+      "floor": "B4A",
+      "level_code": "S3-B4A",
+      "room_code": "S3-B4A-04",
+      "capacity": 30,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "RR1",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S3-B4A-04",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S3_RR2",
+      "building_code": "S3",
+      "name": "Reading Room 2",
+      "venue_type": "FUNCTION_SPACE",
+      "floor": "B4A",
+      "level_code": "S3-B4A",
+      "room_code": "S3-B4A-05",
+      "capacity": 30,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "RR2",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S3-B4A-05",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S3_S3_SR7",
+      "building_code": "S3",
+      "name": "S3 Seminar Room 7",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B4C",
+      "level_code": "S3-B4C",
+      "room_code": "S3-B4C-08",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S3-SR7",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S3-B4C-08",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S3_S3_SR8",
+      "building_code": "S3",
+      "name": "S3 Seminar Room 8",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B4C",
+      "level_code": "S3-B4C",
+      "room_code": "S3-B4C-09",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S3-SR8",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S3-B4C-09",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S3_S3_SR9",
+      "building_code": "S3",
+      "name": "S3 Seminar Room 9",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B4C",
+      "level_code": "S3-B4C",
+      "room_code": "S3-B4C-10",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S3-SR9",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S3-B4C-10",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S3_S3_SR10",
+      "building_code": "S3",
+      "name": "S3 Seminar Room 10",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B4C",
+      "level_code": "S3-B4C",
+      "room_code": "S3-B4C-11",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S3-SR10",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S3-B4C-11",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S3_1_ESR2",
+      "building_code": "S3.1",
+      "name": "Executive Seminar Room 2",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B1",
+      "level_code": "S3.1-B1",
+      "room_code": "S3.1-B1-02/03",
+      "capacity": 53,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ESR2",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S3.1-B1-02/03",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S3_1_ESR3",
+      "building_code": "S3.1",
+      "name": "Executive Seminar Room 3",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B1",
+      "level_code": "S3.1-B1",
+      "room_code": "S3.1-B1-04/05",
+      "capacity": 53,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ESR3",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S3.1-B1-04/05",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S3_1_ESR4",
+      "building_code": "S3.1",
+      "name": "Executive Seminar Room 4",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B1",
+      "level_code": "S3.1-B1",
+      "room_code": "S3.1-B1-06",
+      "capacity": 48,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ESR4",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S3.1-B1-06",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S3_1_PR1",
+      "building_code": "S3.1",
+      "name": "Project Room 1",
+      "venue_type": "PROJECT_ROOM",
+      "floor": "B2",
+      "level_code": "S3.1-B2",
+      "room_code": "S3.1-B2-05",
+      "capacity": 20,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "PR1",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S3.1-B2-05",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S3_1_ESR8",
+      "building_code": "S3.1",
+      "name": "Executive Seminar Room 8",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2",
+      "level_code": "S3.1-B2",
+      "room_code": "S3.1-B2-07",
+      "capacity": 37,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ESR8",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S3.1-B2-07",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S3_1_ESR9",
+      "building_code": "S3.1",
+      "name": "Executive Seminar Room 9",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2",
+      "level_code": "S3.1-B2",
+      "room_code": "S3.1-B2-08/09",
+      "capacity": 53,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ESR9",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S3.1-B2-08/09",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S3_1_ESR10",
+      "building_code": "S3.1",
+      "name": "Executive Seminar Room 10",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2",
+      "level_code": "S3.1-B2",
+      "room_code": "S3.1-B2-11",
+      "capacity": 53,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ESR10",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S3.1-B2-11",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_S3_2_ESR4",
+      "building_code": "S3.2",
+      "name": "S3.2 ESR4",
+      "venue_type": "CLASSROOM",
+      "floor": "B3",
+      "level_code": "S3.2-B3",
+      "room_code": "S3.2-B3-07",
+      "capacity": 49,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine S3.2 ESR4",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "S3.2-B3-07",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_S3_2_ESR3",
+      "building_code": "S3.2",
+      "name": "S3.2 ESR3",
+      "venue_type": "CLASSROOM",
+      "floor": "B3",
+      "level_code": "S3.2-B3",
+      "room_code": "S3.2-B3-08",
+      "capacity": 49,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine S3.2 ESR3",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "S3.2-B3-08",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR23",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 23",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B1A",
+      "level_code": "S4-B1A",
+      "room_code": "S4-B1A-06",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR23",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B1A-06",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR24",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 24",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B1A",
+      "level_code": "S4-B1A",
+      "room_code": "S4-B1A-08",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR24",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B1A-08",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR21",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 21",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B1A",
+      "level_code": "S4-B1A",
+      "room_code": "S4-B1A-11",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR21",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B1A-11",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR22",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 22",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B1A",
+      "level_code": "S4-B1A",
+      "room_code": "S4-B1A-12",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR22",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B1A-12",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_FTR",
+      "building_code": "S4",
+      "name": "Financial Trading Room",
+      "venue_type": "CLASSROOM",
+      "floor": "B1B",
+      "level_code": "S4-B1B",
+      "room_code": "S4-B1B-14/16",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "FTR",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B1B-14/16",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_ITL_SA3",
+      "building_code": "S4",
+      "name": "S4 IT Special Applications Lab 3",
+      "venue_type": "LABORATORY",
+      "floor": "B1B",
+      "level_code": "S4-B1B",
+      "room_code": "S4-B1B-17",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ITL-SA3",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B1B-17",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_CL1",
+      "building_code": "S4",
+      "name": "S4 Communication Lab 1",
+      "venue_type": "LABORATORY",
+      "floor": "B1B",
+      "level_code": "S4-B1B",
+      "room_code": "S4-B1B-22",
+      "capacity": 25,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-CL1",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B1B-22",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_CL2",
+      "building_code": "S4",
+      "name": "S4 Communication Lab 2",
+      "venue_type": "LABORATORY",
+      "floor": "B1B",
+      "level_code": "S4-B1B",
+      "room_code": "S4-B1B-23",
+      "capacity": 25,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-CL2",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B1B-23",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_CL3",
+      "building_code": "S4",
+      "name": "S4 Communication Lab 3",
+      "venue_type": "LABORATORY",
+      "floor": "B1B",
+      "level_code": "S4-B1B",
+      "room_code": "S4-B1B-24",
+      "capacity": 25,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-CL3",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B1B-24",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_CL4",
+      "building_code": "S4",
+      "name": "S4 Communication Lab 4",
+      "venue_type": "LABORATORY",
+      "floor": "B1B",
+      "level_code": "S4-B1B",
+      "room_code": "S4-B1B-25",
+      "capacity": 25,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-CL4",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B1B-25",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_ITL_SA1",
+      "building_code": "S4",
+      "name": "S4 IT Special Applications Lab 1",
+      "venue_type": "LABORATORY",
+      "floor": "B1C",
+      "level_code": "S4-B1C",
+      "room_code": "S4-B1C-29",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ITL-SA1",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B1C-29",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_ITL_SA2",
+      "building_code": "S4",
+      "name": "S4 IT Special Applications Lab 2",
+      "venue_type": "LABORATORY",
+      "floor": "B1C",
+      "level_code": "S4-B1C",
+      "room_code": "S4-B1C-31",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ITL-SA2",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B1C-31",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_FTR1",
+      "building_code": "S4",
+      "name": "S4 Financial Trading Room 1",
+      "venue_type": "CLASSROOM",
+      "floor": "B1C",
+      "level_code": "S4-B1C",
+      "room_code": "S4-B1C-33",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "FTR1",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B1C-33",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_FTR2",
+      "building_code": "S4",
+      "name": "S4 Financial Trading Room 2",
+      "venue_type": "CLASSROOM",
+      "floor": "B1C",
+      "level_code": "S4-B1C",
+      "room_code": "S4-B1C-35",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "FTR2",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B1C-35",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_CL5",
+      "building_code": "S4",
+      "name": "S4 Communication Lab 5",
+      "venue_type": "LABORATORY",
+      "floor": "B1C",
+      "level_code": "S4-B1C",
+      "room_code": "S4-B1C-38",
+      "capacity": 25,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-CL5",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B1C-38",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_CL6",
+      "building_code": "S4",
+      "name": "S4 Communication Lab 6",
+      "venue_type": "LABORATORY",
+      "floor": "B1C",
+      "level_code": "S4-B1C",
+      "room_code": "S4-B1C-39",
+      "capacity": 25,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-CL6",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B1C-39",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_CL7",
+      "building_code": "S4",
+      "name": "S4 Communication Lab 7",
+      "venue_type": "LABORATORY",
+      "floor": "B1C",
+      "level_code": "S4-B1C",
+      "room_code": "S4-B1C-40",
+      "capacity": 25,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-CL7",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B1C-40",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_CL8",
+      "building_code": "S4",
+      "name": "S4 Communication Lab 8",
+      "venue_type": "LABORATORY",
+      "floor": "B1C",
+      "level_code": "S4-B1C",
+      "room_code": "S4-B1C-41",
+      "capacity": 25,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-CL8",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B1C-41",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_FTR3",
+      "building_code": "S4",
+      "name": "S4 Financial Trading Room 3",
+      "venue_type": "CLASSROOM",
+      "floor": "B1C",
+      "level_code": "S4-B1C",
+      "room_code": "S4-B1C-45/46",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "FTR3",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B1C-45/46",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR1",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 01",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2A",
+      "level_code": "S4-B2A",
+      "room_code": "S4-B2A-01",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR1",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B2A-01",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR2",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 02",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2A",
+      "level_code": "S4-B2A",
+      "room_code": "S4-B2A-02",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR2",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B2A-02",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR3",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 03",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2A",
+      "level_code": "S4-B2A",
+      "room_code": "S4-B2A-06",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR3",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B2A-06",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR4",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 04",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2A",
+      "level_code": "S4-B2A",
+      "room_code": "S4-B2A-07",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR4",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B2A-07",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR5",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 05",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2A",
+      "level_code": "S4-B2A",
+      "room_code": "S4-B2A-10",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR5",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B2A-10",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR6",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 06",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2A",
+      "level_code": "S4-B2A",
+      "room_code": "S4-B2A-11",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR6",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B2A-11",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR7",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 07",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2A",
+      "level_code": "S4-B2A",
+      "room_code": "S4-B2A-13",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR7",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B2A-13",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR8",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 08",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2A",
+      "level_code": "S4-B2A",
+      "room_code": "S4-B2A-14",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR8",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B2A-14",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR9",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 09",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2B",
+      "level_code": "S4-B2B",
+      "room_code": "S4-B2B-20",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR9",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B2B-20",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR10",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 10",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2B",
+      "level_code": "S4-B2B",
+      "room_code": "S4-B2B-21",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR10",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B2B-21",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR11",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 11",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2B",
+      "level_code": "S4-B2B",
+      "room_code": "S4-B2B-24",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR11",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B2B-24",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR12",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 12",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2B",
+      "level_code": "S4-B2B",
+      "room_code": "S4-B2B-25",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR12",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B2B-25",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR13",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 13",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2B",
+      "level_code": "S4-B2B",
+      "room_code": "S4-B2B-28",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR13",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B2B-28",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR14",
+      "building_code": "S4",
+      "name": "S4-Seminar Room 14",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2B",
+      "level_code": "S4-B2B",
+      "room_code": "S4-B2B-30",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR14",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B2B-30",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR15",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 15",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2B",
+      "level_code": "S4-B2B",
+      "room_code": "S4-B2B-31",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR15",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B2B-31",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR16",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 16",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2B",
+      "level_code": "S4-B2B",
+      "room_code": "S4-B2B-32",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR16",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B2B-32",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_151",
+      "building_code": "S4",
+      "name": "TR+151",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2C",
+      "level_code": "S4-B2C",
+      "room_code": "S4-B2C-36",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+151",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "S4-B2C-36",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_152",
+      "building_code": "S4",
+      "name": "TR+152",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2C",
+      "level_code": "S4-B2C",
+      "room_code": "S4-B2C-38",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+152",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "S4-B2C-38",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_153",
+      "building_code": "S4",
+      "name": "TR+153",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2C",
+      "level_code": "S4-B2C",
+      "room_code": "S4-B2C-39",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+153",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "S4-B2C-39",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_154",
+      "building_code": "S4",
+      "name": "TR+154",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2C",
+      "level_code": "S4-B2C",
+      "room_code": "S4-B2C-41",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+154",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "S4-B2C-41",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR17",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 17",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2C",
+      "level_code": "S4-B2C",
+      "room_code": "S4-B2C-42",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR17",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B2C-42",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR18",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 18",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2C",
+      "level_code": "S4-B2C",
+      "room_code": "S4-B2C-43",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR18",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B2C-43",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_159",
+      "building_code": "S4",
+      "name": "TR+159",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2C",
+      "level_code": "S4-B2C",
+      "room_code": "S4-B2C-46",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+159",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "S4-B2C-46",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_160",
+      "building_code": "S4",
+      "name": "TR+160",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2C",
+      "level_code": "S4-B2C",
+      "room_code": "S4-B2C-48",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+160",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "S4-B2C-48",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR19",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 19",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2C",
+      "level_code": "S4-B2C",
+      "room_code": "S4-B2C-49",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR19",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B2C-49",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_SR20",
+      "building_code": "S4",
+      "name": "S4 Seminar Room 20",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B2C",
+      "level_code": "S4-B2C",
+      "room_code": "S4-B2C-50",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-SR20",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B2C-50",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_165",
+      "building_code": "S4",
+      "name": "TR+165",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2C",
+      "level_code": "S4-B2C",
+      "room_code": "S4-B2C-53",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+165",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "S4-B2C-53",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_166",
+      "building_code": "S4",
+      "name": "TR+166",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2C",
+      "level_code": "S4-B2C",
+      "room_code": "S4-B2C-55",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+166",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "S4-B2C-55",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_B5_FR",
+      "building_code": "S4",
+      "name": "S4-B5-Function Room",
+      "venue_type": "FUNCTION_SPACE",
+      "floor": "B5",
+      "level_code": "S4-B5",
+      "room_code": "S4-B5-FR",
+      "capacity": 54,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-B5-FR",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B5-FR",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_B5_SR1",
+      "building_code": "S4",
+      "name": "S4-B5-Seminar Room 1",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B5",
+      "level_code": "S4-B5",
+      "room_code": "S4-B5-SR1",
+      "capacity": 80,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-B5-SR1",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B5-SR1",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_S4_S4_B5_SR2",
+      "building_code": "S4",
+      "name": "S4-B5 Seminar Room 2",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "B5",
+      "level_code": "S4-B5",
+      "room_code": "S4-B5-SR2",
+      "capacity": 80,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "S4-B5-SR2",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B5-SR2",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR103",
+      "building_code": "SS1",
+      "name": "TR103",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS1-01",
+      "room_code": "SS1-01-01",
+      "capacity": 75,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR103",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS1-01-01",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR102",
+      "building_code": "SS1",
+      "name": "TR102",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS1-01",
+      "room_code": "SS1-01-02",
+      "capacity": 75,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR102",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS1-01-02",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_67",
+      "building_code": "SS1",
+      "name": "TR+67",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "SS1-B1",
+      "room_code": "SS1-B1-01",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+67",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS1-B1-01",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_66",
+      "building_code": "SS1",
+      "name": "TR+66",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "SS1-B1",
+      "room_code": "SS1-B1-02",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+66",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS1-B1-02",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_65",
+      "building_code": "SS1",
+      "name": "TR+65",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "SS1-B1",
+      "room_code": "SS1-B1-03",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+65",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS1-B1-03",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_64",
+      "building_code": "SS1",
+      "name": "TR+64",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "SS1-B1",
+      "room_code": "SS1-B1-04",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+64",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS1-B1-04",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_63",
+      "building_code": "SS1",
+      "name": "TR+63",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "SS1-B1",
+      "room_code": "SS1-B1-05",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+63",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS1-B1-05",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_62",
+      "building_code": "SS1",
+      "name": "TR+62",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "SS1-B1",
+      "room_code": "SS1-B1-06",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+62",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS1-B1-06",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_61",
+      "building_code": "SS1",
+      "name": "TR+61",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "SS1-B1",
+      "room_code": "SS1-B1-07",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+61",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS1-B1-07",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_69",
+      "building_code": "SS1",
+      "name": "TR+69",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "SS1-B1",
+      "room_code": "SS1-B1-13",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+69",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS1-B1-13",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_68",
+      "building_code": "SS1",
+      "name": "TR+68",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "SS1-B1",
+      "room_code": "SS1-B1-14",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+68",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS1-B1-14",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LT25",
+      "building_code": "SS1",
+      "name": "LT25",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B2",
+      "level_code": "SS1-B2",
+      "room_code": "SS1-B2-01",
+      "capacity": 350,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LT25",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS1-B2-01",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LT24",
+      "building_code": "SS1",
+      "name": "LT24",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B2",
+      "level_code": "SS1-B2",
+      "room_code": "SS1-B2-03",
+      "capacity": 350,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LT24",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS1-B2-03",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_88",
+      "building_code": "SS2",
+      "name": "TR+88",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS2-01",
+      "room_code": "SS2-01-09",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+88",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS2-01-09",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_89",
+      "building_code": "SS2",
+      "name": "TR+89",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS2-01",
+      "room_code": "SS2-01-10",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+89",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS2-01-10",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_90",
+      "building_code": "SS2",
+      "name": "TR+90",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS2-01",
+      "room_code": "SS2-01-11",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+90",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS2-01-11",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_91",
+      "building_code": "SS2",
+      "name": "TR+91",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS2-01",
+      "room_code": "SS2-01-12",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+91",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS2-01-12",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_92",
+      "building_code": "SS2",
+      "name": "TR+92",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS2-01",
+      "room_code": "SS2-01-13",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+92",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS2-01-13",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_93",
+      "building_code": "SS2",
+      "name": "TR+93",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS2-01",
+      "room_code": "SS2-01-14",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+93",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS2-01-14",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_94",
+      "building_code": "SS2",
+      "name": "TR+94",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS2-01",
+      "room_code": "SS2-01-15",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+94",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS2-01-15",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_95",
+      "building_code": "SS2",
+      "name": "TR+95",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS2-01",
+      "room_code": "SS2-01-16",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+95",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS2-01-16",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_96",
+      "building_code": "SS2",
+      "name": "TR+96",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS2-01",
+      "room_code": "SS2-01-17",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+96",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS2-01-17",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LT29",
+      "building_code": "SS2",
+      "name": "LT29",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B1",
+      "level_code": "SS2-B1",
+      "room_code": "SS2-B1-16",
+      "capacity": 254,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LT29",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS2-B1-16",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LT28",
+      "building_code": "SS2",
+      "name": "LT28",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B1",
+      "level_code": "SS2-B1",
+      "room_code": "SS2-B1-17",
+      "capacity": 254,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LT28",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS2-B1-17",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LT23",
+      "building_code": "SS2",
+      "name": "LT23",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B2",
+      "level_code": "SS2-B2",
+      "room_code": "SS2-B2-05",
+      "capacity": 350,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LT23",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS2-B2-05",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LT22",
+      "building_code": "SS2",
+      "name": "LT22",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B2",
+      "level_code": "SS2-B2",
+      "room_code": "SS2-B2-07",
+      "capacity": 350,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LT22",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS2-B2-07",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_EXHIB_GALY",
+      "building_code": "SS3",
+      "name": "EXHIB GALY",
+      "venue_type": "FUNCTION_SPACE",
+      "floor": "B1",
+      "level_code": "SS3-B1",
+      "room_code": "SS3-B1-19",
+      "capacity": 200,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine EXHIB GALY",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS3-B1-19",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_FN_RM",
+      "building_code": "SS3",
+      "name": "FN RM",
+      "venue_type": "CLASSROOM",
+      "floor": "B1",
+      "level_code": "SS3-B1",
+      "room_code": "SS3-B1-22",
+      "capacity": 200,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine FN RM",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS3-B1-22",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_FOYER",
+      "building_code": "SS3",
+      "name": "FOYER",
+      "venue_type": "FUNCTION_SPACE",
+      "floor": "B2",
+      "level_code": "SS3-B2",
+      "room_code": "SS3-B2",
+      "capacity": 200,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine FOYER",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS3-B2",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_RECEP_RM",
+      "building_code": "SS3",
+      "name": "RECEP RM",
+      "venue_type": "FUNCTION_SPACE",
+      "floor": "B2",
+      "level_code": "SS3-B2",
+      "room_code": "SS3-B2-09",
+      "capacity": 10,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine RECEP RM",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS3-B2-09",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LKC_LT_LEE_KONG_CHIAN_LECTURE_THEATRE",
+      "building_code": "SS3",
+      "name": "LKC-LT Lee Kong Chian Lecture Theatre",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B2",
+      "level_code": "SS3-B2",
+      "room_code": "SS3-B2-10",
+      "capacity": 1010,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LKC-LT Lee Kong Chian Lecture Theatre",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS3-B2-10",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TRX122",
+      "building_code": "SS4",
+      "name": "TRX122",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS4-01",
+      "room_code": "SS4-01-24",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TRX122",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS4-01-24",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR121",
+      "building_code": "SS4",
+      "name": "TR121",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS4-01",
+      "room_code": "SS4-01-25",
+      "capacity": 40,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR121",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS4-01-25",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR120",
+      "building_code": "SS4",
+      "name": "TR120",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS4-01",
+      "room_code": "SS4-01-26",
+      "capacity": 48,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR120",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS4-01-26",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_114",
+      "building_code": "SS4",
+      "name": "TR+114",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS4-01",
+      "room_code": "SS4-01-32",
+      "capacity": 36,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+114",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS4-01-32",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_113",
+      "building_code": "SS4",
+      "name": "TR+113",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS4-01",
+      "room_code": "SS4-01-33",
+      "capacity": 36,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+113",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS4-01-33",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_112",
+      "building_code": "SS4",
+      "name": "TR+112",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS4-01",
+      "room_code": "SS4-01-34",
+      "capacity": 36,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+112",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS4-01-34",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_111",
+      "building_code": "SS4",
+      "name": "TR+111",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS4-01",
+      "room_code": "SS4-01-35",
+      "capacity": 36,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+111",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS4-01-35",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_110",
+      "building_code": "SS4",
+      "name": "TR+110",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS4-01",
+      "room_code": "SS4-01-36",
+      "capacity": 36,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+110",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS4-01-36",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_109",
+      "building_code": "SS4",
+      "name": "TR+109",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS4-01",
+      "room_code": "SS4-01-37",
+      "capacity": 36,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+109",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS4-01-37",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_108",
+      "building_code": "SS4",
+      "name": "TR+108",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS4-01",
+      "room_code": "SS4-01-38",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+108",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS4-01-38",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_107",
+      "building_code": "SS4",
+      "name": "TR+107",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS4-01",
+      "room_code": "SS4-01-39",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+107",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS4-01-39",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_106",
+      "building_code": "SS4",
+      "name": "TR+106",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "01",
+      "level_code": "SS4-01",
+      "room_code": "SS4-01-40",
+      "capacity": 36,
+      "bookable_by_staff": false,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+106",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS4-01-40",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_87",
+      "building_code": "SS4",
+      "name": "TR+87",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "SS4-B1",
+      "room_code": "SS4-B1-30",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+87",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS4-B1-30",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_80",
+      "building_code": "SS4",
+      "name": "TR+80",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "SS4-B1",
+      "room_code": "SS4-B1-31",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+80",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS4-B1-31",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_79",
+      "building_code": "SS4",
+      "name": "TR+79",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "SS4-B1",
+      "room_code": "SS4-B1-32",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+79",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS4-B1-32",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_78",
+      "building_code": "SS4",
+      "name": "TR+78",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "SS4-B1",
+      "room_code": "SS4-B1-33",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+78",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS4-B1-33",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_TR_77_DR_ELSIE_YU_CHEN_CHEE_1999",
+      "building_code": "SS4",
+      "name": "TR+77 Dr Elsie Yu Chen Chee (1999)",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B1",
+      "level_code": "SS4-B1",
+      "room_code": "SS4-B1-34",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine TR+77 Dr Elsie Yu Chen Chee (1999)",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS4-B1-34",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LT27",
+      "building_code": "SS4",
+      "name": "LT27",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B2",
+      "level_code": "SS4-B2",
+      "room_code": "SS4-B2-31",
+      "capacity": 406,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LT27",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS4-B2-31",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SOUTH_SPINE_LT26",
+      "building_code": "SS4",
+      "name": "LT26",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B2",
+      "level_code": "SS4-B2",
+      "room_code": "SS4-B2-33",
+      "capacity": 406,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": true,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LT26",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS4-B2-33",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_FL2",
+      "building_code": "WCYP",
+      "name": "ABS Gaia Lounge 2",
+      "venue_type": "FUNCTION_SPACE",
+      "floor": "01",
+      "level_code": "ABS-01",
+      "room_code": "ABS-01-017",
+      "capacity": 50,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS FL2",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-01-017",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_AUD",
+      "building_code": "WCYP",
+      "name": "ABS Auditorium",
+      "venue_type": "AUDITORIUM",
+      "floor": "01",
+      "level_code": "ABS-01",
+      "room_code": "ABS-01-AUDI",
+      "capacity": 190,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS AUD",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-01-AUDI",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_LT1",
+      "building_code": "WCYP",
+      "name": "ABS Lecture Theatre 1",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "01",
+      "level_code": "ABS-01",
+      "room_code": "ABS-01-LT1",
+      "capacity": 80,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS LT1",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-01-LT1",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_SR1",
+      "building_code": "WCYP",
+      "name": "ABS Seminar Room 1",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "01",
+      "level_code": "ABS-01",
+      "room_code": "ABS-01-SR1",
+      "capacity": 84,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS-SR1",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-01-SR1",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_SR2",
+      "building_code": "WCYP",
+      "name": "ABS Seminar Room 2",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "01",
+      "level_code": "ABS-01",
+      "room_code": "ABS-01-SR2",
+      "capacity": 84,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS-SR2",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-01-SR2",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_SR3",
+      "building_code": "WCYP",
+      "name": "ABS Seminar Room 3",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "01",
+      "level_code": "ABS-01",
+      "room_code": "ABS-01-SR3",
+      "capacity": 54,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS-SR3",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-01-SR3",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_COMR1",
+      "building_code": "WCYP",
+      "name": "ABS Computing Room 1",
+      "venue_type": "COMPUTING_ROOM",
+      "floor": "02",
+      "level_code": "ABS-02",
+      "room_code": "ABS-02-043",
+      "capacity": 58,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS COMR1",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-02-043",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_LT2",
+      "building_code": "WCYP",
+      "name": "ABS Lecture Theatre 2",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "02",
+      "level_code": "ABS-02",
+      "room_code": "ABS-02-LT2",
+      "capacity": 80,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS LT2",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-02-LT2",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_LT3",
+      "building_code": "WCYP",
+      "name": "ABS Lecture Theatre 3",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "02",
+      "level_code": "ABS-02",
+      "room_code": "ABS-02-LT3",
+      "capacity": 80,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS LT3",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-02-LT3",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_LT4",
+      "building_code": "WCYP",
+      "name": "ABS Lecture Theatre 4",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "02",
+      "level_code": "ABS-02",
+      "room_code": "ABS-02-LT4",
+      "capacity": 80,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS LT4",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-02-LT4",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_LT6",
+      "building_code": "WCYP",
+      "name": "ABS Lecture Theatre 6",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "02",
+      "level_code": "ABS-02",
+      "room_code": "ABS-02-LT6",
+      "capacity": 120,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS LT6",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-02-LT6",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_SR10",
+      "building_code": "WCYP",
+      "name": "ABS Seminar Room 10",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "02",
+      "level_code": "ABS-02",
+      "room_code": "ABS-02-SR10",
+      "capacity": 48,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS-SR10",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-02-SR10",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_SR11",
+      "building_code": "WCYP",
+      "name": "ABS Seminar Room 11",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "02",
+      "level_code": "ABS-02",
+      "room_code": "ABS-02-SR11",
+      "capacity": 60,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS-SR11",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-02-SR11",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_SR12",
+      "building_code": "WCYP",
+      "name": "ABS Seminar Room 12",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "02",
+      "level_code": "ABS-02",
+      "room_code": "ABS-02-SR12",
+      "capacity": 60,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS-SR12",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-02-SR12",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_SR13",
+      "building_code": "WCYP",
+      "name": "ABS Seminar Room 13",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "02",
+      "level_code": "ABS-02",
+      "room_code": "ABS-02-SR13",
+      "capacity": 48,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS-SR13",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-02-SR13",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_SR4",
+      "building_code": "WCYP",
+      "name": "ABS Seminar Room 4",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "02",
+      "level_code": "ABS-02",
+      "room_code": "ABS-02-SR4",
+      "capacity": 60,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS-SR4",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-02-SR4",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_SR5",
+      "building_code": "WCYP",
+      "name": "ABS Seminar Room 5",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "02",
+      "level_code": "ABS-02",
+      "room_code": "ABS-02-SR5",
+      "capacity": 60,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS-SR5",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-02-SR5",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_SR6",
+      "building_code": "WCYP",
+      "name": "ABS Seminar Room 6",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "02",
+      "level_code": "ABS-02",
+      "room_code": "ABS-02-SR6",
+      "capacity": 60,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS-SR6",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-02-SR6",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_SR7",
+      "building_code": "WCYP",
+      "name": "ABS Seminar Room 7",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "02",
+      "level_code": "ABS-02",
+      "room_code": "ABS-02-SR7",
+      "capacity": 66,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS-SR7",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-02-SR7",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_SR8",
+      "building_code": "WCYP",
+      "name": "ABS Seminar Room 8",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "02",
+      "level_code": "ABS-02",
+      "room_code": "ABS-02-SR8",
+      "capacity": 48,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS-SR8",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-02-SR8",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_SR9",
+      "building_code": "WCYP",
+      "name": "ABS Seminar Room 9",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "02",
+      "level_code": "ABS-02",
+      "room_code": "ABS-02-SR9",
+      "capacity": 66,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS-SR9",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-02-SR9",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_COMR2",
+      "building_code": "WCYP",
+      "name": "ABS Computing Room 2",
+      "venue_type": "COMPUTING_ROOM",
+      "floor": "03",
+      "level_code": "ABS-03",
+      "room_code": "ABS-03-030",
+      "capacity": 58,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS COMR2",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-03-030",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_LT10",
+      "building_code": "WCYP",
+      "name": "ABS Lecture Theatre 10",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "03",
+      "level_code": "ABS-03",
+      "room_code": "ABS-03-LT10",
+      "capacity": 120,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS LT10",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-03-LT10",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_LT7",
+      "building_code": "WCYP",
+      "name": "ABS Lecture Theatre 7",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "03",
+      "level_code": "ABS-03",
+      "room_code": "ABS-03-LT7",
+      "capacity": 80,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS LT7",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-03-LT7",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_LT8",
+      "building_code": "WCYP",
+      "name": "ABS Lecture Theatre 8",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "03",
+      "level_code": "ABS-03",
+      "room_code": "ABS-03-LT8",
+      "capacity": 80,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS LT8",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-03-LT8",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_LT9",
+      "building_code": "WCYP",
+      "name": "ABS Lecture Theatre 9",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "03",
+      "level_code": "ABS-03",
+      "room_code": "ABS-03-LT9",
+      "capacity": 80,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS LT9",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-03-LT9",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_SR14",
+      "building_code": "WCYP",
+      "name": "ABS Seminar Room 14",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "03",
+      "level_code": "ABS-03",
+      "room_code": "ABS-03-SR14",
+      "capacity": 54,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS-SR14",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-03-SR14",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_NBS_ABS_ABS_SR15",
+      "building_code": "WCYP",
+      "name": "ABS Seminar Room 15",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "03",
+      "level_code": "ABS-03",
+      "room_code": "ABS-03-SR15",
+      "capacity": 54,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS-SR15",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-03-SR15",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SCI_BUILDING_CS_TR_7",
+      "building_code": "WKWSCI",
+      "name": "CS-TR+7",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "02",
+      "level_code": "CS-02",
+      "room_code": "CS-02-18",
+      "capacity": 30,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "WKWSCI CS-TR+7",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "CS-02-18",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SCI_BUILDING_CS_TR_8",
+      "building_code": "WKWSCI",
+      "name": "CS-TR+8",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "02",
+      "level_code": "CS-02",
+      "room_code": "CS-02-21",
+      "capacity": 36,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "WKWSCI CS-TR+8",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "CS-02-21",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SCI_BUILDING_CS_TR_9",
+      "building_code": "WKWSCI",
+      "name": "CS-TR+9",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "03",
+      "level_code": "CS-03",
+      "room_code": "CS-03-31",
+      "capacity": 24,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "WKWSCI CS-TR+9",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "CS-03-31",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "FBS_CENTRAL_SCI_BUILDING_LF_LT_LEE_FOUNDATION_LECTURE_THEATRE_CS_LT1",
+      "building_code": "WKWSCI",
+      "name": "LF-LT Lee Foundation Lecture Theatre (CS-LT1)",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "01",
+      "level_code": "WKWSCI-01",
+      "room_code": "WKWSCI-01-LT1",
+      "capacity": 219,
+      "bookable_by_staff": true,
+      "bookable_by_student_organisations": false,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "WKWSCI LF-LT Lee Foundation Lecture Theatre (CS-LT1)",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "WKWSCI-01-LT1",
+          "match_type": "EXACT"
+        }
+      ]
+    }
+  ]
+}

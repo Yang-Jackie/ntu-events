@@ -2,8 +2,8 @@
 
 **Document status:** Active implementation plan
 **Current milestone:** 7 — Venue registry consolidation
-**Next delivery goal:** Establish a reviewed, maintainable location registry
-that supplies real building map points and resolves observed venue wording
+**Next delivery goal:** Exercise representative source-location resolution and
+the fresh-database Event-to-reviewed-marker flow
 
 This plan commits to delivery outcomes, sequencing, and completion evidence.
 Candidate directions describe plausible starting points, not approved
@@ -31,22 +31,22 @@ personal-use trial; changes after that point must account for its existing data.
 
 ## 2. Milestones
 
-| Milestone                       | Outcome                                                                                          | Status      |
-| ------------------------------- | ------------------------------------------------------------------------------------------------ | ----------- |
-| 0. Foundation research          | Product scope, initial source research, and domain questions are understood well enough to begin | Complete    |
-| 1. Repository scaffold          | Backend, web, API-client package, local database, and basic checks run                           | Complete    |
-| 2. Domain foundation            | Core source, ingestion, event, organizer, classification, and venue records are reviewable       | Complete    |
-| 3. First-source ingestion       | Telegram content can be processed repeatedly with retained provenance and inspectable results    | Complete    |
-| 4. Processing workflow          | A reviewable candidate can become canonical event data through a safe, repeatable workflow       | Complete    |
-| 4A. Deduplication hardening     | Likely duplicates and revisions are identified and resolved using reviewable evidence            | Complete    |
-| 5. API contract                 | The web application can retrieve typed event data through the generated client                   | Complete    |
-| 6. Personal discovery interface | The owner can find ingested Events through a local map, list, and detail view                    | Complete    |
-| 7. Venue registry consolidation | Buildings and observed venues have reviewed identities, aliases, relationships, and map points  | In progress |
-| 8. Organizer registry consolidation | Known organizers resolve consistently and new organizer mentions enter an owner-reviewed flow | Not started |
-| 9. Retained personal-use hardening | A clean retained trial handles corrections, reruns, failures, source changes, and upgrades reliably | Not started |
-| 10. Controlled source expansion | Additional approved sources reuse the shared workflow                                            | Not started |
-| 11. Public-readiness gate       | The owner approves evidence, quality, security, privacy, accessibility, and rollout readiness    | Not started |
-| 12. Public deployment           | The approved audience can reliably access the product                                            | Not started |
+| Milestone                           | Outcome                                                                                             | Status      |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------- | ----------- |
+| 0. Foundation research              | Product scope, initial source research, and domain questions are understood well enough to begin    | Complete    |
+| 1. Repository scaffold              | Backend, web, API-client package, local database, and basic checks run                              | Complete    |
+| 2. Domain foundation                | Core source, ingestion, event, organizer, classification, and venue records are reviewable          | Complete    |
+| 3. First-source ingestion           | Telegram content can be processed repeatedly with retained provenance and inspectable results       | Complete    |
+| 4. Processing workflow              | A reviewable candidate can become canonical event data through a safe, repeatable workflow          | Complete    |
+| 4A. Deduplication hardening         | Likely duplicates and revisions are identified and resolved using reviewable evidence               | Complete    |
+| 5. API contract                     | The web application can retrieve typed event data through the generated client                      | Complete    |
+| 6. Personal discovery interface     | The owner can find ingested Events through a local map, list, and detail view                       | Complete    |
+| 7. Venue registry consolidation     | Buildings and observed venues have reviewed identities, aliases, relationships, and map points      | In progress |
+| 8. Organizer registry consolidation | Known organizers resolve consistently and new organizer mentions enter an owner-reviewed flow       | Not started |
+| 9. Retained personal-use hardening  | A clean retained trial handles corrections, reruns, failures, source changes, and upgrades reliably | Not started |
+| 10. Controlled source expansion     | Additional approved sources reuse the shared workflow                                               | Not started |
+| 11. Public-readiness gate           | The owner approves evidence, quality, security, privacy, accessibility, and rollout readiness       | Not started |
+| 12. Public deployment               | The approved audience can reliably access the product                                               | Not started |
 
 ## 3. Completed milestone: deduplication hardening
 
@@ -110,6 +110,33 @@ separate from normalized location data and unresolved wording is not guessed.
 5. What is the simplest reproducible maintenance and resolution workflow that
    supports a clean rebuild and stays inspectable and safe on reruns?
 
+### Implemented registry and building-point slices
+
+The repository now owns a reviewed catalog of stable NTU/NIE location and
+venue identities. It includes a shallow campus/complex/block hierarchy,
+standardized level and room codes, comprehensive public central and NBS
+teaching/event facilities (including tutorial, seminar, computing and lab
+spaces), selected independently verified specialist spaces, capacities and
+booking flags where published, current/former-name aliases, and per-record
+source provenance. A reviewed manual catalog and generated official-directory
+snapshot merge by physical room code to minimize duplication. Migrations and
+an idempotent management command rebuild the result safely. Verified aliases
+are globally unambiguous, and the catalog validator rejects geographic fields
+so this stage cannot accidentally invent or overwrite coordinates.
+
+Geographic data remains a separate reviewed snapshot. It supplies WGS84 points
+for all 89 active anchors from OpenStreetMap objects, records OSM provenance,
+verification time and positioning method, and synchronizes idempotently without
+placing coordinates on rooms. Exact mapped points and building-geometry centres
+are preferred; indistinguishable North/South Spine sub-blocks use their parent
+complex marker, two multi-block halls use a documented derived centre, and Hall
+1 uses its officially announced temporary 30 Nanyang Link site. OSM attribution
+and ODbL terms are retained with the snapshot.
+
+This completes the identity, relationship and building-point foundation, not
+Milestone 7. Representative ingestion still needs an explicit location-resolution
+review and a fresh-database real Event-to-marker exercise.
+
 ### Candidate directions to evaluate
 
 - Continue treating a Building as the ordinary map anchor and its Venues as
@@ -131,13 +158,14 @@ separate from normalized location data and unresolved wording is not guessed.
 
 ### Map evolution note (not a milestone exit condition)
 
-The present intention is to try an OSM-derived vector basemap with MapLibre and
-a small reviewed NTU overlay before pursuing deeper institutional map access.
-If NTU later authorizes structured MazeMap data, the likely next experiment is
-to retain the renderer and add normalized campus, floor, room, or POI layers;
-OneMap raster could replace the basemap where it proves useful. If authorization
-only permits the MazeMap iframe or JS SDK, treat that as a separate integration
-rather than assuming its underlying data can enter the venue registry.
+The map now uses an OSM-derived OpenFreeMap vector basemap with MapLibre. A
+small reviewed NTU overlay remains a possible next map experiment before
+pursuing deeper institutional map access. If NTU later authorizes structured
+MazeMap data, the renderer could be retained while adding normalized campus,
+floor, room, or POI layers; OneMap raster could replace the basemap where it
+proves useful. If authorization only permits the MazeMap iframe or JS SDK,
+treat that as a separate integration rather than assuming its underlying data
+can enter the venue registry.
 
 This sequence is a planning note, not additional Milestone 7 scope. The current
 milestone still needs only trustworthy building-level anchors and observed

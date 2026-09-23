@@ -1,0 +1,2860 @@
+{
+  "catalog_version": 1,
+  "verified_at": "2026-09-21T00:00:00+08:00",
+  "scope": "Reviewed, non-geographic NTU main-campus and NIE venue identities",
+  "sources": {
+    "ntu_maps": {
+      "label": "NTU Maps",
+      "url": "https://maps.ntu.edu.sg/"
+    },
+    "ntu_orientation": {
+      "label": "NTU Explore Our Campus",
+      "url": "https://www.ntu.edu.sg/orientation/explore-our-campus"
+    },
+    "ntu_art_trail": {
+      "label": "NTU Campus Art Trail 2026",
+      "url": "https://www.ntu.edu.sg/life-at-ntu/museum/campus-art-trail"
+    },
+    "ntu_halls": {
+      "label": "NTU Hall Orientation",
+      "url": "https://www.ntu.edu.sg/orientation/hall-orientation"
+    },
+    "ntu_nanyang_crescent_halls": {
+      "label": "NTU Nanyang Crescent Halls",
+      "url": "https://www.ntu.edu.sg/life-at-ntu/student-life/campus-life-and-wellbeing/residential-education/re-programmes/nanyang-crescent-halls"
+    },
+    "ntu_north_hill_halls": {
+      "label": "NTU Binjai Hall and North Hill Halls",
+      "url": "https://www.ntu.edu.sg/life-at-ntu/accommodation/graduate-housing/detail/binjai-hall"
+    },
+    "ntu_facilities": {
+      "label": "NTU Facility Location and Capacity",
+      "url": "https://wis.ntu.edu.sg/pls/webexe88/FBSDOCU.FBSLOCATN"
+    },
+    "nbs_facilities": {
+      "label": "NBS Facilities Booking System",
+      "url": "https://wis.ntu.edu.sg/pls/webexe88/LADOCU.FBSLOCATN?w_sch=NBS"
+    },
+    "ntu_library": {
+      "label": "About NTU Library",
+      "url": "https://www.ntu.edu.sg/education/libraries/about-ntu-library"
+    },
+    "ntu_library_map": {
+      "label": "NTU Library Map 2026",
+      "url": "https://www.ntu.edu.sg/media/docs/default-source/ntu-library/lib-map.pdf?sfvrsn=aa7c23a_1"
+    },
+    "ntu_sports": {
+      "label": "NTU Sports and Recreation Centre",
+      "url": "https://www.ntu.edu.sg/life-at-ntu/recreational-spaces-facilities/sports-recreation-centre/eligibility-usage"
+    },
+    "ntu_cceb": {
+      "label": "CCEB Contact Information",
+      "url": "https://www.ntu.edu.sg/cceb/about-us/contact-information"
+    },
+    "ntu_abn": {
+      "label": "Academic Building North official address",
+      "url": "https://www.ntu.edu.sg/cysren/contact-us"
+    },
+    "ntu_shhk": {
+      "label": "SHHK Building official information",
+      "url": "https://www.ntu.edu.sg/hass/about-us/contact-info"
+    },
+    "ntu_soh": {
+      "label": "School of Humanities",
+      "url": "https://www.ntu.edu.sg/soh"
+    },
+    "ntu_soh_mr6_event": {
+      "label": "School of Humanities event at SHHK Meeting Room 6",
+      "url": "https://www.ntu.edu.sg/soh/news-events/events/detail/2026/03/26/english/bram-stoker-s-sources--extraction-culture-and-the-circuits-of-knowledge-production"
+    },
+    "ntu_lcc_events": {
+      "label": "Language and Communication Centre speaker series",
+      "url": "https://www.ntu.edu.sg/lcc/news-and-events/lcc-speaker-series"
+    },
+    "ntu_shhk_auditorium": {
+      "label": "NTU Southeast Asian Studies Symposium programme",
+      "url": "https://www.ntu.edu.sg/docs/librariesprovider120/research-doc/research-events-and-seminars/southeast-asian-studies-symposium-programme_22apr_for-public.pdf"
+    },
+    "ntu_innovation": {
+      "label": "NTU Innovation Centre",
+      "url": "https://www.ntu.edu.sg/innovates"
+    },
+    "ntu_innovation_port": {
+      "label": "NTU Innovation Port",
+      "url": "https://www.ntu.edu.sg/ntupreneur/support-from-the-entrepreneurship-ecosystem/ntu-innovation-port"
+    },
+    "ntu_adm": {
+      "label": "School of Art, Design and Media",
+      "url": "https://www.ntu.edu.sg/adm"
+    },
+    "ntu_ccds_event": {
+      "label": "CCDS event at ABN Conference Room 1-1",
+      "url": "https://www.ntu.edu.sg/computing/news-events/events/detail/2026/06/25/default-calendar/seminar--flexibility-as-an-essential-requirement-for-real-time-embedded-systems"
+    },
+    "ntu_ccds_contact": {
+      "label": "CCDS student enquiries and location",
+      "url": "https://www.ntu.edu.sg/computing/contact-us/students%27-enquiries"
+    },
+    "ntu_college_science": {
+      "label": "College of Science contact information",
+      "url": "https://www.ntu.edu.sg/science/about-us/contact-us"
+    },
+    "ntu_cee_es_lab": {
+      "label": "CEE Engineering Software Laboratory",
+      "url": "https://www.ntu.edu.sg/cee/about-us/laboratories/es-lab"
+    },
+    "ntu_cee_hydraulics": {
+      "label": "CEE Hydraulics Laboratory",
+      "url": "https://www.ntu.edu.sg/cee/about-us/laboratories/hydraulics-lab"
+    },
+    "ntu_rrc_gallery": {
+      "label": "Robotics Research Centre Robotics Gallery",
+      "url": "https://www.ntu.edu.sg/rrc/robotics-research-centre-labs/robotics-gallery"
+    },
+    "ntu_rrc_industrial": {
+      "label": "Robotics Research Centre Industrial Robotics Lab",
+      "url": "https://www.ntu.edu.sg/rrc/robotics-research-centre-labs/industrial-robotics-lab"
+    },
+    "ntu_rrc_assistive": {
+      "label": "Robotics Research Centre Assistive Robotics Lab",
+      "url": "https://www.ntu.edu.sg/rrc/robotics-research-centre-labs/assistive-robotics-lab"
+    },
+    "ntu_rrc_learning": {
+      "label": "Robotics Research Centre Robotics Learning Lab",
+      "url": "https://www.ntu.edu.sg/rrc/robotics-research-centre-labs/robotics-learning-lab"
+    },
+    "ntu_innovates_spaces": {
+      "label": "NTU Innovation and Entrepreneurship facilities and spaces",
+      "url": "https://www.ntu.edu.sg/innovates/innovationport"
+    },
+    "ntu_mse_courses": {
+      "label": "MSE Semester 1 postgraduate course venues",
+      "url": "https://www.ntu.edu.sg/mse/admissions/postgraduates/current-students/postgraduate-courses/semester-1-courses"
+    },
+    "ntu_global_lounge": {
+      "label": "NTU Global Lounge",
+      "url": "https://www.ntu.edu.sg/life-at-ntu/recreational-spaces-facilities/global-lounge"
+    },
+    "ntu_homecoming_floor_plan": {
+      "label": "NTU Homecoming North Spine event floor plan",
+      "url": "https://www.ntu.edu.sg/docs/librariesprovider150/default-document-library/homecoming-2025-event-floor-plan.pdf?sfvrsn=adb5d2bb_1"
+    },
+    "ntu_nanyang_auditorium_rates": {
+      "label": "Nanyang Auditorium spaces and capacities",
+      "url": "https://www.ntu.edu.sg/life-at-ntu/recreational-spaces-facilities/nanyang-auditorium/rates"
+    },
+    "ntu_nanyang_auditorium_crimson": {
+      "label": "Nanyang Auditorium Crimson Room floor plan",
+      "url": "https://www.ntu.edu.sg/media/docs/default-source/nanyang-auditorium-floor-plans/f-crimson.pdf?Status=Master&sfvrsn=2502fb4b_6"
+    },
+    "nie_profile": {
+      "label": "NIE Institutional Profile 2024-2025",
+      "url": "https://www.ntu.edu.sg/docs/nielibraries/spaq/institutional-profile-highlights-2024-2025dc9fc8e0-2daf-4800-a019-5cf66dcdbc9b.pdf"
+    }
+  },
+  "building_code_renames": [
+    {
+      "from": "UOBIH",
+      "to": "INNOVATION_CENTRE"
+    },
+    {
+      "from": "SOH",
+      "to": "SHHK"
+    }
+  ],
+  "retired_building_codes": [
+    "GAIA",
+    "SSS"
+  ],
+  "buildings": [
+    {
+      "code": "NS",
+      "name": "North Spine",
+      "campus_area": "MAIN",
+      "location_kind": "COMPLEX",
+      "venue_type": "BUILDING",
+      "source": "ntu_maps",
+      "aliases": [
+        {
+          "value": "NS",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "North Academic Complex",
+          "match_type": "OBSERVED"
+        }
+      ]
+    },
+    {
+      "code": "N1",
+      "name": "Block N1",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "NS",
+      "venue_type": "BUILDING",
+      "source": "ntu_maps",
+      "aliases": [
+        {
+          "value": "CEE",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "School of Civil and Environmental Engineering",
+          "match_type": "OBSERVED"
+        }
+      ]
+    },
+    {
+      "code": "N1.2",
+      "name": "Block N1.2",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "NS",
+      "venue_type": "BUILDING",
+      "source": "ntu_cceb",
+      "aliases": [
+        {
+          "value": "CCEB Nanyang Drive",
+          "match_type": "OBSERVED"
+        }
+      ]
+    },
+    {
+      "code": "N1.3",
+      "name": "Block N1.3",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "NS",
+      "venue_type": "BUILDING",
+      "source": "ntu_maps",
+      "aliases": []
+    },
+    {
+      "code": "N2",
+      "name": "Block N2",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "NS",
+      "venue_type": "BUILDING",
+      "source": "ntu_college_science",
+      "aliases": [
+        {
+          "value": "ASE",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "Asian School of the Environment",
+          "match_type": "OBSERVED"
+        }
+      ]
+    },
+    {
+      "code": "N3",
+      "name": "Block N3",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "NS",
+      "venue_type": "BUILDING",
+      "source": "ntu_maps",
+      "aliases": [
+        {
+          "value": "MAE",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "School of Mechanical and Aerospace Engineering",
+          "match_type": "OBSERVED"
+        }
+      ]
+    },
+    {
+      "code": "N3.1",
+      "name": "Block N3.1",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "NS",
+      "venue_type": "BUILDING",
+      "source": "ntu_rrc_assistive",
+      "aliases": []
+    },
+    {
+      "code": "N3.2",
+      "name": "Block N3.2",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "NS",
+      "venue_type": "BUILDING",
+      "source": "ntu_rrc_learning",
+      "aliases": []
+    },
+    {
+      "code": "N4",
+      "name": "Block N4",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "NS",
+      "venue_type": "BUILDING",
+      "source": "ntu_ccds_contact",
+      "aliases": [
+        {
+          "value": "CCDS",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "SCSE",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "College of Computing and Data Science",
+          "match_type": "OBSERVED"
+        }
+      ]
+    },
+    {
+      "code": "N4.1",
+      "name": "Block N4.1",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "NS",
+      "venue_type": "BUILDING",
+      "source": "ntu_innovates_spaces",
+      "aliases": [
+        {
+          "value": "MSE",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "School of Materials Science and Engineering",
+          "match_type": "OBSERVED"
+        }
+      ]
+    },
+    {
+      "code": "NS1",
+      "name": "North Spine Block NS1",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "NS",
+      "venue_type": "BUILDING",
+      "source": "ntu_facilities",
+      "aliases": []
+    },
+    {
+      "code": "NS2",
+      "name": "North Spine Block NS2",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "NS",
+      "venue_type": "BUILDING",
+      "source": "ntu_facilities",
+      "aliases": []
+    },
+    {
+      "code": "NS3",
+      "name": "North Spine Block NS3",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "NS",
+      "venue_type": "BUILDING",
+      "source": "ntu_facilities",
+      "aliases": []
+    },
+    {
+      "code": "NS4",
+      "name": "North Spine Block NS4",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "NS",
+      "venue_type": "BUILDING",
+      "source": "ntu_facilities",
+      "aliases": []
+    },
+    {
+      "code": "SS",
+      "name": "South Spine",
+      "campus_area": "MAIN",
+      "location_kind": "COMPLEX",
+      "venue_type": "BUILDING",
+      "source": "ntu_maps",
+      "aliases": [
+        {
+          "value": "SS",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "South Academic Complex",
+          "match_type": "OBSERVED"
+        }
+      ]
+    },
+    {
+      "code": "S1",
+      "name": "Block S1",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "SS",
+      "venue_type": "BUILDING",
+      "source": "ntu_maps",
+      "aliases": []
+    },
+    {
+      "code": "S2",
+      "name": "Block S2",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "SS",
+      "venue_type": "BUILDING",
+      "source": "ntu_maps",
+      "aliases": []
+    },
+    {
+      "code": "S3",
+      "name": "Block S3",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "SS",
+      "venue_type": "BUILDING",
+      "source": "nbs_facilities",
+      "aliases": []
+    },
+    {
+      "code": "S3.1",
+      "name": "Block S3.1",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "SS",
+      "venue_type": "BUILDING",
+      "source": "nbs_facilities",
+      "aliases": []
+    },
+    {
+      "code": "S3.2",
+      "name": "Block S3.2",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "SS",
+      "venue_type": "BUILDING",
+      "source": "ntu_facilities",
+      "aliases": []
+    },
+    {
+      "code": "S4",
+      "name": "Block S4",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "SS",
+      "venue_type": "BUILDING",
+      "source": "nbs_facilities",
+      "aliases": []
+    },
+    {
+      "code": "SS1",
+      "name": "South Spine Block SS1",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "SS",
+      "venue_type": "BUILDING",
+      "source": "ntu_facilities",
+      "aliases": []
+    },
+    {
+      "code": "SS2",
+      "name": "South Spine Block SS2",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "SS",
+      "venue_type": "BUILDING",
+      "source": "ntu_facilities",
+      "aliases": []
+    },
+    {
+      "code": "SS3",
+      "name": "South Spine Block SS3",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "SS",
+      "venue_type": "BUILDING",
+      "source": "ntu_facilities",
+      "aliases": []
+    },
+    {
+      "code": "SS4",
+      "name": "South Spine Block SS4",
+      "campus_area": "MAIN",
+      "location_kind": "BLOCK",
+      "parent_code": "SS",
+      "venue_type": "BUILDING",
+      "source": "ntu_facilities",
+      "aliases": []
+    },
+    {
+      "code": "ADMIN",
+      "name": "Administration Building",
+      "campus_area": "MAIN",
+      "venue_type": "BUILDING",
+      "source": "ntu_maps",
+      "aliases": [
+        {
+          "value": "Admin Building",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "location_kind": "BUILDING"
+    },
+    {
+      "code": "NYA",
+      "name": "Nanyang Auditorium",
+      "campus_area": "MAIN",
+      "venue_type": "AUDITORIUM",
+      "source": "ntu_art_trail",
+      "aliases": [
+        {
+          "value": "NYA",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "Nanyang Audi",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "location_kind": "BUILDING"
+    },
+    {
+      "code": "SSC",
+      "name": "Student Services Centre",
+      "campus_area": "MAIN",
+      "venue_type": "BUILDING",
+      "source": "ntu_maps",
+      "aliases": [
+        {
+          "value": "SSC",
+          "match_type": "ABBREVIATION"
+        }
+      ],
+      "location_kind": "BUILDING"
+    },
+    {
+      "code": "UHS",
+      "name": "University Health Service",
+      "campus_area": "MAIN",
+      "venue_type": "BUILDING",
+      "source": "ntu_maps",
+      "aliases": [
+        {
+          "value": "UHS",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "University Health Services",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "location_kind": "BUILDING"
+    },
+    {
+      "code": "RTP",
+      "name": "Research TechnoPlaza",
+      "campus_area": "MAIN",
+      "venue_type": "BUILDING",
+      "source": "ntu_maps",
+      "aliases": [
+        {
+          "value": "RTP",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "Research Technoplaza",
+          "match_type": "NORMALIZED"
+        }
+      ],
+      "location_kind": "BUILDING"
+    },
+    {
+      "code": "EMB",
+      "name": "Experimental Medicine Building",
+      "campus_area": "MAIN",
+      "venue_type": "BUILDING",
+      "source": "ntu_art_trail",
+      "aliases": [
+        {
+          "value": "EMB",
+          "match_type": "ABBREVIATION"
+        }
+      ],
+      "location_kind": "BUILDING"
+    },
+    {
+      "code": "ABN",
+      "name": "Academic Building North",
+      "campus_area": "MAIN",
+      "venue_type": "BUILDING",
+      "source": "ntu_abn",
+      "address": "61 Nanyang Drive",
+      "postal_code": "637335",
+      "aliases": [
+        {
+          "value": "ABN",
+          "match_type": "ABBREVIATION"
+        }
+      ],
+      "location_kind": "BUILDING"
+    },
+    {
+      "code": "SBS",
+      "name": "School of Biological Sciences",
+      "campus_area": "MAIN",
+      "venue_type": "BUILDING",
+      "source": "ntu_maps",
+      "aliases": [
+        {
+          "value": "SBS",
+          "match_type": "ABBREVIATION"
+        }
+      ],
+      "location_kind": "BUILDING"
+    },
+    {
+      "code": "SPMS",
+      "name": "School of Physical and Mathematical Sciences",
+      "campus_area": "MAIN",
+      "venue_type": "BUILDING",
+      "source": "ntu_cceb",
+      "address": "21 Nanyang Link",
+      "postal_code": "637371",
+      "aliases": [
+        {
+          "value": "SPMS",
+          "match_type": "ABBREVIATION"
+        }
+      ],
+      "location_kind": "BUILDING"
+    },
+    {
+      "code": "WKWSCI",
+      "name": "Wee Kim Wee School of Communication and Information",
+      "campus_area": "MAIN",
+      "venue_type": "BUILDING",
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "WKWSCI",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "SCI Building",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "location_kind": "BUILDING"
+    },
+    {
+      "code": "ADM",
+      "name": "School of Art, Design and Media",
+      "campus_area": "MAIN",
+      "venue_type": "BUILDING",
+      "source": "ntu_adm",
+      "address": "81 Nanyang Drive",
+      "postal_code": "637458",
+      "aliases": [
+        {
+          "value": "ADM",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "SADM",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "School of Art Design and Media",
+          "match_type": "NORMALIZED"
+        }
+      ],
+      "location_kind": "BUILDING"
+    },
+    {
+      "code": "LHS",
+      "name": "UOB Innovation Hub",
+      "campus_area": "MAIN",
+      "venue_type": "BUILDING",
+      "source": "ntu_art_trail",
+      "aliases": [
+        {
+          "value": "LHS",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "The Hive",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "Learning Hub South",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "location_kind": "BUILDING"
+    },
+    {
+      "code": "LHN",
+      "name": "The Arc",
+      "campus_area": "MAIN",
+      "venue_type": "BUILDING",
+      "source": "ntu_facilities",
+      "address": "63 Nanyang Drive",
+      "postal_code": "636922",
+      "aliases": [
+        {
+          "value": "LHN",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "Learning Hub North",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "location_kind": "BUILDING"
+    },
+    {
+      "code": "WAVE",
+      "name": "The Wave",
+      "campus_area": "MAIN",
+      "venue_type": "SPORTS_FACILITY",
+      "source": "ntu_sports",
+      "address": "110 Nanyang Crescent",
+      "postal_code": "636956",
+      "aliases": [
+        {
+          "value": "Wave Sports Hall",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "location_kind": "FACILITY"
+    },
+    {
+      "code": "WCYP",
+      "name": "Wee Cho Yaw Plaza",
+      "campus_area": "MAIN",
+      "venue_type": "BUILDING",
+      "source": "ntu_art_trail",
+      "address": "91 Nanyang Avenue",
+      "postal_code": "639956",
+      "aliases": [
+        {
+          "value": "WCYP",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "Gaia",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "Academic Building South",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "South Academic Building",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "ABS",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "Nanyang Business School",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NBS",
+          "match_type": "ABBREVIATION"
+        }
+      ],
+      "location_kind": "BUILDING"
+    },
+    {
+      "code": "INNOVATION_CENTRE",
+      "name": "NTU Innovation Centre",
+      "campus_area": "MAIN",
+      "venue_type": "BUILDING",
+      "source": "ntu_innovation",
+      "address": "71 Nanyang Drive",
+      "postal_code": "638075",
+      "aliases": [
+        {
+          "value": "Innovation Centre",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "location_kind": "BUILDING"
+    },
+    {
+      "code": "NYP",
+      "name": "Nanyang Playhouse",
+      "campus_area": "NIE",
+      "venue_type": "AUDITORIUM",
+      "source": "nie_profile",
+      "aliases": [],
+      "location_kind": "BUILDING",
+      "parent_code": "NIE"
+    },
+    {
+      "code": "NEC",
+      "name": "Nanyang Executive Centre",
+      "campus_area": "MAIN",
+      "venue_type": "BUILDING",
+      "source": "ntu_maps",
+      "aliases": [
+        {
+          "value": "NEC",
+          "match_type": "ABBREVIATION"
+        }
+      ],
+      "location_kind": "BUILDING"
+    },
+    {
+      "code": "NYH",
+      "name": "Nanyang House",
+      "campus_area": "MAIN",
+      "venue_type": "BUILDING",
+      "source": "ntu_maps",
+      "aliases": [],
+      "location_kind": "BUILDING"
+    },
+    {
+      "code": "CHC",
+      "name": "Chinese Heritage Centre",
+      "campus_area": "MAIN",
+      "venue_type": "BUILDING",
+      "source": "ntu_art_trail",
+      "aliases": [
+        {
+          "value": "CHC",
+          "match_type": "ABBREVIATION"
+        }
+      ],
+      "location_kind": "BUILDING"
+    },
+    {
+      "code": "SRC",
+      "name": "Sports and Recreation Centre",
+      "campus_area": "MAIN",
+      "venue_type": "SPORTS_FACILITY",
+      "source": "ntu_sports",
+      "address": "20 Nanyang Green",
+      "aliases": [
+        {
+          "value": "SRC",
+          "match_type": "ABBREVIATION"
+        }
+      ],
+      "location_kind": "FACILITY"
+    },
+    {
+      "code": "YG",
+      "name": "Yunnan Garden",
+      "campus_area": "MAIN",
+      "venue_type": "OUTDOOR",
+      "source": "ntu_art_trail",
+      "aliases": [
+        {
+          "value": "YG",
+          "match_type": "ABBREVIATION"
+        }
+      ],
+      "location_kind": "OUTDOOR"
+    },
+    {
+      "code": "SHHK",
+      "name": "Singapore Hokkien Huay Kuan Building",
+      "campus_area": "MAIN",
+      "venue_type": "BUILDING",
+      "source": "ntu_shhk",
+      "address": "48 Nanyang Avenue",
+      "postal_code": "639818",
+      "aliases": [
+        {
+          "value": "SHHK",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "CoHASS Building",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "HASS Building",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "location_kind": "BUILDING"
+    },
+    {
+      "code": "CCEB_NL",
+      "name": "CCEB at Nanyang Link",
+      "campus_area": "MAIN",
+      "venue_type": "BUILDING",
+      "source": "ntu_cceb",
+      "address": "21 Nanyang Link",
+      "postal_code": "637371",
+      "aliases": [
+        {
+          "value": "CCEB Nanyang Link",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "location_kind": "BUILDING"
+    },
+    {
+      "code": "CAMPUS_CLUBHOUSE",
+      "name": "Campus Clubhouse",
+      "campus_area": "MAIN",
+      "venue_type": "BUILDING",
+      "source": "ntu_maps",
+      "aliases": [],
+      "location_kind": "BUILDING"
+    },
+    {
+      "code": "NANYANG_LAKE",
+      "name": "Nanyang Lake",
+      "campus_area": "MAIN",
+      "venue_type": "OUTDOOR",
+      "source": "ntu_maps",
+      "aliases": [],
+      "location_kind": "OUTDOOR"
+    },
+    {
+      "code": "THE_QUAD",
+      "name": "The Quad",
+      "campus_area": "MAIN",
+      "venue_type": "OUTDOOR",
+      "source": "ntu_cceb",
+      "aliases": [],
+      "location_kind": "OUTDOOR"
+    },
+    {
+      "code": "30_NANYANG_LINK",
+      "name": "30 Nanyang Link",
+      "campus_area": "MAIN",
+      "venue_type": "SPORTS_FACILITY",
+      "source": "ntu_sports",
+      "address": "30 Nanyang Link",
+      "aliases": [],
+      "location_kind": "FACILITY"
+    },
+    {
+      "code": "NANYANG_CRESCENT_HALLS",
+      "name": "Nanyang Crescent Halls",
+      "campus_area": "MAIN",
+      "venue_type": "BUILDING",
+      "source": "ntu_nanyang_crescent_halls",
+      "aliases": [],
+      "location_kind": "COMPLEX"
+    },
+    {
+      "code": "NORTH_HILL",
+      "name": "North Hill",
+      "campus_area": "MAIN",
+      "venue_type": "BUILDING",
+      "source": "ntu_north_hill_halls",
+      "aliases": [
+        {
+          "value": "North Hill Halls",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "location_kind": "COMPLEX"
+    },
+    {
+      "code": "HALL1",
+      "name": "Hall 1",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL"
+    },
+    {
+      "code": "HALL2",
+      "name": "Hall 2",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL"
+    },
+    {
+      "code": "HALL3",
+      "name": "Hall 3",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL"
+    },
+    {
+      "code": "HALL4",
+      "name": "Hall 4",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL"
+    },
+    {
+      "code": "HALL5",
+      "name": "Hall 5",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL"
+    },
+    {
+      "code": "HALL6",
+      "name": "Hall 6",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL"
+    },
+    {
+      "code": "HALL7",
+      "name": "Hall 7",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL",
+      "parent_code": "NANYANG_CRESCENT_HALLS"
+    },
+    {
+      "code": "HALL8",
+      "name": "Hall 8",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL"
+    },
+    {
+      "code": "HALL9",
+      "name": "Hall 9",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL"
+    },
+    {
+      "code": "HALL10",
+      "name": "Hall 10",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL"
+    },
+    {
+      "code": "HALL11",
+      "name": "Hall 11",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL"
+    },
+    {
+      "code": "HALL12",
+      "name": "Hall 12",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL"
+    },
+    {
+      "code": "HALL13",
+      "name": "Hall 13",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL"
+    },
+    {
+      "code": "HALL14",
+      "name": "Hall 14",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL"
+    },
+    {
+      "code": "HALL15",
+      "name": "Hall 15",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL"
+    },
+    {
+      "code": "HALL16",
+      "name": "Hall 16",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL"
+    },
+    {
+      "code": "CRESCENT",
+      "name": "Crescent Hall",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL"
+    },
+    {
+      "code": "PIONEER",
+      "name": "Pioneer Hall",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL"
+    },
+    {
+      "code": "BINJAI",
+      "name": "Binjai Hall",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL",
+      "parent_code": "NORTH_HILL"
+    },
+    {
+      "code": "TANJONG",
+      "name": "Tanjong Hall",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL",
+      "parent_code": "NORTH_HILL"
+    },
+    {
+      "code": "BANYAN",
+      "name": "Banyan Hall",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL",
+      "parent_code": "NORTH_HILL"
+    },
+    {
+      "code": "TAMARIND",
+      "name": "Tamarind Hall",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL",
+      "parent_code": "NANYANG_CRESCENT_HALLS"
+    },
+    {
+      "code": "SARACA",
+      "name": "Saraca Hall",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_halls",
+      "aliases": [],
+      "location_kind": "HALL",
+      "parent_code": "NANYANG_CRESCENT_HALLS"
+    },
+    {
+      "code": "GH1",
+      "name": "Graduate Hall 1",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_maps",
+      "aliases": [],
+      "location_kind": "HALL"
+    },
+    {
+      "code": "GH2",
+      "name": "Graduate Hall 2",
+      "campus_area": "MAIN",
+      "venue_type": "HALL",
+      "source": "ntu_maps",
+      "aliases": [],
+      "location_kind": "HALL"
+    },
+    {
+      "code": "NIE",
+      "name": "National Institute of Education",
+      "campus_area": "NIE",
+      "venue_type": "BUILDING",
+      "source": "nie_profile",
+      "address": "1 Nanyang Walk",
+      "postal_code": "637616",
+      "aliases": [
+        {
+          "value": "NIE",
+          "match_type": "ABBREVIATION"
+        }
+      ],
+      "location_kind": "COMPLEX"
+    },
+    {
+      "code": "NIE_ADMIN",
+      "name": "NIE Block 1 Administration",
+      "campus_area": "NIE",
+      "venue_type": "BUILDING",
+      "source": "nie_profile",
+      "aliases": [
+        {
+          "value": "NIE Block 1",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "location_kind": "BUILDING",
+      "parent_code": "NIE"
+    },
+    {
+      "code": "NIE_EDUCATION",
+      "name": "NIE Block 2 Education",
+      "campus_area": "NIE",
+      "venue_type": "BUILDING",
+      "source": "nie_profile",
+      "aliases": [
+        {
+          "value": "NIE Block 2",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "location_kind": "BUILDING",
+      "parent_code": "NIE"
+    },
+    {
+      "code": "NIE_ARTS",
+      "name": "NIE Block 3 Arts",
+      "campus_area": "NIE",
+      "venue_type": "BUILDING",
+      "source": "nie_profile",
+      "aliases": [
+        {
+          "value": "NIE Block 3",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "location_kind": "BUILDING",
+      "parent_code": "NIE"
+    },
+    {
+      "code": "NIE_LIBRARY",
+      "name": "NIE Library",
+      "campus_area": "NIE",
+      "venue_type": "LIBRARY",
+      "source": "nie_profile",
+      "aliases": [
+        {
+          "value": "NIE Block 4 Library",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "location_kind": "BUILDING",
+      "parent_code": "NIE"
+    },
+    {
+      "code": "NIE_PE",
+      "name": "NIE Block 5 Physical Education",
+      "campus_area": "NIE",
+      "venue_type": "BUILDING",
+      "source": "nie_profile",
+      "aliases": [
+        {
+          "value": "NIE Block 5",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "location_kind": "BUILDING",
+      "parent_code": "NIE"
+    },
+    {
+      "code": "NIE_SCIENCE",
+      "name": "NIE Block 7 Science",
+      "campus_area": "NIE",
+      "venue_type": "BUILDING",
+      "source": "nie_profile",
+      "aliases": [
+        {
+          "value": "NIE Block 7",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "location_kind": "BUILDING",
+      "parent_code": "NIE"
+    },
+    {
+      "code": "NIE_GREENHOUSE",
+      "name": "NIE Green House",
+      "campus_area": "NIE",
+      "venue_type": "OTHER",
+      "source": "nie_profile",
+      "aliases": [],
+      "location_kind": "BUILDING",
+      "parent_code": "NIE"
+    },
+    {
+      "code": "NIE_SPORTS_HALL",
+      "name": "NIE Sports Hall",
+      "campus_area": "NIE",
+      "venue_type": "SPORTS_FACILITY",
+      "source": "nie_profile",
+      "aliases": [],
+      "location_kind": "FACILITY",
+      "parent_code": "NIE"
+    }
+  ],
+  "venues": [
+    {
+      "code": "NS_LT1",
+      "building_code": "NS3",
+      "name": "LT1 (Von Lee Yong Miang Lecture Theatre)",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "02",
+      "room_code": "NS3-02-09",
+      "capacity": 502,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT1",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS LT1",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "Von Lee Yong Miang Lecture Theatre",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS3-02-09",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "NS3-02"
+    },
+    {
+      "code": "NS_TCT_LT",
+      "building_code": "NS4",
+      "name": "Tan Chin Tuan Lecture Theatre (LT2)",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "02",
+      "room_code": "NS4-02-36",
+      "capacity": 306,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "TCT-LT",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "TCTLT",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "Tan Chin Tuan Theatre",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-02-36",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "NS4-02"
+    },
+    {
+      "code": "NS_LT3",
+      "building_code": "NS4",
+      "name": "LT3",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "02",
+      "room_code": "NS4-02-32",
+      "capacity": 240,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT3",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-02-32",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "NS4-02"
+    },
+    {
+      "code": "NS_LT4",
+      "building_code": "NS4",
+      "name": "LT4",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "02",
+      "room_code": "NS4-02-34",
+      "capacity": 240,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT4",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-02-34",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "NS4-02"
+    },
+    {
+      "code": "NS_LT5",
+      "building_code": "NS2",
+      "name": "LT5",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "02",
+      "room_code": "NS2-02-07",
+      "capacity": 240,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT5",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS2-02-07",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "NS2-02"
+    },
+    {
+      "code": "NS_LT6",
+      "building_code": "NS2",
+      "name": "LT6",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "02",
+      "room_code": "NS2-02-05",
+      "capacity": 240,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT6",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS2-02-05",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "NS2-02"
+    },
+    {
+      "code": "NS_LT7",
+      "building_code": "NS1",
+      "name": "LT7",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "02",
+      "room_code": "NS1-02-03",
+      "capacity": 240,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT7",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS1-02-03",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "NS1-02"
+    },
+    {
+      "code": "NS_LT8",
+      "building_code": "NS1",
+      "name": "LT8",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "02",
+      "room_code": "NS1-02-01",
+      "capacity": 240,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT8",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS1-02-01",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "NS1-02"
+    },
+    {
+      "code": "NS_LT9",
+      "building_code": "NS4",
+      "name": "LT9",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "04",
+      "room_code": "NS4-04-39",
+      "capacity": 122,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT9",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-04-39",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "NS4-04"
+    },
+    {
+      "code": "NS_LT10",
+      "building_code": "NS4",
+      "name": "LT10",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "04",
+      "room_code": "NS4-04-41",
+      "capacity": 122,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT10",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "North Spine LT 10",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS-04-41",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "NS4-04-41",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "NS4-04"
+    },
+    {
+      "code": "NS_LT19",
+      "building_code": "N2",
+      "name": "LT19",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B2A",
+      "room_code": "N2-B2A-01",
+      "capacity": 343,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "North Spine LT19",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "level_code": "N2-B2A"
+    },
+    {
+      "code": "NS_LT19A",
+      "building_code": "NS",
+      "name": "LT19A",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "01",
+      "room_code": "LT19A-01-01",
+      "capacity": 577,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "LT19A",
+          "match_type": "EXACT"
+        },
+        {
+          "value": "LT19A-01-01",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "LT19A-01"
+    },
+    {
+      "code": "NS_LT1A",
+      "building_code": "NS",
+      "name": "LT1A",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "01",
+      "room_code": "LT1A-01-01",
+      "capacity": 694,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "LT1A",
+          "match_type": "EXACT"
+        },
+        {
+          "value": "LT1A-01-01",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "LT1A-01"
+    },
+    {
+      "code": "NS_LT2A",
+      "building_code": "NS",
+      "name": "LT2A",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "01",
+      "room_code": "LT2A-01-01",
+      "capacity": 602,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "LT2A",
+          "match_type": "EXACT"
+        },
+        {
+          "value": "LT2A-01-01",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "LT2A-01"
+    },
+    {
+      "code": "NS_LWNL",
+      "building_code": "NS3",
+      "name": "Lee Wee Nam Library",
+      "venue_type": "LIBRARY",
+      "floor": "03",
+      "room_code": "NS3-03-01",
+      "source": "ntu_library",
+      "aliases": [
+        {
+          "value": "LWNL",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "NS3-03-01",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "NS3-03"
+    },
+    {
+      "code": "SS_LT22",
+      "building_code": "SS2",
+      "name": "LT22",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B2",
+      "room_code": "SS2-B2-07",
+      "capacity": 350,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LT22",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS2-B2-07",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "SS2-B2"
+    },
+    {
+      "code": "SS_LT23",
+      "building_code": "SS2",
+      "name": "LT23",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B2",
+      "room_code": "SS2-B2-05",
+      "capacity": 350,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LT23",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS2-B2-05",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "SS2-B2"
+    },
+    {
+      "code": "SS_LT24",
+      "building_code": "SS1",
+      "name": "LT24",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B2",
+      "room_code": "SS1-B2-03",
+      "capacity": 350,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LT24",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS1-B2-03",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "SS1-B2"
+    },
+    {
+      "code": "SS_LT25",
+      "building_code": "SS1",
+      "name": "LT25",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B2",
+      "room_code": "SS1-B2-01",
+      "capacity": 350,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LT25",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS1-B2-01",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "SS1-B2"
+    },
+    {
+      "code": "SS_LT26",
+      "building_code": "SS4",
+      "name": "LT26",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B2",
+      "room_code": "SS4-B2-33",
+      "capacity": 406,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LT26",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS4-B2-33",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "SS4-B2"
+    },
+    {
+      "code": "SS_LT27",
+      "building_code": "SS4",
+      "name": "LT27",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B2",
+      "room_code": "SS4-B2-31",
+      "capacity": 406,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LT27",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS4-B2-31",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "SS4-B2"
+    },
+    {
+      "code": "SS_LT28",
+      "building_code": "SS2",
+      "name": "LT28",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B1",
+      "room_code": "SS2-B1-17",
+      "capacity": 254,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LT28",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS2-B1-17",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "SS2-B1"
+    },
+    {
+      "code": "SS_LT29",
+      "building_code": "SS2",
+      "name": "LT29",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B1",
+      "room_code": "SS2-B1-16",
+      "capacity": 254,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine LT29",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SS2-B1-16",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "SS2-B1"
+    },
+    {
+      "code": "SS_LKC_LT",
+      "building_code": "SS3",
+      "name": "Lee Kong Chian Lecture Theatre",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B2",
+      "room_code": "SS3-B2-10",
+      "capacity": 1010,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "LKC-LT",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "SS3-B2-10",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "SS3-B2"
+    },
+    {
+      "code": "SS_FOYER",
+      "building_code": "SS3",
+      "name": "Lee Kong Chian Lecture Theatre Foyer",
+      "venue_type": "FUNCTION_SPACE",
+      "floor": "B2",
+      "room_code": "SS3-B2",
+      "capacity": 200,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "South Spine Foyer",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "level_code": "SS3-B2"
+    },
+    {
+      "code": "SS_EXHIBITION_GALLERY",
+      "building_code": "SS3",
+      "name": "South Spine Exhibition Gallery",
+      "venue_type": "GALLERY",
+      "floor": "B1",
+      "room_code": "SS3-B1-19",
+      "capacity": 200,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "Exhibition Gallery",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "level_code": "SS3-B1"
+    },
+    {
+      "code": "SS_FUNCTION_ROOM",
+      "building_code": "SS3",
+      "name": "South Spine Function Room",
+      "venue_type": "FUNCTION_SPACE",
+      "floor": "B1",
+      "room_code": "SS3-B1-22",
+      "capacity": 200,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "SS Function Room",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "level_code": "SS3-B1"
+    },
+    {
+      "code": "SS_CHINESE_LIBRARY",
+      "building_code": "S3.2",
+      "name": "Chinese Library",
+      "venue_type": "LIBRARY",
+      "floor": "B5",
+      "room_code": "S3.2-B5-01",
+      "source": "ntu_library",
+      "aliases": [
+        {
+          "value": "S3.2-B5-01",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "S3.2-B5"
+    },
+    {
+      "code": "SS_HSS_LIBRARY",
+      "building_code": "S4",
+      "name": "Humanities and Social Sciences Library",
+      "venue_type": "LIBRARY",
+      "floor": "B3C",
+      "room_code": "S4-B3C-05",
+      "source": "ntu_library",
+      "aliases": [
+        {
+          "value": "HSS Library",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "S4-B3C-05",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "S4-B3C"
+    },
+    {
+      "code": "SS_EEE",
+      "building_code": "SS",
+      "name": "School of Electrical and Electronic Engineering",
+      "venue_type": "OTHER",
+      "source": "ntu_maps",
+      "aliases": [
+        {
+          "value": "EEE",
+          "match_type": "ABBREVIATION"
+        }
+      ]
+    },
+    {
+      "code": "WKWSCI_LF_LT",
+      "building_code": "WKWSCI",
+      "name": "Lee Foundation Lecture Theatre",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "01",
+      "room_code": "WKWSCI-01-LT1",
+      "capacity": 219,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "LF-LT",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "CS-LT1",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "WKWSCI-01-LT1",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "WKWSCI-01"
+    },
+    {
+      "code": "WKWSCI_LIBRARY",
+      "building_code": "WKWSCI",
+      "name": "Communication and Information Library",
+      "venue_type": "LIBRARY",
+      "floor": "01",
+      "room_code": "CS-01-18",
+      "source": "ntu_library",
+      "aliases": [
+        {
+          "value": "Communication & Information Library",
+          "match_type": "NORMALIZED"
+        },
+        {
+          "value": "CS-01-18",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "CS-01"
+    },
+    {
+      "code": "LHS_LT",
+      "building_code": "LHS",
+      "name": "UOB Innovation Hub Lecture Theatre",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "01",
+      "room_code": "LHS-01-04",
+      "capacity": 111,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "LHS-LT",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "LHS-01-04",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "LHS-01"
+    },
+    {
+      "code": "LHS_LIBRARY_OUTPOST",
+      "building_code": "LHS",
+      "name": "Library Outpost",
+      "venue_type": "LIBRARY",
+      "floor": "01",
+      "room_code": "LHS-01-03",
+      "source": "ntu_library_map",
+      "aliases": [
+        {
+          "value": "LHS Library Outpost",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-01-03",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "LHS-01"
+    },
+    {
+      "code": "LHS_TR24",
+      "building_code": "LHS",
+      "name": "LHS-TR+24",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "room_code": "LHS-B2-01",
+      "capacity": 36,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "LHS TR+24",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-B2-01",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "LHS-B2"
+    },
+    {
+      "code": "LHS_TR52",
+      "building_code": "LHS",
+      "name": "LHS-TR+52",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "02",
+      "room_code": "LHS-02-06",
+      "capacity": 60,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "LHS TR+52",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHS-02-06",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "LHS-02"
+    },
+    {
+      "code": "LHS_TR56",
+      "building_code": "LHS",
+      "name": "Derek Goh Bak Heng Tutorial Room (LHS-TR+56)",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "03",
+      "room_code": "LHS-03-02",
+      "capacity": 60,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "LHS-TR+56",
+          "match_type": "EXACT"
+        },
+        {
+          "value": "LHS-03-02",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "LHS-03"
+    },
+    {
+      "code": "LHN_LT",
+      "building_code": "LHN",
+      "name": "The Arc Lecture Theatre",
+      "venue_type": "LECTURE_THEATRE",
+      "floor": "B1",
+      "room_code": "LHN-B1-15",
+      "capacity": 108,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "LHN-LT",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "LHN-B1-15",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "LHN-B1"
+    },
+    {
+      "code": "LHN_TR01",
+      "building_code": "LHN",
+      "name": "LHN-TR+01",
+      "venue_type": "TUTORIAL_ROOM",
+      "floor": "B2",
+      "room_code": "LHN-B2-01",
+      "capacity": 36,
+      "source": "ntu_facilities",
+      "aliases": [
+        {
+          "value": "The Arc TR+1",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN TR+1",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "LHN-B2-01",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "LHN-B2"
+    },
+    {
+      "code": "WCYP_ABS_AUD",
+      "building_code": "WCYP",
+      "name": "ABS Auditorium",
+      "venue_type": "AUDITORIUM",
+      "floor": "01",
+      "room_code": "ABS-01-AUDI",
+      "capacity": 190,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS AUD",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "ABS-01-AUDI",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "ABS-01"
+    },
+    {
+      "code": "WCYP_SR3",
+      "building_code": "WCYP",
+      "name": "Seminar Room 3",
+      "venue_type": "SEMINAR_ROOM",
+      "floor": "01",
+      "room_code": "ABS-01-SR3",
+      "capacity": 54,
+      "source": "nbs_facilities",
+      "aliases": [
+        {
+          "value": "ABS Seminar Room 3",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "ABS-01-SR3",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "ABS-01"
+    },
+    {
+      "code": "WCYP_INNOVATION_PORT",
+      "building_code": "WCYP",
+      "name": "NTU Innovation Port",
+      "venue_type": "FUNCTION_SPACE",
+      "floor": "03",
+      "room_code": "ABS-03-018",
+      "source": "ntu_innovation_port",
+      "aliases": [
+        {
+          "value": "Innovation Port at Wee Cho Yaw Plaza",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "level_code": "ABS-03"
+    },
+    {
+      "code": "ABN_CF3",
+      "building_code": "ABN",
+      "name": "ABN Conference Room 1-1",
+      "venue_type": "MEETING_ROOM",
+      "floor": "01A",
+      "room_code": "ABN-01A-CF3",
+      "source": "ntu_ccds_event",
+      "aliases": [
+        {
+          "value": "ABN-01a-CF3",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "ABN-01A"
+    },
+    {
+      "code": "SHHK_SOH",
+      "building_code": "SHHK",
+      "name": "School of Humanities",
+      "venue_type": "OTHER",
+      "source": "ntu_shhk",
+      "aliases": [
+        {
+          "value": "SoH",
+          "match_type": "ABBREVIATION"
+        }
+      ]
+    },
+    {
+      "code": "SHHK_SSS",
+      "building_code": "SHHK",
+      "name": "School of Social Sciences",
+      "venue_type": "OTHER",
+      "source": "ntu_shhk",
+      "aliases": [
+        {
+          "value": "SSS",
+          "match_type": "ABBREVIATION"
+        }
+      ]
+    },
+    {
+      "code": "SHHK_AUDITORIUM",
+      "building_code": "SHHK",
+      "name": "HSS Auditorium",
+      "venue_type": "AUDITORIUM",
+      "floor": "B1",
+      "room_code": "SHHK-B1-14",
+      "source": "ntu_shhk_auditorium",
+      "aliases": [
+        {
+          "value": "SHHK Auditorium",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "B1-14",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "level_code": "SHHK-B1"
+    },
+    {
+      "code": "SHHK_CONFERENCE_0557",
+      "building_code": "SHHK",
+      "name": "SHHK Conference Room",
+      "venue_type": "MEETING_ROOM",
+      "floor": "05",
+      "room_code": "SHHK-05-57",
+      "source": "ntu_lcc_events",
+      "aliases": [
+        {
+          "value": "SHHK Conference Room 05-57",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "SHHK-05-57",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "SHHK-05"
+    },
+    {
+      "code": "SHHK_MR1",
+      "building_code": "SHHK",
+      "name": "SHHK Meeting Room 1",
+      "venue_type": "MEETING_ROOM",
+      "floor": "03",
+      "room_code": "SHHK-03-65",
+      "source": "ntu_soh",
+      "aliases": [
+        {
+          "value": "SHHK Meeting Room 1 (03-65)",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "level_code": "SHHK-03"
+    },
+    {
+      "code": "SHHK_MR2",
+      "building_code": "SHHK",
+      "name": "SHHK Meeting Room 2",
+      "venue_type": "MEETING_ROOM",
+      "floor": "03",
+      "room_code": "SHHK-03-93",
+      "source": "ntu_soh",
+      "aliases": [
+        {
+          "value": "SHHK Meeting Room 2 (03-93)",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "level_code": "SHHK-03"
+    },
+    {
+      "code": "SHHK_MR6",
+      "building_code": "SHHK",
+      "name": "SHHK Meeting Room 6",
+      "venue_type": "MEETING_ROOM",
+      "floor": "04",
+      "room_code": "SHHK-04-95",
+      "source": "ntu_soh_mr6_event",
+      "aliases": [
+        {
+          "value": "SHHK Meeting Room 6 (04-95)",
+          "match_type": "OBSERVED"
+        }
+      ],
+      "level_code": "SHHK-04"
+    },
+    {
+      "code": "ADM_GALLERY",
+      "building_code": "ADM",
+      "name": "ADM Gallery",
+      "venue_type": "GALLERY",
+      "source": "ntu_adm",
+      "aliases": [
+        {
+          "value": "ADM Gallery 1 and 2",
+          "match_type": "OBSERVED"
+        }
+      ]
+    },
+    {
+      "code": "ADM_LIBRARY",
+      "building_code": "ADM",
+      "name": "Art, Design and Media Library",
+      "venue_type": "LIBRARY",
+      "floor": "01",
+      "room_code": "ART-01-03",
+      "source": "ntu_library",
+      "aliases": [
+        {
+          "value": "ADM Library",
+          "match_type": "OBSERVED"
+        },
+        {
+          "value": "ART-01-03",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "ART-01"
+    },
+    {
+      "code": "CHC_WANG_GUNGWU_LIBRARY",
+      "building_code": "CHC",
+      "name": "Wang Gungwu Library",
+      "venue_type": "LIBRARY",
+      "floor": "02",
+      "room_code": "CHC-02-LIB",
+      "source": "ntu_library",
+      "aliases": [
+        {
+          "value": "CHC-02-LIB",
+          "match_type": "EXACT"
+        }
+      ],
+      "level_code": "CHC-02"
+    },
+    {
+      "code": "WAVE_SPORTS_HALL",
+      "building_code": "WAVE",
+      "name": "Multipurpose Sports Hall",
+      "venue_type": "SPORTS_FACILITY",
+      "source": "ntu_sports",
+      "aliases": [
+        {
+          "value": "The Wave Sports Hall",
+          "match_type": "OBSERVED"
+        }
+      ]
+    },
+    {
+      "code": "SRC_BASKETBALL",
+      "building_code": "SRC",
+      "name": "Basketball Courts",
+      "venue_type": "SPORTS_FACILITY",
+      "source": "ntu_sports",
+      "aliases": [
+        {
+          "value": "SRC Basketball Courts",
+          "match_type": "OBSERVED"
+        }
+      ]
+    },
+    {
+      "code": "SRC_MAIN_FIELD",
+      "building_code": "SRC",
+      "name": "Main Field",
+      "venue_type": "SPORTS_FACILITY",
+      "source": "ntu_sports",
+      "aliases": [
+        {
+          "value": "SRC Main Field",
+          "match_type": "OBSERVED"
+        }
+      ]
+    },
+    {
+      "code": "SRC_FUTSAL",
+      "building_code": "SRC",
+      "name": "Outdoor Futsal Court",
+      "venue_type": "SPORTS_FACILITY",
+      "source": "ntu_sports",
+      "aliases": [
+        {
+          "value": "SRC Futsal Court",
+          "match_type": "OBSERVED"
+        }
+      ]
+    },
+    {
+      "code": "SRC_TENNIS",
+      "building_code": "SRC",
+      "name": "Tennis Courts",
+      "venue_type": "SPORTS_FACILITY",
+      "source": "ntu_sports",
+      "aliases": [
+        {
+          "value": "SRC Tennis Courts",
+          "match_type": "OBSERVED"
+        }
+      ]
+    },
+    {
+      "code": "SRC_SQUASH",
+      "building_code": "SRC",
+      "name": "Squash Courts",
+      "venue_type": "SPORTS_FACILITY",
+      "source": "ntu_sports",
+      "aliases": [
+        {
+          "value": "SRC Squash Courts",
+          "match_type": "OBSERVED"
+        }
+      ]
+    },
+    {
+      "code": "NIE_ART_GALLERY",
+      "building_code": "NIE_ARTS",
+      "name": "NIE Art Gallery",
+      "venue_type": "GALLERY",
+      "source": "nie_profile",
+      "aliases": [
+        {
+          "value": "Art Gallery at NIE",
+          "match_type": "OBSERVED"
+        }
+      ]
+    },
+    {
+      "code": "N1_ES_TEACHING_LABS",
+      "building_code": "N1",
+      "name": "Engineering Software Teaching Labs 1 and 2",
+      "venue_type": "COMPUTING_ROOM",
+      "floor": "B2B",
+      "level_code": "N1-B2B",
+      "room_code": "N1-B2B-13",
+      "capacity": 140,
+      "source": "ntu_cee_es_lab",
+      "aliases": [
+        {
+          "value": "EST Lab 1",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "EST Lab 2",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "N1-B2B-13",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "N1_ES_PROJECT_LAB",
+      "building_code": "N1",
+      "name": "Engineering Software Project Lab",
+      "venue_type": "COMPUTING_ROOM",
+      "floor": "B3C",
+      "level_code": "N1-B3C",
+      "room_code": "N1-B3C-48",
+      "capacity": 40,
+      "source": "ntu_cee_es_lab",
+      "aliases": [
+        {
+          "value": "ESP Lab",
+          "match_type": "ABBREVIATION"
+        },
+        {
+          "value": "N1-B3C-48",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "N1_HYDRAULICS_MODELLING_LAB",
+      "building_code": "N1",
+      "name": "Hydraulics Modelling Laboratory",
+      "venue_type": "LABORATORY",
+      "floor": "B5",
+      "level_code": "N1-B5",
+      "room_code": "N1-B5-W301",
+      "source": "ntu_cee_hydraulics",
+      "aliases": [
+        {
+          "value": "N1-B5-W301",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "N1_HYDRAULICS_STUDIO",
+      "building_code": "N1",
+      "name": "Hydraulics Studio",
+      "venue_type": "STUDIO",
+      "floor": "B3B",
+      "level_code": "N1-B3B",
+      "room_code": "N1-B3B-28",
+      "source": "ntu_cee_hydraulics",
+      "aliases": [
+        {
+          "value": "N1-B3B-28",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "N3_ROBOTICS_GALLERY",
+      "building_code": "N3",
+      "name": "Robotics Gallery",
+      "venue_type": "GALLERY",
+      "floor": "01A",
+      "level_code": "N3-01A",
+      "room_code": "N3-01A-01",
+      "source": "ntu_rrc_gallery",
+      "aliases": [
+        {
+          "value": "N3-01A-01",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "N3_INDUSTRIAL_ROBOTICS_LAB",
+      "building_code": "N3",
+      "name": "Industrial Robotics Lab",
+      "venue_type": "LABORATORY",
+      "floor": "01B",
+      "level_code": "N3-01B",
+      "room_code": "N3-01B-09",
+      "source": "ntu_rrc_industrial",
+      "aliases": [
+        {
+          "value": "N3-01B-09",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "N3_1_ASSISTIVE_ROBOTICS_LAB",
+      "building_code": "N3.1",
+      "name": "Assistive Robotics Lab",
+      "venue_type": "LABORATORY",
+      "floor": "B2A",
+      "level_code": "N3.1-B2A",
+      "room_code": "N3.1-B2A-01",
+      "source": "ntu_rrc_assistive",
+      "aliases": [
+        {
+          "value": "N3.1-B2A-01",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "N3_2_ROBOTICS_LEARNING_LAB",
+      "building_code": "N3.2",
+      "name": "Robotics Learning Lab",
+      "venue_type": "LABORATORY",
+      "floor": "B1",
+      "level_code": "N3.2-B1",
+      "room_code": "N3.2-B1-03",
+      "source": "ntu_rrc_learning",
+      "aliases": [
+        {
+          "value": "N3.2-B1-03",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "N4_1_MSE_UNDERGRADUATE_LAB",
+      "building_code": "N4.1",
+      "name": "MSE Undergraduate Laboratory",
+      "venue_type": "LABORATORY",
+      "floor": "B4B",
+      "level_code": "N4-B4B",
+      "room_code": "N4-B4B-13",
+      "source": "ntu_innovates_spaces",
+      "aliases": [
+        {
+          "value": "N4-B4B-13",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "LHN_INNOVATION_PORT",
+      "building_code": "LHN",
+      "name": "Innovation Port at The Arc",
+      "venue_type": "FUNCTION_SPACE",
+      "floor": "B1",
+      "level_code": "LHN-B1",
+      "room_code": "LHN-B1-01A",
+      "source": "ntu_innovates_spaces",
+      "aliases": [
+        {
+          "value": "LHN-B1-01A",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "LHN_PIONEER_PORT",
+      "building_code": "LHN",
+      "name": "Pioneer Port Event Space",
+      "venue_type": "FUNCTION_SPACE",
+      "floor": "B1",
+      "capacity": 100,
+      "source": "ntu_innovates_spaces",
+      "aliases": [
+        {
+          "value": "Pioneer Port",
+          "match_type": "OBSERVED"
+        }
+      ]
+    },
+    {
+      "code": "LHN_ENTREPRENEURS_ENCLAVE",
+      "building_code": "LHN",
+      "name": "Entrepreneurs' Enclave Event Space",
+      "venue_type": "FUNCTION_SPACE",
+      "floor": "B1",
+      "capacity": 50,
+      "source": "ntu_innovates_spaces",
+      "aliases": [
+        {
+          "value": "Entrepreneurs' Enclave",
+          "match_type": "OBSERVED"
+        }
+      ]
+    },
+    {
+      "code": "LHN_CREATORS_COVE",
+      "building_code": "LHN",
+      "name": "Creators' Cove",
+      "venue_type": "MEETING_ROOM",
+      "floor": "B1",
+      "capacity": 8,
+      "source": "ntu_innovates_spaces",
+      "aliases": []
+    },
+    {
+      "code": "LHN_VENTURE_VISTA",
+      "building_code": "LHN",
+      "name": "Venture Vista",
+      "venue_type": "MEETING_ROOM",
+      "floor": "B1",
+      "capacity": 8,
+      "source": "ntu_innovates_spaces",
+      "aliases": []
+    },
+    {
+      "code": "NYA_THEATRE",
+      "building_code": "NYA",
+      "name": "Nanyang Auditorium Theatre",
+      "venue_type": "AUDITORIUM",
+      "capacity": 1674,
+      "source": "ntu_nanyang_auditorium_rates",
+      "aliases": []
+    },
+    {
+      "code": "NYA_FOYER",
+      "building_code": "NYA",
+      "name": "Nanyang Auditorium Foyer",
+      "venue_type": "FUNCTION_SPACE",
+      "capacity": 956,
+      "source": "ntu_nanyang_auditorium_rates",
+      "aliases": []
+    },
+    {
+      "code": "NYA_EXHIBITION_HALL",
+      "building_code": "NYA",
+      "name": "Nanyang Auditorium Exhibition Hall",
+      "venue_type": "FUNCTION_SPACE",
+      "capacity": 793,
+      "source": "ntu_nanyang_auditorium_rates",
+      "aliases": []
+    },
+    {
+      "code": "NYA_CRIMSON_ROOM",
+      "building_code": "NYA",
+      "name": "Crimson Room",
+      "venue_type": "FUNCTION_SPACE",
+      "floor": "B1",
+      "level_code": "NA-B1",
+      "room_code": "NA-B1-1",
+      "capacity": 111,
+      "source": "ntu_nanyang_auditorium_crimson",
+      "aliases": [
+        {
+          "value": "NA-B1-1",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "NYA_DRESSING_ROOM_1",
+      "building_code": "NYA",
+      "name": "Dressing Room 1 at Annex B1",
+      "venue_type": "FUNCTION_SPACE",
+      "floor": "B1",
+      "capacity": 65,
+      "source": "ntu_nanyang_auditorium_rates",
+      "aliases": []
+    },
+    {
+      "code": "NYA_VIP_ROOM",
+      "building_code": "NYA",
+      "name": "VIP Room at Annex B1",
+      "venue_type": "MEETING_ROOM",
+      "floor": "B1",
+      "capacity": 8,
+      "source": "ntu_nanyang_auditorium_rates",
+      "aliases": []
+    },
+    {
+      "code": "S1_GARAGE_EEE",
+      "building_code": "S1",
+      "name": "Garage@EEE",
+      "venue_type": "LABORATORY",
+      "floor": "B3C",
+      "level_code": "S1-B3C",
+      "room_code": "S1-B3C-26",
+      "source": "ntu_innovates_spaces",
+      "aliases": [
+        {
+          "value": "S1-B3C-26",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "N4_SCSE_INNOVATION_LAB",
+      "building_code": "N4",
+      "name": "SCSE Innovation Lab",
+      "venue_type": "LABORATORY",
+      "floor": "B1B",
+      "level_code": "N4-B1B",
+      "room_code": "N4-B1B-13",
+      "source": "ntu_innovates_spaces",
+      "aliases": [
+        {
+          "value": "N4-B1B-13",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "ABN_DYSON_NTU_STUDIO",
+      "building_code": "ABN",
+      "name": "Dyson-NTU Studio",
+      "venue_type": "STUDIO",
+      "floor": "02A",
+      "level_code": "ABN-02A",
+      "room_code": "ABN-02A-01",
+      "source": "ntu_innovates_spaces",
+      "aliases": [
+        {
+          "value": "ABN-02A-01",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "N3_2_MAKER_LAB",
+      "building_code": "N3.2",
+      "name": "Maker Lab@MAE",
+      "venue_type": "LABORATORY",
+      "floor": "B1",
+      "level_code": "N3.2-B1",
+      "room_code": "N3.2-B1-02N",
+      "source": "ntu_innovates_spaces",
+      "aliases": [
+        {
+          "value": "N3.2-B1-02N",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "N4_1_MSE_E_STUDIO",
+      "building_code": "N4.1",
+      "name": "MSE E-Studio",
+      "venue_type": "STUDIO",
+      "floor": "B2",
+      "level_code": "N4.1-B2",
+      "room_code": "N4.1-B2-02",
+      "source": "ntu_mse_courses",
+      "aliases": [
+        {
+          "value": "N4.1-B2-02",
+          "match_type": "EXACT"
+        }
+      ]
+    },
+    {
+      "code": "NS_AIA_CANOPY",
+      "building_code": "NS",
+      "name": "AIA Canopy",
+      "venue_type": "OUTDOOR",
+      "floor": "1",
+      "source": "ntu_homecoming_floor_plan",
+      "aliases": [
+        {
+          "value": "AIA Canopy (NS)",
+          "match_type": "OBSERVED"
+        }
+      ]
+    },
+    {
+      "code": "NS_GLOBAL_LOUNGE",
+      "building_code": "NS",
+      "name": "Global Lounge",
+      "venue_type": "FUNCTION_SPACE",
+      "source": "ntu_global_lounge",
+      "aliases": []
+    }
+  ]
+}

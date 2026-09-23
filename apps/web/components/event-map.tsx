@@ -1,10 +1,15 @@
 "use client";
 
-import type * as Leaflet from "leaflet";
+import type {
+  LngLatBoundsLike,
+  Map as MapLibreMap,
+  Marker as MapLibreMarker,
+} from "maplibre-gl";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 import type { MapMarker } from "@/lib/discovery";
+import { BASEMAP_STYLE_URL, MAPLIBRE_WORKER_URL } from "@/lib/map-config";
 
 type EventMapProps = {
   bbox?: string;
@@ -12,11 +17,11 @@ type EventMapProps = {
   returnPath: string;
 };
 
-const ntuCentre: Leaflet.LatLngExpression = [1.3483, 103.6831];
+const ntuCentre: [longitude: number, latitude: number] = [103.6831, 1.3483];
 
 export function EventMap({ bbox, markers, returnPath }: EventMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<Leaflet.Map>(null);
+  const mapRef = useRef<MapLibreMap>(null);
   const syncMapRef = useRef<(() => void) | null>(null);
   const updateTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const suppressMoveRef = useRef(false);
@@ -31,23 +36,27 @@ export function EventMap({ bbox, markers, returnPath }: EventMapProps) {
     let cancelled = false;
 
     const initialize = async () => {
-      const L = (await import("leaflet")).default;
+      const maplibre = await import("maplibre-gl");
       if (cancelled || !containerRef.current) return;
-      const map = L.map(containerRef.current, {
-        zoomControl: false,
+      maplibre.setWorkerUrl(MAPLIBRE_WORKER_URL);
+      const map = new maplibre.Map({
+        container: containerRef.current,
+        style: BASEMAP_STYLE_URL,
+        center: ntuCentre,
+        zoom: 15,
         minZoom: 12,
-        zoomAnimation: false,
-        fadeAnimation: false,
-        markerZoomAnimation: false,
+        maxZoom: 19,
+        dragRotate: false,
+        pitchWithRotate: false,
+        fadeDuration: 0,
       });
       mapRef.current = map;
-      L.control.zoom({ position: "bottomright" }).addTo(map);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 19,
-      }).addTo(map);
-      const markerLayer = L.layerGroup().addTo(map);
+      map.touchZoomRotate.disableRotation();
+      map.addControl(
+        new maplibre.NavigationControl({ showCompass: false }),
+        "bottom-right",
+      );
+      let renderedMarkers: MapLibreMarker[] = [];
       let appliedBbox: string | undefined;
 
       const setViewWithoutSync = (setView: () => void) => {
@@ -60,8 +69,13 @@ export function EventMap({ bbox, markers, returnPath }: EventMapProps) {
 
       const syncMap = () => {
         const current = latestPropsRef.current;
-        markerLayer.clearLayers();
-        addMarkers(L, markerLayer, current.markers, current.returnPath);
+        renderedMarkers.forEach((marker) => marker.remove());
+        renderedMarkers = addMarkers(
+          maplibre,
+          map,
+          current.markers,
+          current.returnPath,
+        );
 
         const bboxChanged = current.bbox !== appliedBbox;
         const changeCameFromMap =
@@ -76,19 +90,15 @@ export function EventMap({ bbox, markers, returnPath }: EventMapProps) {
         const parsedBounds = parseBounds(current.bbox);
         setViewWithoutSync(() => {
           if (parsedBounds) {
-            map.fitBounds(parsedBounds, { animate: false });
+            map.fitBounds(parsedBounds, { duration: 0 });
           } else if (current.markers.length) {
-            map.fitBounds(
-              L.latLngBounds(
-                current.markers.map((marker) => [
-                  marker.latitude,
-                  marker.longitude,
-                ]),
-              ),
-              { padding: [48, 48], maxZoom: 17, animate: false },
-            );
+            map.fitBounds(boundsFromMarkers(current.markers), {
+              padding: 48,
+              maxZoom: 17,
+              duration: 0,
+            });
           } else {
-            map.setView(ntuCentre, 15, { animate: false });
+            map.jumpTo({ center: ntuCentre, zoom: 15 });
           }
         });
       };
@@ -157,32 +167,48 @@ export function EventMap({ bbox, markers, returnPath }: EventMapProps) {
 }
 
 function addMarkers(
-  L: typeof Leaflet,
-  layer: Leaflet.LayerGroup,
+  maplibre: typeof import("maplibre-gl"),
+  map: MapLibreMap,
   markers: MapMarker[],
   returnPath: string,
-) {
+): MapLibreMarker[] {
+  const renderedMarkers: MapLibreMarker[] = [];
+
   for (const marker of markers) {
-    const icon = L.divIcon({
-      className: "event-map-marker-wrap",
-      html: `<span class="event-map-marker"><span>${marker.events.length}</span></span>`,
-      iconAnchor: [18, 36],
-      iconSize: [36, 36],
-      popupAnchor: [0, -34],
-    });
-    const leafletMarker = L.marker([marker.latitude, marker.longitude], {
-      icon,
-    }).addTo(layer);
-    leafletMarker.bindPopup(buildPopup(marker, returnPath), {
+    const element = document.createElement("button");
+    element.type = "button";
+    element.className = "event-map-marker-wrap";
+    element.setAttribute(
+      "aria-label",
+      `${marker.label}: ${marker.events.length} ${marker.events.length === 1 ? "event" : "events"}`,
+    );
+    const pin = document.createElement("span");
+    pin.className = "event-map-marker";
+    const count = document.createElement("span");
+    count.textContent = String(marker.events.length);
+    pin.append(count);
+    element.append(pin);
+
+    const popup = new maplibre.Popup({
       className: "event-map-popup",
-      minWidth: 210,
+      maxWidth: "280px",
+      offset: 34,
+    }).setDOMContent(buildPopup(marker, returnPath));
+    const renderedMarker = new maplibre.Marker({
+      element,
+      anchor: "bottom",
     });
+    renderedMarker
+      .setLngLat([marker.longitude, marker.latitude])
+      .setPopup(popup)
+      .addTo(map);
+    renderedMarkers.push(renderedMarker);
   }
+
+  return renderedMarkers;
 }
 
-function parseBounds(
-  value: string | undefined,
-): Leaflet.LatLngBoundsExpression | null {
+function parseBounds(value: string | undefined): LngLatBoundsLike | null {
   if (!value) return null;
   const [west, south, east, north] = value.split(",").map(Number);
   if ([west, south, east, north].some((item) => !Number.isFinite(item)))
@@ -196,8 +222,17 @@ function parseBounds(
     return null;
   }
   return [
-    [south, west],
-    [north, east],
+    [west, south],
+    [east, north],
+  ];
+}
+
+function boundsFromMarkers(markers: MapMarker[]): LngLatBoundsLike {
+  const longitudes = markers.map((marker) => marker.longitude);
+  const latitudes = markers.map((marker) => marker.latitude);
+  return [
+    [Math.min(...longitudes), Math.min(...latitudes)],
+    [Math.max(...longitudes), Math.max(...latitudes)],
   ];
 }
 

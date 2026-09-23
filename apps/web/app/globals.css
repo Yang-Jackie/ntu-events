@@ -520,7 +520,9 @@ h3 {
 
 .event-map-marker-wrap {
   border: 0;
+  padding: 0;
   background: transparent;
+  cursor: pointer;
 }
 
 .event-map-marker {
@@ -561,7 +563,7 @@ h3 {
   text-decoration: none;
 }
 
-.leaflet-control-attribution {
+.maplibregl-ctrl-attrib {
   font-size: 0.62rem !important;
 }
 

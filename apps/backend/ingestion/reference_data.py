@@ -57,9 +57,11 @@ def _venue_values() -> list[dict[str, Any]]:
     return [
         {
             "id": venue.pk,
+            "code": venue.code,
             "name": venue.name,
             "building_code": venue.building.code if venue.building else None,
             "building_name": venue.building.name if venue.building else None,
+            "level_code": venue.level_code or None,
             "room_code": venue.room_code or None,
             "aliases": [alias.alias for alias in venue.aliases.all()],
         }

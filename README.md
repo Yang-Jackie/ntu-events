@@ -77,6 +77,45 @@ Run Django management commands inside the backend container:
 docker compose run --rm backend python apps/backend/manage.py <command>
 ```
 
+## Venue catalog and map points
+
+The reviewed NTU/NIE venue catalog combines
+`apps/backend/venues/catalog.json` with the versioned official-facilities
+snapshot at `apps/backend/venues/facilities.json`. Refresh the snapshot from
+the public NTU central and NBS facility directories, then review its diff:
+
+```powershell
+corepack pnpm venues:update
+corepack pnpm venues:check
+```
+
+Migrations load the merged catalog on a clean database. After reviewing a
+catalog or snapshot change, synchronize an existing development database with:
+
+```powershell
+corepack pnpm venues:sync
+```
+
+The synchronization is repeatable, preserves existing map points, and does not
+accept coordinates or geometry in this catalog. A catalog entry needs an
+official source, a project-owned stable code, a parent location for subvenues,
+and globally unambiguous verified aliases. MazeMap may be used manually to
+spot coverage gaps, but its data is not extracted or copied into the catalog;
+records discovered that way still require an independent official NTU source.
+
+Reviewed building-level WGS84 points are stored separately in
+`apps/backend/venues/geography.json`. The snapshot covers every active location
+anchor, retains its OpenStreetMap object reference and positioning method, and
+leaves rooms coordinate-free so they inherit their building marker. After a
+reviewed geography change, synchronize an existing development database with:
+
+```powershell
+corepack pnpm venues:geography:sync
+```
+
+The geographic data is © OpenStreetMap contributors and available under the
+[Open Database License](https://www.openstreetmap.org/copyright).
+
 ## Telegram ingestion
 
 Set `TELEGRAM_API_ID`, `TELEGRAM_API_HASH`, and `OPENAI_API_KEY` in the ignored
