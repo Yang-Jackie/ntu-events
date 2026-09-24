@@ -307,8 +307,10 @@ job status. A source-neutral worker serially selects every READY candidate that
 has no plan, reconstructs its raw evidence through the candidate's extraction
 provenance, and runs matching and canonicalization. PostgreSQL session advisory
 locking permits at most one canonicalization worker globally. Unexpected worker
-errors leave the candidate READY and terminate the process visibly; broader
-retry and claim state is deferred until operating evidence warrants it.
+errors leave the candidate READY and terminate the process visibly. Model-output
+and structured-output validation failures are retried up to three total model
+attempts per candidate, with each attempt persisted separately. Exhausting that
+bound creates a review-required plan and lets the serial queue continue.
 
 Each extracted candidate also records whether it is an event announcement,
 event follow-up, or unknown. This observation classification is descriptive and

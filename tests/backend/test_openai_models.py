@@ -124,6 +124,9 @@ def test_canonicalization_decision_provider_is_source_neutral() -> None:
     call = parse.call_args
     assert call.kwargs["model"] == "gpt-5-mini"
     assert call.kwargs["text"] == {"verbosity": "low"}
+    system_prompt = call.kwargs["input"][0]["content"]
+    assert "Singapore local time" in system_prompt
+    assert "never emit Z or +00:00" in system_prompt
     assert json.loads(call.kwargs["input"][1]["content"])["event_candidate"]["id"] == 1
 
 

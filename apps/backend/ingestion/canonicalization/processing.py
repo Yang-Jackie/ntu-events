@@ -6,6 +6,7 @@ from typing import Any
 
 from django.db.models import Max
 from django.utils import timezone
+from pydantic import ValidationError
 
 from ingestion.canonicalization.context import build_canonicalization_context, match_record
 from ingestion.canonicalization.decision_provider import (
@@ -29,6 +30,8 @@ from ingestion.models import (
 )
 from ingestion.raw_storage import RawContentStorage
 from ingestion.reference_data import candidate_reference_data_hash
+
+MAX_CANONICALIZATION_MODEL_ATTEMPTS = 3
 
 
 def process_candidate(
@@ -63,27 +66,8 @@ def process_candidate(
         raw_document=raw_document,
         match_snapshot=match_snapshot,
     )
-    started_at = timezone.now()
     result = None
     error: Exception | None = None
-    try:
-        result = decision_provider.decide(context)
-    except Exception as exc:
-        error = exc
-    completed_at = timezone.now()
-
-    raw_output_key = ""
-    response_identifier = ""
-    token_usage: dict[str, Any] = {}
-    if result is not None:
-        raw_output_key = storage.save(result.raw_response, suffix=".json").storage_key
-        response_identifier = result.response_identifier
-        token_usage = result.token_usage
-    elif isinstance(error, ModelOutputError):
-        raw_output_key = storage.save(error.raw_response, suffix=".json").storage_key
-        response_identifier = error.response_identifier
-        token_usage = error.token_usage
-
     serialized_context = json.dumps(
         context,
         ensure_ascii=False,
@@ -91,28 +75,56 @@ def process_candidate(
         separators=(",", ":"),
     )
     job = _originating_job(candidate)
-    invocation = ModelInvocation.objects.create(
-        job=job,
-        stage=ModelInvocationStage.CANONICALIZATION,
-        model_name=decision_provider.model_name,
-        prompt_version=CANONICALIZATION_PROMPT_VERSION,
-        schema_version=CANONICALIZATION_SCHEMA_VERSION,
-        batch_index=candidate.pk,
-        attempt_number=_next_canonicalization_attempt(job, candidate.pk),
-        status=ExtractionStatus.SUCCEEDED if result else ExtractionStatus.FAILED,
-        started_at=started_at,
-        completed_at=completed_at,
-        response_identifier=response_identifier,
-        input_hash=hashlib.sha256(serialized_context.encode("utf-8")).hexdigest(),
-        reference_data_hash=candidate_reference_data_hash(context["catalog"]),
-        reference_data_snapshot=context["catalog"],
-        raw_output_storage_key=raw_output_key,
-        token_usage=token_usage,
-        error_type=type(error).__name__ if error else "",
-        error_message=str(error) if error else "",
-    )
-    if error is not None and not isinstance(error, ModelOutputError):
-        raise error
+    invocation: ModelInvocation
+    while True:
+        started_at = timezone.now()
+        result = None
+        error = None
+        try:
+            result = decision_provider.decide(context)
+        except Exception as exc:
+            error = exc
+        completed_at = timezone.now()
+
+        raw_output_key = ""
+        response_identifier = ""
+        token_usage: dict[str, Any] = {}
+        if result is not None:
+            raw_output_key = storage.save(result.raw_response, suffix=".json").storage_key
+            response_identifier = result.response_identifier
+            token_usage = result.token_usage
+        elif isinstance(error, ModelOutputError):
+            raw_output_key = storage.save(error.raw_response, suffix=".json").storage_key
+            response_identifier = error.response_identifier
+            token_usage = error.token_usage
+
+        invocation = ModelInvocation.objects.create(
+            job=job,
+            stage=ModelInvocationStage.CANONICALIZATION,
+            model_name=decision_provider.model_name,
+            prompt_version=CANONICALIZATION_PROMPT_VERSION,
+            schema_version=CANONICALIZATION_SCHEMA_VERSION,
+            batch_index=candidate.pk,
+            attempt_number=_next_canonicalization_attempt(job, candidate.pk),
+            status=ExtractionStatus.SUCCEEDED if result else ExtractionStatus.FAILED,
+            started_at=started_at,
+            completed_at=completed_at,
+            response_identifier=response_identifier,
+            input_hash=hashlib.sha256(serialized_context.encode("utf-8")).hexdigest(),
+            reference_data_hash=candidate_reference_data_hash(context["catalog"]),
+            reference_data_snapshot=context["catalog"],
+            raw_output_storage_key=raw_output_key,
+            token_usage=token_usage,
+            error_type=type(error).__name__ if error else "",
+            error_message=str(error) if error else "",
+        )
+        if error is None:
+            break
+        if not isinstance(error, (ModelOutputError, ValidationError)):
+            raise error
+        if invocation.attempt_number >= MAX_CANONICALIZATION_MODEL_ATTEMPTS:
+            break
+
     plan = canonicalize_candidate(
         candidate.pk,
         expected_version=candidate.edit_version,

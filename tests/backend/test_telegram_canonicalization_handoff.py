@@ -4,6 +4,7 @@ import pytest
 from events.models import Event
 from ingestion.candidates import update_event_candidate
 from ingestion.canonicalization.worker import CanonicalizationWorkerRuntime
+from ingestion.contracts import CanonicalRegistrationValue
 from ingestion.jobs import claim_job, enqueue_sources
 from ingestion.models import (
     CandidateStatus,
@@ -107,6 +108,87 @@ def test_unexpected_canonicalization_failure_leaves_candidate_ready(tmp_path) ->
     assert invocation.error_type == "RuntimeError"
 
 
+def test_structured_output_validation_failure_is_retried_and_can_recover(tmp_path) -> None:
+    source = make_source()
+    enqueue = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
+    job = claim_job(enqueue.jobs[0].pk, "ingestion-worker")
+    assert job is not None
+    models = FakeModels()
+    storage = LocalRawContentStorage(tmp_path)
+    TelegramTextPipeline(
+        fetcher=FakeFetcher(fixture_messages()[:2]),
+        models=models,
+        storage=storage,
+    ).execute(job)
+    runtime = CanonicalizationWorkerRuntime(decision_provider=models, storage=storage)
+    assert runtime.run_next_candidate() is not None
+    candidate = EventCandidate.objects.get(
+        candidate_index=0,
+        extraction_run__raw_source_document__source_representation__external_identifier="2",
+    )
+    original_decide = models.decide
+    call_count = 0
+
+    def flaky_decide(context):
+        nonlocal call_count
+        call_count += 1
+        if call_count < 3:
+            _raise_invalid_canonical_time()
+        return original_decide(context)
+
+    models.decide = Mock(side_effect=flaky_decide)
+
+    assert runtime.run_next_candidate() is not None
+
+    candidate.refresh_from_db()
+    assert candidate.status == CandidateStatus.PROCESSED
+    invocations = list(
+        ModelInvocation.objects.filter(stage="CANONICALIZATION", batch_index=candidate.pk).order_by(
+            "attempt_number"
+        )
+    )
+    assert [item.attempt_number for item in invocations] == [1, 2, 3]
+    assert [item.status for item in invocations] == ["FAILED", "FAILED", "SUCCEEDED"]
+    assert [item.error_type for item in invocations] == ["ValidationError", "ValidationError", ""]
+
+
+def test_exhausted_structured_output_retries_create_review_required_plan(tmp_path) -> None:
+    source = make_source()
+    enqueue = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
+    job = claim_job(enqueue.jobs[0].pk, "ingestion-worker")
+    assert job is not None
+    models = FakeModels()
+    storage = LocalRawContentStorage(tmp_path)
+    TelegramTextPipeline(
+        fetcher=FakeFetcher(fixture_messages()[:2]),
+        models=models,
+        storage=storage,
+    ).execute(job)
+    runtime = CanonicalizationWorkerRuntime(decision_provider=models, storage=storage)
+    assert runtime.run_next_candidate() is not None
+    candidate = EventCandidate.objects.get(
+        candidate_index=0,
+        extraction_run__raw_source_document__source_representation__external_identifier="2",
+    )
+    models.decide = Mock(side_effect=lambda _context: _raise_invalid_canonical_time())
+
+    assert runtime.run_next_candidate() is not None
+
+    candidate.refresh_from_db()
+    assert candidate.status == CandidateStatus.PROCESSED
+    assert candidate.canonicalization_plan.status == "REVIEW_REQUIRED"
+    assert "Canonicalization model failed" in candidate.canonicalization_plan.application_error
+    invocations = list(
+        ModelInvocation.objects.filter(stage="CANONICALIZATION", batch_index=candidate.pk).order_by(
+            "attempt_number"
+        )
+    )
+    assert len(invocations) == 3
+    assert [item.attempt_number for item in invocations] == [1, 2, 3]
+    assert {item.status for item in invocations} == {"FAILED"}
+    assert {item.error_type for item in invocations} == {"ValidationError"}
+
+
 def test_pre_invocation_canonicalization_failure_propagates_and_leaves_candidate_ready(
     tmp_path,
 ) -> None:
@@ -207,3 +289,20 @@ def test_repaired_ready_candidate_is_eligible_for_the_worker(tmp_path) -> None:
     candidate.refresh_from_db()
     assert candidate.status == CandidateStatus.PROCESSED
     assert Event.objects.count() == 1
+
+
+def _raise_invalid_canonical_time() -> None:
+    CanonicalRegistrationValue.model_validate(
+        {
+            "name": "Registration",
+            "scope": "EVENT",
+            "occurrence_id": None,
+            "occurrence_client_ref": None,
+            "url": None,
+            "opens_date": None,
+            "opens_time": None,
+            "closes_date": "2026-08-18",
+            "closes_time": "23:59:00Z",
+            "instructions": None,
+        }
+    )
