@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 
 from django.conf import settings
@@ -25,7 +26,11 @@ class CanonicalizationWorkerRuntime:
         self._decision_provider = decision_provider
         self._storage = storage
 
-    def run_next_candidate(self) -> EventCandidate | None:
+    def run_next_candidate(
+        self,
+        *,
+        on_started: Callable[[EventCandidate], None] | None = None,
+    ) -> EventCandidate | None:
         candidate = (
             EventCandidate.objects.filter(
                 status=CandidateStatus.READY,
@@ -36,6 +41,8 @@ class CanonicalizationWorkerRuntime:
         )
         if candidate is None:
             return None
+        if on_started is not None:
+            on_started(candidate)
         process_candidate(
             candidate_id=candidate.pk,
             decision_provider=self._get_decision_provider(),

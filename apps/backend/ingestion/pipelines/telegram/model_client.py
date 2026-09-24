@@ -23,7 +23,7 @@ from ingestion.pipelines.telegram.contracts import (
 from ingestion.reference_data import candidate_reference_data_hash, canonical_json
 
 SCREENING_PROMPT_VERSION = "telegram-screening-v3"
-EXTRACTION_PROMPT_VERSION = "telegram-extraction-v5"
+EXTRACTION_PROMPT_VERSION = "telegram-extraction-v6"
 
 SCREENING_PROMPT = """Classify every supplied public NTU Telegram message.
 Use EVENT when it clearly advertises or materially updates a time-bounded event that NTU students
@@ -43,7 +43,8 @@ attendee-relevant detail the message states, and route those with no structured 
 costs, prerequisites, and recurrence or cadence stated in prose - into description.
 Interpret dates and times as Singapore local time and resolve relative dates using
 published_at. Write every time as a plain wall-clock value with no UTC offset or
-timezone suffix. A continuous
+timezone suffix. Represent a stated time range with separate start_time and end_time
+values; never put a range such as 19:00-22:00 in one time field. A continuous
 cross-midnight activity is one occurrence. Treat a lecture, conference, or workshop series as one
 event whose advertised sessions are separate occurrences, including independently titled,
 separately dated, or separately registered sessions. Give every occurrence a candidate-local
@@ -107,13 +108,21 @@ class OpenAITelegramModels:
             input=[
                 {"role": "system", "content": EXTRACTION_PROMPT},
                 {
-                    "role": "user",
-                    "content": _extraction_prompt_json(messages, reference_data),
+                    "role": "developer",
+                    "content": [
+                        {
+                            "type": "input_text",
+                            "text": _reference_data_json(reference_data),
+                            "prompt_cache_breakpoint": {"mode": "explicit"},
+                        }
+                    ],
                 },
+                {"role": "user", "content": _messages_json(messages)},
             ],
             text_format=ExtractionBatch,
             reasoning={"effort": "low"},
             text={"verbosity": "low"},
+            prompt_cache_options={"mode": "explicit"},
             prompt_cache_key=prompt_cache_key(
                 stage="telegram-extraction",
                 model=self.extraction_model,
@@ -156,21 +165,10 @@ def _messages_json(messages: list[TelegramMessage]) -> str:
     )
 
 
-def _extraction_prompt_json(
-    messages: list[TelegramMessage],
-    reference_data: dict[str, Any],
-) -> str:
-    # reference_data precedes messages so the static reference catalog falls inside the
-    # cacheable prompt prefix and only the per-batch messages are billed at full rate.
-    # Re-parsing the canonical form normalizes nested key order into insertion order, so the
-    # emitted fragment is byte-identical to what candidate_reference_data_hash covers.
-    # These outer keys must not be sorted: alphabetical order puts messages first and moves
-    # reference_data out of the shared prefix. test_openai_models.py guards the ordering.
-    payload = {
-        "reference_data": json.loads(canonical_json(reference_data)),
-        "messages": [message.prompt_record() for message in messages],
-    }
-    return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+def _reference_data_json(reference_data: dict[str, Any]) -> str:
+    # The explicit breakpoint makes this byte-stable catalog the end of the cacheable prefix.
+    # Per-batch messages are sent afterwards so they are neither shared nor cache-written.
+    return '{"reference_data":' + canonical_json(reference_data) + "}"
 
 
 def _validate_identities(messages: list[TelegramMessage], returned: list[str]) -> None:

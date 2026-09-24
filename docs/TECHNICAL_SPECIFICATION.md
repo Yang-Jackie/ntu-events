@@ -233,6 +233,11 @@ The model may suggest those values, while unmatched source-grounded values
 remain available for review. Model suggestions do not create or modify trusted
 canonical records.
 
+Extraction and canonicalization place their stable reference catalog behind an
+explicit provider cache boundary and send source- or candidate-specific evidence
+after that boundary. This lets repeated calls reuse the catalog without writing
+each dynamic suffix into the prompt cache.
+
 Candidate schemas and extraction instructions are versioned so changed
 semantics can be reprocessed safely.
 
@@ -532,7 +537,9 @@ because it represents the same Singapore clock value without changing the
 associated date. Other offsets are structurally invalid and are rejected
 rather than converted without their associated date, because time-only
 conversion can silently cross a date boundary. Cross-midnight activities
-remain representable through their separate start and end dates.
+remain representable through their separate start and end dates. Extraction
+represents a stated time range with separate start and end time fields rather
+than placing the range in one time value.
 
 The current model can retain multiple occurrences and registration windows.
 Further edge-case behavior for recurrence, overnight events, and timezone

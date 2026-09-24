@@ -54,7 +54,11 @@ class Command(BaseCommand):
         try:
             while True:
                 self._assert_lock_connection(lock_connection)
-                candidate = runtime.run_next_candidate()
+                candidate = runtime.run_next_candidate(
+                    on_started=lambda item: self.stdout.write(
+                        f"Candidate {item.pk} processing started."
+                    )
+                )
                 self._assert_lock_connection(lock_connection)
                 if candidate is not None:
                     candidate.refresh_from_db()

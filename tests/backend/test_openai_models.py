@@ -83,7 +83,11 @@ def test_model_calls_send_verbosity_inside_text_configuration() -> None:
     for call in parse.call_args_list:
         assert call.kwargs["text"] == {"verbosity": "low"}
         assert "verbosity" not in call.kwargs
-        prompt = json.loads(call.kwargs["input"][1]["content"])
+    screening_prompt = json.loads(parse.call_args_list[0].kwargs["input"][1]["content"])
+    extraction_call = parse.call_args_list[1]
+    extraction_catalog = json.loads(extraction_call.kwargs["input"][1]["content"][0]["text"])
+    extraction_prompt = json.loads(extraction_call.kwargs["input"][2]["content"])
+    for prompt in (screening_prompt, extraction_prompt):
         assert prompt["messages"][0]["published_at"] == "2026-08-11T02:00:00+08:00"
         assert prompt["messages"][0]["links"] == [
             {
@@ -92,8 +96,12 @@ def test_model_calls_send_verbosity_inside_text_configuration() -> None:
                 "url": "https://example.com/register",
             }
         ]
-    extraction_prompt = json.loads(parse.call_args_list[1].kwargs["input"][1]["content"])
-    assert extraction_prompt["reference_data"] == reference_data
+    assert extraction_catalog["reference_data"] == reference_data
+    assert extraction_call.kwargs["input"][1]["content"][0]["prompt_cache_breakpoint"] == {
+        "mode": "explicit"
+    }
+    assert extraction_call.kwargs["prompt_cache_options"] == {"mode": "explicit"}
+    assert "separate start_time and end_time" in extraction_call.kwargs["input"][0]["content"]
     assert parse.call_args_list[0].kwargs["reasoning"] == {"effort": "minimal"}
     assert parse.call_args_list[1].kwargs["reasoning"] == {"effort": "low"}
     for response in responses:
@@ -118,7 +126,10 @@ def test_canonicalization_decision_provider_is_source_neutral() -> None:
     provider.model_name = "gpt-5-mini"
     provider.client = SimpleNamespace(responses=SimpleNamespace(parse=parse))
 
-    result = provider.decide({"event_candidate": {"id": 1}, "possible_matches": []})
+    catalog = {"organizers": [], "venues": [], "classifications": {}}
+    result = provider.decide(
+        {"event_candidate": {"id": 1}, "possible_matches": [], "catalog": catalog}
+    )
 
     assert result.parsed == proposal
     call = parse.call_args
@@ -127,7 +138,20 @@ def test_canonicalization_decision_provider_is_source_neutral() -> None:
     system_prompt = call.kwargs["input"][0]["content"]
     assert "Singapore local time" in system_prompt
     assert "never emit Z or +00:00" in system_prompt
-    assert json.loads(call.kwargs["input"][1]["content"])["event_candidate"]["id"] == 1
+    catalog_block = call.kwargs["input"][1]["content"][0]
+    assert json.loads(catalog_block["text"]) == {"catalog": catalog}
+    assert catalog_block["prompt_cache_breakpoint"] == {"mode": "explicit"}
+    dynamic_context = json.loads(call.kwargs["input"][2]["content"])
+    assert dynamic_context["event_candidate"]["id"] == 1
+    assert "catalog" not in dynamic_context
+    assert call.kwargs["prompt_cache_options"] == {"mode": "explicit"}
+    assert call.kwargs["prompt_cache_key"] == prompt_cache_key(
+        stage="event-canonicalization",
+        model="gpt-5-mini",
+        prompt_version=CANONICALIZATION_PROMPT_VERSION,
+        schema_version=CANONICALIZATION_SCHEMA_VERSION,
+        reference_data_hash=candidate_reference_data_hash(catalog),
+    )
 
 
 def test_incomplete_response_raises_error_with_raw_provider_artifact() -> None:
@@ -158,7 +182,7 @@ def test_incomplete_response_raises_error_with_raw_provider_artifact() -> None:
     assert "max_output_tokens" in str(captured.value)
 
 
-def test_extraction_prompt_keeps_reference_data_in_the_cacheable_prefix() -> None:
+def test_extraction_prompt_uses_an_explicit_stable_catalog_cache_boundary() -> None:
     reference_data = {
         "venues": [{"name": "LT1", "id": 1, "aliases": ["lt 1"]}],
         "classifications": {"formats": [{"code": "TALK", "label": "Talk"}]},
@@ -178,14 +202,14 @@ def test_extraction_prompt_keeps_reference_data_in_the_cacheable_prefix() -> Non
         # Identity validation only needs the first message of each batch to be returned.
         models.extract(batch[:1], reference_data=reference_data)
 
-    contents = [call.kwargs["input"][1]["content"] for call in parse.call_args_list]
+    catalog_blocks = [call.kwargs["input"][1]["content"][0] for call in parse.call_args_list]
     serialized_reference = canonical_json(reference_data)
-    for content in contents:
-        # The static catalog must lead the payload, byte-identically to the hashed form,
-        # or it falls outside the shared prefix and is billed at full rate every call.
-        assert content.startswith('{"reference_data":' + serialized_reference + ',"messages":')
-    prefixes = {content.split(',"messages":')[0] for content in contents}
-    assert len(prefixes) == 1
+    for call, block in zip(parse.call_args_list, catalog_blocks, strict=True):
+        assert block["text"] == '{"reference_data":' + serialized_reference + "}"
+        assert block["prompt_cache_breakpoint"] == {"mode": "explicit"}
+        assert call.kwargs["prompt_cache_options"] == {"mode": "explicit"}
+        assert json.loads(call.kwargs["input"][2]["content"])["messages"]
+    assert len({block["text"] for block in catalog_blocks}) == 1
 
     # Distinct batches must share one cache key, otherwise every call routes to a cold cache.
     cache_keys = [call.kwargs["prompt_cache_key"] for call in parse.call_args_list]

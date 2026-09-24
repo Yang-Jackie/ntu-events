@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+from io import StringIO
 from types import SimpleNamespace
+from unittest.mock import Mock
 
 import psycopg
 import pytest
+from django.core.management import call_command
 from django.db import connection
 from ingestion.management.commands.run_canonicalization_worker import (
     release_global_lock,
@@ -37,3 +40,39 @@ def test_postgres_advisory_lock_allows_only_one_worker_session() -> None:
         release_global_lock(first)
         assert try_acquire_global_lock(second) is True
         release_global_lock(second)
+
+
+@pytest.mark.django_db
+def test_worker_logs_candidate_before_processing(monkeypatch) -> None:
+    output = StringIO()
+    candidate = SimpleNamespace(pk=42, status="PROCESSED", refresh_from_db=Mock())
+
+    class FakeRuntime:
+        def run_next_candidate(self, *, on_started):
+            on_started(candidate)
+            assert "Candidate 42 processing started." in output.getvalue()
+            return candidate
+
+        def close(self) -> None:
+            return None
+
+    monkeypatch.setattr(
+        "ingestion.management.commands.run_canonicalization_worker.CanonicalizationWorkerRuntime",
+        FakeRuntime,
+    )
+    monkeypatch.setattr(
+        "ingestion.management.commands.run_canonicalization_worker.try_acquire_global_lock",
+        lambda _database: True,
+    )
+    monkeypatch.setattr(
+        "ingestion.management.commands.run_canonicalization_worker.release_global_lock",
+        lambda _database: None,
+    )
+
+    call_command("run_canonicalization_worker", "--once", stdout=output)
+
+    assert output.getvalue().splitlines() == [
+        "Canonicalization worker started with the global advisory lock.",
+        "Candidate 42 processing started.",
+        "Candidate 42 finished with status PROCESSED.",
+    ]
