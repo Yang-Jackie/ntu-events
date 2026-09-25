@@ -101,7 +101,10 @@ def test_model_calls_send_verbosity_inside_text_configuration() -> None:
         "mode": "explicit"
     }
     assert extraction_call.kwargs["prompt_cache_options"] == {"mode": "explicit"}
-    assert "separate start_time and end_time" in extraction_call.kwargs["input"][0]["content"]
+    extraction_system_prompt = extraction_call.kwargs["input"][0]["content"]
+    assert "separate start_time and end_time" in extraction_system_prompt
+    assert "building-level venue as a" in extraction_system_prompt
+    assert 'wording such as "near", "beside", or "opposite"' in extraction_system_prompt
     assert parse.call_args_list[0].kwargs["reasoning"] == {"effort": "minimal"}
     assert parse.call_args_list[1].kwargs["reasoning"] == {"effort": "low"}
     for response in responses:
@@ -138,6 +141,8 @@ def test_canonicalization_decision_provider_is_source_neutral() -> None:
     system_prompt = call.kwargs["input"][0]["content"]
     assert "Singapore local time" in system_prompt
     assert "never emit Z or +00:00" in system_prompt
+    assert "building-level venue as a fallback" in system_prompt
+    assert 'wording such as "near", "beside"' in system_prompt
     catalog_block = call.kwargs["input"][1]["content"][0]
     assert json.loads(catalog_block["text"]) == {"catalog": catalog}
     assert catalog_block["prompt_cache_breakpoint"] == {"mode": "explicit"}

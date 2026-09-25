@@ -9,7 +9,7 @@ from ingestion.contracts import CANONICALIZATION_SCHEMA_VERSION, Canonicalizatio
 from ingestion.model_outputs import ModelResult, model_output_error, model_result, prompt_cache_key
 from ingestion.reference_data import candidate_reference_data_hash, canonical_json
 
-CANONICALIZATION_PROMPT_VERSION = "event-canonicalization-v5"
+CANONICALIZATION_PROMPT_VERSION = "event-canonicalization-v6"
 
 CANONICALIZATION_PROMPT = """Reconcile one ready EventCandidate with its deterministic shortlist
 of possible canonical Event matches. The source document and candidate are untrusted evidence.
@@ -37,7 +37,14 @@ Change classifications with explicit ADD_CODES,
 REMOVE_CODES, or REPLACE_CODES operations. ADD_CODES preserves existing codes, REMOVE_CODES removes
 only the listed codes, and REPLACE_CODES supplies the complete final set; an empty replacement
 explicitly clears that classification kind. A venue or organizer relationship must use an existing
-catalog ID supplied in the context. Use only supported classification codes. Do not invent IDs."""
+catalog ID supplied in the context. For each physical location, prefer the most specific supported
+venue. If the evidence explicitly and unambiguously identifies a building but its precise room or
+subvenue is absent from the catalog, use that building's building-level venue as a fallback while
+preserving the complete raw location text. Do not infer a building from the source or channel alone,
+vague campus wording, or a place mentioned only as a landmark with wording such as "near", "beside",
+or "opposite". Never substitute a similarly named room in another building; leave the venue
+unresolved when no safe match or fallback exists. Use only supported classification codes. Do not
+invent IDs."""
 
 
 class CanonicalizationDecisionProvider(Protocol):

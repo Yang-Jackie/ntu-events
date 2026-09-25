@@ -135,7 +135,11 @@ and ODbL terms are retained with the snapshot.
 
 This completes the identity, relationship and building-point foundation, not
 Milestone 7. Representative ingestion still needs an explicit location-resolution
-review and a fresh-database real Event-to-marker exercise.
+review and a fresh-database real Event-to-marker exercise. As a first bounded
+resolution rule, model-assisted extraction and canonicalization now use a
+building-level venue only when source evidence unambiguously establishes the
+parent of a missing room or subvenue; broader consistency and unresolved-term
+review remain part of the milestone.
 
 ### Candidate directions to evaluate
 

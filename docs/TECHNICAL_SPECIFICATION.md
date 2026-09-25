@@ -231,7 +231,12 @@ references so registrations can identify their intended occurrence.
 Extraction receives a snapshot of supported classification and venue values.
 The model may suggest those values, while unmatched source-grounded values
 remain available for review. Model suggestions do not create or modify trusted
-canonical records.
+canonical records. When source wording or a recognized location code
+unambiguously identifies a building but the precise room or subvenue is absent
+from the catalog, extraction and canonicalization may use the corresponding
+building-level venue while preserving the precise raw wording. They must not
+infer that fallback from source identity, vague campus wording, or a place used
+only as a nearby landmark; those cases remain unresolved and reviewable.
 
 Extraction and canonicalization place their stable reference catalog behind an
 explicit provider cache boundary and send source- or candidate-specific evidence

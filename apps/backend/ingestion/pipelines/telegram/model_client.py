@@ -23,7 +23,7 @@ from ingestion.pipelines.telegram.contracts import (
 from ingestion.reference_data import candidate_reference_data_hash, canonical_json
 
 SCREENING_PROMPT_VERSION = "telegram-screening-v3"
-EXTRACTION_PROMPT_VERSION = "telegram-extraction-v6"
+EXTRACTION_PROMPT_VERSION = "telegram-extraction-v7"
 
 SCREENING_PROMPT = """Classify every supplied public NTU Telegram message.
 Use EVENT when it clearly advertises or materially updates a time-bounded event that NTU students
@@ -39,7 +39,7 @@ An event is a time-bounded activity an NTU student can attend in person, online,
 format. Do not reject an event because of its location or attendance mode. Never invent source
 facts. Use null, empty lists, UNKNOWN, and ambiguities when the source omits or obscures
 information. Omitting a stated fact is as wrong as inventing one: capture every
-attendee-relevant detail the message states, and route those with no structured home - perks,
+relevant detail the message states, and route those with no structured home - perks,
 costs, prerequisites, and recurrence or cadence stated in prose - into description.
 Interpret dates and times as Singapore local time and resolve relative dates using
 published_at. Write every time as a plain wall-clock value with no UTC offset or
@@ -50,8 +50,16 @@ event whose advertised sessions are separate occurrences, including independentl
 separately dated, or separately registered sessions. Give every occurrence a candidate-local
 local_ref and use it for occurrence-scoped registrations. Preserve raw venue wording. Use only
 supported classification codes and venue IDs from reference_data; when no classification fits,
-place a source-grounded label in other_values, and when no venue fits, leave suggested_venue_ids
-empty. Classify each extracted candidate as EVENT_ANNOUNCEMENT when the message substantially
+place a source-grounded label in other_values. For each physical location, prefer the most specific
+supported venue. If the source explicitly and unambiguously identifies a building but its precise
+room or subvenue is absent from reference_data, use that building's building-level venue as a
+fallback while preserving the complete source wording in raw_location. For example, resolve
+"Hall 11 Reading Room" to the Hall 11 venue when no Hall 11 Reading Room venue exists. Do not infer
+a building from the source or channel alone, from vague wording such as "on campus", or from a
+place mentioned only as a landmark in wording such as "near", "beside", or "opposite". Never
+substitute a similarly named room in another building. When neither a precise venue nor an
+unambiguous parent-building fallback fits, leave suggested_venue_ids empty. Classify each extracted
+candidate as EVENT_ANNOUNCEMENT when the message substantially
 announces the event, EVENT_FOLLOW_UP when it mainly updates or follows up an already announced
 event, or UNKNOWN when this cannot be determined. This classification is descriptive only.
 Preserve ambiguities, confidence, and short evidence. Return every message_identity exactly
