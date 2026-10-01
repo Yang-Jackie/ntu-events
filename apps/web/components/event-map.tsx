@@ -9,9 +9,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 import type { MapMarker } from "@/lib/discovery";
-import { BASEMAP_STYLE_URL, MAPLIBRE_WORKER_URL } from "@/lib/map-config";
+import {
+  basemapStyle,
+  DEFAULT_BASEMAP_PROVIDER,
+  MAPLIBRE_WORKER_URL,
+  type BasemapProvider,
+} from "@/lib/map-config";
 
 type EventMapProps = {
+  basemap: BasemapProvider;
   bbox?: string;
   markers: MapMarker[];
   returnPath: string;
@@ -19,7 +25,12 @@ type EventMapProps = {
 
 const ntuCentre: [longitude: number, latitude: number] = [103.6831, 1.3483];
 
-export function EventMap({ bbox, markers, returnPath }: EventMapProps) {
+export function EventMap({
+  basemap,
+  bbox,
+  markers,
+  returnPath,
+}: EventMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap>(null);
   const syncMapRef = useRef<(() => void) | null>(null);
@@ -41,7 +52,7 @@ export function EventMap({ bbox, markers, returnPath }: EventMapProps) {
       maplibre.setWorkerUrl(MAPLIBRE_WORKER_URL);
       const map = new maplibre.Map({
         container: containerRef.current,
-        style: BASEMAP_STYLE_URL,
+        style: basemapStyle(basemap),
         center: ntuCentre,
         zoom: 15,
         minZoom: 12,
@@ -144,12 +155,20 @@ export function EventMap({ bbox, markers, returnPath }: EventMapProps) {
         mapRef.current = null;
       }
     };
-  }, [router]);
+  }, [basemap, router]);
 
   useEffect(() => {
     latestPropsRef.current = { bbox, markers, queryString, returnPath };
     syncMapRef.current?.();
   }, [bbox, markers, queryString, returnPath]);
+
+  const selectBasemap = (provider: BasemapProvider) => {
+    if (provider === basemap) return;
+    const next = new URLSearchParams(queryString);
+    if (provider === DEFAULT_BASEMAP_PROVIDER) next.delete("basemap");
+    else next.set("basemap", provider);
+    router.replace(next.size ? `/?${next}` : "/", { scroll: false });
+  };
 
   return (
     <div className="event-map-frame">
@@ -158,6 +177,26 @@ export function EventMap({ bbox, markers, returnPath }: EventMapProps) {
         ref={containerRef}
         aria-label="Map of event venues"
       />
+      <div
+        className="event-map__basemap-switch"
+        role="group"
+        aria-label="Choose basemap provider"
+      >
+        <button
+          aria-pressed={basemap === "openfreemap"}
+          onClick={() => selectBasemap("openfreemap")}
+          type="button"
+        >
+          OpenFreeMap
+        </button>
+        <button
+          aria-pressed={basemap === "openstreetmap"}
+          onClick={() => selectBasemap("openstreetmap")}
+          type="button"
+        >
+          OpenStreetMap
+        </button>
+      </div>
       <div className="event-map__status">
         <strong>{markers.length}</strong> mapped{" "}
         {markers.length === 1 ? "place" : "places"}

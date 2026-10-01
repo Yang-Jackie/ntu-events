@@ -162,8 +162,10 @@ review remain part of the milestone.
 
 ### Map evolution note (not a milestone exit condition)
 
-The map now uses an OSM-derived OpenFreeMap vector basemap with MapLibre. A
-small reviewed NTU overlay remains a possible next map experiment before
+The MapLibre map now defaults to an OSM-derived OpenFreeMap vector basemap and
+offers an URL-backed local-development comparison with OpenStreetMap Standard
+raster tiles. This comparison does not approve either public tile service for
+deployment. A small reviewed NTU overlay remains a possible next map experiment before
 pursuing deeper institutional map access. If NTU later authorizes structured
 MazeMap data, the renderer could be retained while adding normalized campus,
 floor, room, or POI layers; OneMap raster could replace the basemap where it

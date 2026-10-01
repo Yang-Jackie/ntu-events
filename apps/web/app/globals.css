@@ -496,6 +496,42 @@ h3 {
   position: relative;
 }
 
+.event-map__basemap-switch {
+  position: absolute;
+  z-index: 500;
+  top: 1rem;
+  left: 1rem;
+  display: flex;
+  gap: 0.2rem;
+  padding: 0.22rem;
+  border: 1px solid rgba(16, 42, 51, 0.18);
+  border-radius: 0.65rem;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 20px rgba(16, 42, 51, 0.12);
+  backdrop-filter: blur(8px);
+}
+
+.event-map__basemap-switch button {
+  padding: 0.45rem 0.6rem;
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.event-map__basemap-switch button[aria-pressed="true"] {
+  background: var(--ink);
+  color: white;
+}
+
+.event-map__basemap-switch button:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
 .event-map__status {
   position: absolute;
   z-index: 500;

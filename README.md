@@ -62,6 +62,13 @@ corepack pnpm dev:web
 - Next.js: `http://localhost:3000/`
 - Next.js health: `http://localhost:3000/api/health`
 
+The map defaults to the OpenFreeMap Liberty vector basemap. Use its on-map
+switch, or add `basemap=openstreetmap` to the discovery URL, to compare it with
+OpenStreetMap Standard raster tiles. Direct OpenStreetMap tiles are included
+only for normal interactive local-development comparison: do not add bulk
+prefetching, offline downloads, or a caching proxy, and reassess the provider
+before any public deployment.
+
 Docker Compose binds the Django and PostgreSQL host ports to `127.0.0.1`, so
 the local owner-operated services are not published to other network devices.
 

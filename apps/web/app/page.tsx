@@ -14,6 +14,7 @@ import {
   pathWith,
   type SearchParamRecord,
 } from "@/lib/discovery";
+import { basemapProvider } from "@/lib/map-config";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +36,7 @@ export default async function Home({
   const returnPath = discoveryPath(params);
   const currentPage = query.page ?? 1;
   const mapView = first(params.view) === "map";
+  const basemap = basemapProvider(first(params.basemap));
 
   return (
     <main className={`discovery-shell ${mapView ? "view-map" : "view-list"}`}>
@@ -126,6 +128,7 @@ export default async function Home({
         </section>
         <aside className="event-map-panel" aria-label="Campus event map">
           <EventMap
+            basemap={basemap}
             bbox={query.bbox}
             markers={markers}
             returnPath={returnPath}

@@ -445,15 +445,19 @@ and map bounds are URL-backed so navigation and detail-page returns preserve the
 current context. The default list begins with the current Singapore date and
 orders the next occurrence first; past Events remain available explicitly.
 
-The interactive map uses MapLibre GL JS in a client-only boundary with the
-OpenFreeMap Liberty style and its OSM-derived vector basemap for the local
-personal-use phase. The basemap style URL is replaceable configuration rather
-than canonical location data. Occurrences at the same reviewed building share
-one count marker, while standalone venue points remain separate. Settled map
-movement updates the API `bbox` filter, and mobile presentation is list-first
-with an explicit List/Map switch. The hosted basemap and its usage terms and
-operational guarantees must be reassessed before any approved public
-deployment.
+The interactive map uses MapLibre GL JS in a client-only boundary. OpenFreeMap
+Liberty remains the default OSM-derived vector basemap for the local
+personal-use phase. A URL-backed on-map development switch can instead render
+OpenStreetMap Standard raster tiles for direct visual comparison while
+preserving the current bounds and discovery filters. Direct OSM tiles are
+limited to normal interactive local use: the application does not prefetch
+them, support offline download, or proxy them. Basemap configuration remains
+presentation state rather than canonical location data. Occurrences at the
+same reviewed building share one count marker, while standalone venue points
+remain separate. Settled map movement updates the API `bbox` filter, and mobile
+presentation is list-first with an explicit List/Map switch. Hosted basemaps
+and their usage terms and operational guarantees must be reassessed before any
+approved public deployment.
 
 ### Working note: possible map-data evolution
 
