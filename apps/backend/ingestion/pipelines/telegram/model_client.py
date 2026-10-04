@@ -79,11 +79,15 @@ class OpenAITelegramModels:
         *,
         screening_model: str,
         extraction_model: str,
+        screening_reasoning_effort: str = "low",
+        extraction_reasoning_effort: str = "medium",
         max_retries: int = 2,
         timeout_seconds: float = 90,
     ):
         self.screening_model = screening_model
         self.extraction_model = extraction_model
+        self.screening_reasoning_effort = screening_reasoning_effort
+        self.extraction_reasoning_effort = extraction_reasoning_effort
         self.client = OpenAI(max_retries=max_retries, timeout=timeout_seconds)
 
     def screen(self, messages: list[TelegramMessage]) -> ModelResult[ScreeningBatch]:
@@ -94,7 +98,7 @@ class OpenAITelegramModels:
                 {"role": "user", "content": _messages_json(messages)},
             ],
             text_format=ScreeningBatch,
-            reasoning={"effort": "minimal"},
+            reasoning={"effort": self.screening_reasoning_effort},
             text={"verbosity": "low"},
             prompt_cache_key=prompt_cache_key(
                 stage="telegram-screening",
@@ -128,7 +132,7 @@ class OpenAITelegramModels:
                 {"role": "user", "content": _messages_json(messages)},
             ],
             text_format=ExtractionBatch,
-            reasoning={"effort": "low"},
+            reasoning={"effort": self.extraction_reasoning_effort},
             text={"verbosity": "low"},
             prompt_cache_options={"mode": "explicit"},
             prompt_cache_key=prompt_cache_key(

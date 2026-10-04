@@ -60,10 +60,12 @@ class OpenAICanonicalizationDecisionProvider:
         self,
         *,
         model_name: str,
+        reasoning_effort: str = "medium",
         max_retries: int = 2,
         timeout_seconds: float = 90,
     ):
         self.model_name = model_name
+        self.reasoning_effort = reasoning_effort
         self.client = OpenAI(max_retries=max_retries, timeout=timeout_seconds)
 
     def decide(self, context: dict[str, Any]) -> ModelResult[CanonicalizationProposal]:
@@ -91,7 +93,7 @@ class OpenAICanonicalizationDecisionProvider:
                 },
             ],
             text_format=CanonicalizationProposal,
-            reasoning={"effort": "low"},
+            reasoning={"effort": self.reasoning_effort},
             text={"verbosity": "low"},
             prompt_cache_options={"mode": "explicit"},
             prompt_cache_key=prompt_cache_key(

@@ -189,6 +189,16 @@ such as client lifetime, retry behavior, batching, and cache keys belong to the
 implementation and tests; when they affect durable behavior, document the
 outcome after it is verified.
 
+Model names and reasoning effort are independently configurable per stage via
+`OPENAI_<STAGE>_MODEL` and `OPENAI_<STAGE>_REASONING_EFFORT`, where `<STAGE>` is
+`SCREENING`, `EXTRACTION`, or `CANONICALIZATION`. Screening defaults to
+`gpt-5-nano` with `low` effort; extraction and canonicalization default to
+`gpt-6-luna` with `medium` effort. Docker Compose passes these environment
+settings to the backend and both workers. Recreate those containers after
+changing their environment settings. These settings do not automatically
+repair existing candidates or canonical Events; changing effort alone does not
+invalidate successful screening or extraction reuse.
+
 A stale RUNNING ingestion job is requeued with the same identity and a new
 attempt number. For Telegram screening, a later attempt replaces the job's
 per-message screening result, while each model invocation remains retained as

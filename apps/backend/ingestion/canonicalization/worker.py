@@ -61,6 +61,7 @@ class CanonicalizationWorkerRuntime:
                 raise RuntimeError("OPENAI_API_KEY is required for canonicalization")
             self._decision_provider = OpenAICanonicalizationDecisionProvider(
                 model_name=settings.OPENAI_CANONICALIZATION_MODEL,
+                reasoning_effort=settings.OPENAI_CANONICALIZATION_REASONING_EFFORT,
             )
         return self._decision_provider
 

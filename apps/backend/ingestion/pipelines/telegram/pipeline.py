@@ -114,6 +114,8 @@ class TelegramTextPipeline:
             self._models = OpenAITelegramModels(
                 screening_model=settings.OPENAI_SCREENING_MODEL,
                 extraction_model=settings.OPENAI_EXTRACTION_MODEL,
+                screening_reasoning_effort=settings.OPENAI_SCREENING_REASONING_EFFORT,
+                extraction_reasoning_effort=settings.OPENAI_EXTRACTION_REASONING_EFFORT,
             )
         return self._models
 

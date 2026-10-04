@@ -9,6 +9,7 @@ from ingestion.canonicalization.decision_provider import (
     CANONICALIZATION_PROMPT_VERSION,
     OpenAICanonicalizationDecisionProvider,
 )
+from ingestion.canonicalization.worker import CanonicalizationWorkerRuntime
 from ingestion.contracts import (
     CANONICALIZATION_SCHEMA_VERSION,
     CanonicalizationAction,
@@ -30,10 +31,15 @@ from ingestion.pipelines.telegram.model_client import (
     SCREENING_PROMPT_VERSION,
     OpenAITelegramModels,
 )
+from ingestion.pipelines.telegram.pipeline import TelegramTextPipeline
 from ingestion.reference_data import candidate_reference_data_hash, canonical_json
 
 
-def test_model_calls_send_verbosity_inside_text_configuration() -> None:
+@pytest.mark.parametrize(
+    "efforts",
+    [{}, {"screening_reasoning_effort": "high", "extraction_reasoning_effort": "low"}],
+)
+def test_model_calls_send_verbosity_inside_text_configuration(monkeypatch, efforts) -> None:
     message = TelegramMessage(
         message_id=1,
         channel_id=123,
@@ -71,10 +77,13 @@ def test_model_calls_send_verbosity_inside_text_configuration() -> None:
         _response(ExtractionBatch(results=[ExtractedMessage(message_identity="1", events=[])])),
     )
     parse = Mock(side_effect=responses)
-    models = object.__new__(OpenAITelegramModels)
-    models.screening_model = "gpt-5-nano"
-    models.extraction_model = "gpt-5-mini"
-    models.client = SimpleNamespace(responses=SimpleNamespace(parse=parse))
+    client = SimpleNamespace(responses=SimpleNamespace(parse=parse))
+    monkeypatch.setattr(
+        "ingestion.pipelines.telegram.model_client.OpenAI", Mock(return_value=client)
+    )
+    models = OpenAITelegramModels(
+        screening_model="gpt-5-nano", extraction_model="gpt-5-mini", **efforts
+    )
 
     models.screen([message])
     reference_data = {"classifications": {"formats": []}, "venues": []}
@@ -105,13 +114,18 @@ def test_model_calls_send_verbosity_inside_text_configuration() -> None:
     assert "separate start_time and end_time" in extraction_system_prompt
     assert "building-level venue as a" in extraction_system_prompt
     assert 'wording such as "near", "beside", or "opposite"' in extraction_system_prompt
-    assert parse.call_args_list[0].kwargs["reasoning"] == {"effort": "minimal"}
-    assert parse.call_args_list[1].kwargs["reasoning"] == {"effort": "low"}
+    assert parse.call_args_list[0].kwargs["reasoning"] == {
+        "effort": efforts.get("screening_reasoning_effort", "low")
+    }
+    assert parse.call_args_list[1].kwargs["reasoning"] == {
+        "effort": efforts.get("extraction_reasoning_effort", "medium")
+    }
     for response in responses:
         response.model_dump_json.assert_called_once_with(warnings=False)
 
 
-def test_canonicalization_decision_provider_is_source_neutral() -> None:
+@pytest.mark.parametrize("efforts", [{}, {"reasoning_effort": "high"}])
+def test_canonicalization_decision_provider_is_source_neutral(monkeypatch, efforts) -> None:
     proposal = CanonicalizationProposal(
         action=CanonicalizationAction.LINK_ONLY,
         target_event_id=42,
@@ -125,9 +139,11 @@ def test_canonicalization_decision_provider_is_source_neutral() -> None:
     )
     response = _response(proposal)
     parse = Mock(return_value=response)
-    provider = object.__new__(OpenAICanonicalizationDecisionProvider)
-    provider.model_name = "gpt-5-mini"
-    provider.client = SimpleNamespace(responses=SimpleNamespace(parse=parse))
+    client = SimpleNamespace(responses=SimpleNamespace(parse=parse))
+    monkeypatch.setattr(
+        "ingestion.canonicalization.decision_provider.OpenAI", Mock(return_value=client)
+    )
+    provider = OpenAICanonicalizationDecisionProvider(model_name="gpt-5-mini", **efforts)
 
     catalog = {"organizers": [], "venues": [], "classifications": {}}
     result = provider.decide(
@@ -137,6 +153,7 @@ def test_canonicalization_decision_provider_is_source_neutral() -> None:
     assert result.parsed == proposal
     call = parse.call_args
     assert call.kwargs["model"] == "gpt-5-mini"
+    assert call.kwargs["reasoning"] == {"effort": efforts.get("reasoning_effort", "medium")}
     assert call.kwargs["text"] == {"verbosity": "low"}
     system_prompt = call.kwargs["input"][0]["content"]
     assert "Singapore local time" in system_prompt
@@ -177,6 +194,7 @@ def test_incomplete_response_raises_error_with_raw_provider_artifact() -> None:
     response = _response(None, status="incomplete", incomplete_reason="max_output_tokens")
     models = object.__new__(OpenAITelegramModels)
     models.extraction_model = "gpt-5-mini"
+    models.extraction_reasoning_effort = "medium"
     models.client = SimpleNamespace(responses=SimpleNamespace(parse=Mock(return_value=response)))
 
     with pytest.raises(ModelOutputError) as captured:
@@ -201,6 +219,7 @@ def test_extraction_prompt_uses_an_explicit_stable_catalog_cache_boundary() -> N
     )
     models = object.__new__(OpenAITelegramModels)
     models.extraction_model = "gpt-5-mini"
+    models.extraction_reasoning_effort = "medium"
     models.client = SimpleNamespace(responses=SimpleNamespace(parse=parse))
 
     for batch in batches:
@@ -226,6 +245,41 @@ def test_extraction_prompt_uses_an_explicit_stable_catalog_cache_boundary() -> N
         schema_version=EXTRACTION_SCHEMA_VERSION,
         reference_data_hash=candidate_reference_data_hash(reference_data),
     )
+
+
+def test_telegram_pipeline_passes_stage_configuration_to_provider(monkeypatch, settings) -> None:
+    settings.OPENAI_API_KEY = "test-key"
+    settings.OPENAI_SCREENING_MODEL = "screening-model"
+    settings.OPENAI_EXTRACTION_MODEL = "extraction-model"
+    settings.OPENAI_SCREENING_REASONING_EFFORT = "medium"
+    settings.OPENAI_EXTRACTION_REASONING_EFFORT = "high"
+    factory = Mock()
+    monkeypatch.setattr("ingestion.pipelines.telegram.pipeline.OpenAITelegramModels", factory)
+    pipeline = TelegramTextPipeline()
+
+    assert pipeline._get_models() is factory.return_value
+    assert pipeline._get_models() is factory.return_value
+    factory.assert_called_once_with(
+        screening_model="screening-model",
+        extraction_model="extraction-model",
+        screening_reasoning_effort="medium",
+        extraction_reasoning_effort="high",
+    )
+
+
+def test_canonicalization_worker_passes_stage_configuration_to_provider(monkeypatch, settings):
+    settings.OPENAI_API_KEY = "test-key"
+    settings.OPENAI_CANONICALIZATION_MODEL = "canonicalization-model"
+    settings.OPENAI_CANONICALIZATION_REASONING_EFFORT = "high"
+    factory = Mock()
+    monkeypatch.setattr(
+        "ingestion.canonicalization.worker.OpenAICanonicalizationDecisionProvider", factory
+    )
+    runtime = CanonicalizationWorkerRuntime()
+
+    assert runtime._get_decision_provider() is factory.return_value
+    assert runtime._get_decision_provider() is factory.return_value
+    factory.assert_called_once_with(model_name="canonicalization-model", reasoning_effort="high")
 
 
 def test_prompt_cache_key_tracks_the_reference_catalog() -> None:
