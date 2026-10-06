@@ -22,6 +22,7 @@ from ingestion.models import (
     CanonicalizationPlanStatus,
     EventCandidate,
 )
+from ingestion.observability import log_context, log_event, logged_phase
 from ingestion.reference_data import build_candidate_reference_data
 
 
@@ -39,7 +40,11 @@ def canonicalize_candidate(
     target_snapshot_hashes: dict[int, str] | None = None,
 ) -> CanonicalizationPlan | None:
     """Match one READY candidate, create its sole plan, and optionally apply it."""
-    with transaction.atomic():
+    with (
+        log_context(candidate_id=candidate_id),
+        logged_phase("canonicalization.plan_preparation"),
+        transaction.atomic(),
+    ):
         candidate = (
             EventCandidate.objects.select_for_update()
             .select_related("source_representation")
@@ -93,7 +98,9 @@ def canonicalize_candidate(
                 grounding_flags=grounding_flags or [],
             )
         else:
-            hard_issues = validate_proposal(candidate, parsed_decision, matches=matches)
+            with logged_phase("canonicalization.proposal_validation"):
+                hard_issues = validate_proposal(candidate, parsed_decision, matches=matches)
+            log_event("canonicalization.proposal_validated", issue_count=len(hard_issues))
             generated = parsed_decision.model_dump(mode="json")
             target = (
                 Event.objects.filter(pk=parsed_decision.target_event_id).first()
@@ -130,6 +137,15 @@ def canonicalize_candidate(
         candidate.save(update_fields=("status", "processed_at", "updated_at"))
 
     if apply_ready and plan.status == CanonicalizationPlanStatus.READY:
-        apply_canonicalization_plan(plan.pk, expected_version=plan.plan_version)
+        with logged_phase(
+            "canonicalization.application", candidate_id=candidate_id, plan_id=plan.pk
+        ):
+            apply_canonicalization_plan(plan.pk, expected_version=plan.plan_version)
         plan.refresh_from_db()
+    log_event(
+        "canonicalization.plan_finished",
+        candidate_id=candidate_id,
+        plan_id=plan.pk,
+        status=plan.status,
+    )
     return plan

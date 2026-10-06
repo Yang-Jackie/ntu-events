@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 from typing import Any
 
 from django.db.models import Max
 from django.utils import timezone
+from openai import APITimeoutError
 from pydantic import ValidationError
 
 from ingestion.canonicalization.context import build_canonicalization_context, match_record
@@ -28,6 +30,7 @@ from ingestion.models import (
     ModelInvocation,
     ModelInvocationStage,
 )
+from ingestion.observability import log_context, log_event, logged_phase, usage_fields
 from ingestion.raw_storage import RawContentStorage
 from ingestion.reference_data import candidate_reference_data_hash
 
@@ -41,6 +44,18 @@ def process_candidate(
     storage: RawContentStorage,
 ) -> CanonicalizationPlan | None:
     """Run the complete source-neutral READY-candidate canonicalization workflow."""
+    with log_context(candidate_id=candidate_id), logged_phase("canonicalization.candidate"):
+        return _process_candidate(
+            candidate_id=candidate_id, decision_provider=decision_provider, storage=storage
+        )
+
+
+def _process_candidate(
+    *,
+    candidate_id: int,
+    decision_provider: CanonicalizationDecisionProvider,
+    storage: RawContentStorage,
+) -> CanonicalizationPlan | None:
     candidate = EventCandidate.objects.select_related(
         "source_representation",
         "extraction_run__model_invocation__job",
@@ -49,9 +64,12 @@ def process_candidate(
     if candidate.status != CandidateStatus.READY:
         return None
     payload = EventCandidatePayload.model_validate(candidate.effective_payload)
-    matches = find_candidate_matches(candidate, payload)
-    match_snapshot = [match_record(match) for match in matches]
+    with logged_phase("canonicalization.matching"):
+        matches = find_candidate_matches(candidate, payload)
+        match_snapshot = [match_record(match) for match in matches]
+    log_event("canonicalization.matches", match_count=len(matches))
     if not matches:
+        log_event("canonicalization.model_bypassed", reason="no_matches")
         return canonicalize_candidate(
             candidate.pk,
             expected_version=candidate.edit_version,
@@ -59,13 +77,14 @@ def process_candidate(
             match_snapshot=match_snapshot,
         )
 
-    raw_document = _load_raw_document(candidate, storage)
-    context = build_canonicalization_context(
-        candidate,
-        payload,
-        raw_document=raw_document,
-        match_snapshot=match_snapshot,
-    )
+    with logged_phase("canonicalization.context"):
+        raw_document = _load_raw_document(candidate, storage)
+        context = build_canonicalization_context(
+            candidate,
+            payload,
+            raw_document=raw_document,
+            match_snapshot=match_snapshot,
+        )
     result = None
     error: Exception | None = None
     serialized_context = json.dumps(
@@ -77,11 +96,16 @@ def process_candidate(
     job = _originating_job(candidate)
     invocation: ModelInvocation
     while True:
+        attempt_number = _next_canonicalization_attempt(job, candidate.pk)
         started_at = timezone.now()
         result = None
         error = None
         try:
-            result = decision_provider.decide(context)
+            with (
+                log_context(job_id=job.pk, model_attempt=attempt_number),
+                logged_phase("canonicalization.model_attempt"),
+            ):
+                result = decision_provider.decide(context)
         except Exception as exc:
             error = exc
         completed_at = timezone.now()
@@ -105,7 +129,7 @@ def process_candidate(
             prompt_version=CANONICALIZATION_PROMPT_VERSION,
             schema_version=CANONICALIZATION_SCHEMA_VERSION,
             batch_index=candidate.pk,
-            attempt_number=_next_canonicalization_attempt(job, candidate.pk),
+            attempt_number=attempt_number,
             status=ExtractionStatus.SUCCEEDED if result else ExtractionStatus.FAILED,
             started_at=started_at,
             completed_at=completed_at,
@@ -118,12 +142,25 @@ def process_candidate(
             error_type=type(error).__name__ if error else "",
             error_message=str(error) if error else "",
         )
+        log_event(
+            "canonicalization.invocation_recorded",
+            job_id=job.pk,
+            model_attempt=attempt_number,
+            invocation_id=invocation.pk,
+            status=invocation.status,
+            error_type=invocation.error_type or None,
+            response_id=response_identifier or None,
+            **usage_fields(token_usage),
+        )
         if error is None:
+            break
+        if isinstance(error, APITimeoutError):
             break
         if not isinstance(error, (ModelOutputError, ValidationError)):
             raise error
         if invocation.attempt_number >= MAX_CANONICALIZATION_MODEL_ATTEMPTS:
             break
+        log_event("canonicalization.output_retry", next_model_attempt=attempt_number + 1)
 
     plan = canonicalize_candidate(
         candidate.pk,
@@ -141,6 +178,16 @@ def process_candidate(
         plan.application_error = f"Canonicalization model failed: {error}"[:2000]
         plan.status = CanonicalizationPlanStatus.REVIEW_REQUIRED
         plan.save(update_fields=("application_error", "status", "updated_at"))
+        log_event(
+            "canonicalization.timeout_review"
+            if isinstance(error, APITimeoutError)
+            else "canonicalization.output_failure_review",
+            level=logging.WARNING,
+            plan_id=plan.pk,
+            status=plan.status,
+            error_type=type(error).__name__,
+            continuing=True,
+        )
     return plan
 
 

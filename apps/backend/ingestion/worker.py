@@ -8,6 +8,7 @@ from uuid import uuid4
 from ingestion.errors import RetryableIngestionError, UnsupportedPipelineError
 from ingestion.jobs import claim_job, claim_next_job, mark_job_failed, mark_job_for_retry
 from ingestion.models import IngestionJob
+from ingestion.observability import log_context, log_event, logged_phase
 from ingestion.pipelines.base import IngestionPipeline
 
 MAX_JOB_ATTEMPTS = 3
@@ -42,10 +43,14 @@ class WorkerRuntime:
 
     def run_claimed_job(self, job: IngestionJob) -> None:
         try:
-            pipeline = self.pipelines.get(job.pipeline_key)
-            if pipeline is None:
-                raise UnsupportedPipelineError(job.pipeline_key)
-            pipeline.execute(job)
+            with (
+                log_context(job_id=job.pk, source_id=job.source_id, job_attempt=job.attempt_count),
+                logged_phase("ingestion.job"),
+            ):
+                pipeline = self.pipelines.get(job.pipeline_key)
+                if pipeline is None:
+                    raise UnsupportedPipelineError(job.pipeline_key)
+                pipeline.execute(job)
         except RetryableIngestionError as exc:
             if job.attempt_count < MAX_JOB_ATTEMPTS:
                 mark_job_for_retry(
@@ -57,6 +62,13 @@ class WorkerRuntime:
                 mark_job_failed(job, exc)
         except Exception as exc:
             mark_job_failed(job, exc)
+        log_event(
+            "ingestion.job_finished",
+            job_id=job.pk,
+            status=job.status,
+            failures_count=job.failures_count,
+            error_type=job.error_type or None,
+        )
 
     def close(self) -> None:
         for pipeline in self.pipelines.values():

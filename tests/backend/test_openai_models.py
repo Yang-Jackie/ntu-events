@@ -6,6 +6,7 @@ from unittest.mock import Mock
 
 import pytest
 from ingestion.canonicalization.decision_provider import (
+    CANONICALIZATION_PROMPT,
     CANONICALIZATION_PROMPT_VERSION,
     OpenAICanonicalizationDecisionProvider,
 )
@@ -27,6 +28,7 @@ from ingestion.pipelines.telegram.contracts import (
     ScreeningLabel,
 )
 from ingestion.pipelines.telegram.model_client import (
+    EXTRACTION_PROMPT,
     EXTRACTION_PROMPT_VERSION,
     SCREENING_PROMPT_VERSION,
     OpenAITelegramModels,
@@ -157,7 +159,7 @@ def test_canonicalization_decision_provider_is_source_neutral(monkeypatch, effor
     assert call.kwargs["text"] == {"verbosity": "low"}
     system_prompt = call.kwargs["input"][0]["content"]
     assert "Singapore local time" in system_prompt
-    assert "never emit Z or +00:00" in system_prompt
+    assert "NEVER convert them again" in system_prompt
     assert "building-level venue as a fallback" in system_prompt
     assert 'wording such as "near", "beside"' in system_prompt
     catalog_block = call.kwargs["input"][1]["content"][0]
@@ -174,6 +176,48 @@ def test_canonicalization_decision_provider_is_source_neutral(monkeypatch, effor
         schema_version=CANONICALIZATION_SCHEMA_VERSION,
         reference_data_hash=candidate_reference_data_hash(catalog),
     )
+
+
+@pytest.mark.parametrize("prompt", [EXTRACTION_PROMPT, CANONICALIZATION_PROMPT])
+def test_model_prompts_require_singapore_wall_clock_times(prompt) -> None:
+    assert "MUST use Singapore local time (Asia/Singapore, UTC+08:00)" in prompt
+    assert "Convert explicitly non-Singapore source times" in prompt
+    assert "adjust the associated date on rollover" in prompt
+    assert "otherwise treat source times as Singapore local" in prompt
+    assert "Every non-null time MUST be a plain HH:MM:SS wall-clock value" in prompt
+    assert "NEVER emit Z, +08:00, +00:00," in prompt
+    assert "or ANY offset or timezone suffix. No exceptions." in prompt
+    assert "6pm -> 18:00:00" in prompt
+    assert "10:00 UTC -> 18:00:00" in prompt
+    assert "20:00 UTC -> 04:00:00 on the following date" in prompt
+    assert "18:00+08:00 -> 18:00:00" in prompt
+    assert "without timezone conversion" not in prompt
+
+
+@pytest.mark.parametrize(
+    "factory, arguments, patch_target",
+    [
+        (
+            OpenAITelegramModels,
+            {"screening_model": "screening", "extraction_model": "extraction"},
+            "ingestion.pipelines.telegram.model_client.OpenAI",
+        ),
+        (
+            OpenAICanonicalizationDecisionProvider,
+            {"model_name": "canonicalization"},
+            "ingestion.canonicalization.decision_provider.OpenAI",
+        ),
+    ],
+)
+def test_model_clients_use_45_second_timeout_and_two_sdk_retries(
+    monkeypatch, factory, arguments, patch_target
+) -> None:
+    sdk = Mock()
+    monkeypatch.setattr(patch_target, sdk)
+
+    factory(**arguments)
+
+    sdk.assert_called_once_with(max_retries=2, timeout=45)
 
 
 def test_incomplete_response_raises_error_with_raw_provider_artifact() -> None:
@@ -317,8 +361,8 @@ def test_changed_prompt_and_schema_versions_do_not_reuse_previous_cache_routes()
     previous_extraction = prompt_cache_key(
         stage="telegram-extraction",
         model="gpt-5-mini",
-        prompt_version="telegram-extraction-v4",
-        schema_version="telegram-extraction-v3",
+        prompt_version="telegram-extraction-v7",
+        schema_version=EXTRACTION_SCHEMA_VERSION,
     )
     current_canonicalization = prompt_cache_key(
         stage="event-canonicalization",
@@ -329,8 +373,8 @@ def test_changed_prompt_and_schema_versions_do_not_reuse_previous_cache_routes()
     previous_canonicalization = prompt_cache_key(
         stage="event-canonicalization",
         model="gpt-5-mini",
-        prompt_version="event-canonicalization-v2",
-        schema_version="canonicalization-plan-v2",
+        prompt_version="event-canonicalization-v6",
+        schema_version=CANONICALIZATION_SCHEMA_VERSION,
     )
 
     assert current_extraction != previous_extraction

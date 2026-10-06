@@ -199,6 +199,20 @@ changing their environment settings. These settings do not automatically
 repair existing candidates or canonical Events; changing effort alone does not
 invalidate successful screening or extraction reuse.
 
+All three model stages use a 45-second SDK timeout and two SDK retries. This is
+per HTTP attempt, not a total request deadline; three timed-out attempts can
+take about 135 seconds plus SDK retry delays. Screening and extraction record
+an exhausted timeout as a failed batch, continue other batches, and retain
+failed message IDs for a later ingestion rather than retrying the timeout at
+application level.
+
+Workers emit UTC-timestamped JSON workflow logs with job, candidate, batch and
+attempt identifiers, phase starts and durations, sanitized SDK retry notices,
+plan outcomes, and available provider request/response IDs and token/cache
+counters. Extraction logs separate executor queue wait from model-call elapsed
+time. Logs exclude source text, prompts, raw model output, exception messages,
+headers and credentials; missing usage is reported as unknown, not zero.
+
 A stale RUNNING ingestion job is requeued with the same identity and a new
 attempt number. For Telegram screening, a later attempt replaces the job's
 per-message screening result, while each model invocation remains retained as
@@ -326,7 +340,10 @@ and candidate persistence finish; canonicalization outcomes do not change that
 job status. A source-neutral worker serially selects every READY candidate that
 has no plan, reconstructs its raw evidence through the candidate's extraction
 provenance, and runs matching and canonicalization. PostgreSQL session advisory
-locking permits at most one canonicalization worker globally. Unexpected worker
+locking permits at most one canonicalization worker globally. An API timeout
+after SDK retries creates a review-required plan with the failed invocation and
+error recorded, moves the candidate to PROCESSED, and lets the queue continue.
+There is no application-level timeout retry or backoff. Other unexpected worker
 errors leave the candidate READY and terminate the process visibly. Model-output
 and structured-output validation failures are retried up to three total model
 attempts per candidate, with each attempt persisted separately. Exhausting that
@@ -550,8 +567,15 @@ without inventing precision. Attendance mode and public meeting access belong
 to the occurrence because different sessions of one event may differ.
 
 Extracted candidate times and canonicalization-proposal times are stored as
-Singapore local wall-clock values without a UTC offset or timezone suffix. At
-the model-output boundary, an exact `+08:00` offset is accepted and stripped
+Singapore local wall-clock values without a UTC offset or timezone suffix.
+Both model prompts require non-null event and registration times as `HH:MM:SS`
+with no suffix. They instruct conversion of explicitly non-Singapore source
+times together with any associated date rollover; source times without a
+stated timezone are treated as Singapore local. Canonicalization must not
+convert already-normalized candidate or canonical times again. These are model
+instructions, not deterministic timezone conversion in application code.
+
+At the model-output boundary, an exact `+08:00` offset is accepted and stripped
 because it represents the same Singapore clock value without changing the
 associated date. Other offsets are structurally invalid and are rejected
 rather than converted without their associated date, because time-only

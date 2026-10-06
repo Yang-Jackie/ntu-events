@@ -8,6 +8,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from ingestion.models import IngestionJob, JobStatus
+from ingestion.observability import logged_phase
 from ingestion.pipelines.telegram.adapter import TelegramFetcher
 from ingestion.pipelines.telegram.model_client import OpenAITelegramModels
 from ingestion.pipelines.telegram.processing import process_telegram_messages
@@ -71,13 +72,14 @@ class TelegramTextPipeline:
         fetcher = self._get_fetcher()
         models = self._get_models()
         storage = self._get_storage()
-        fetch_result = asyncio.run(
-            fetcher.fetch(
-                source_configuration=job.source.configuration,
-                message_limit=options["message_limit"],
-                overlap=options["overlap"],
+        with logged_phase("ingestion.fetch", job_id=job.pk, source_id=job.source_id):
+            fetch_result = asyncio.run(
+                fetcher.fetch(
+                    source_configuration=job.source.configuration,
+                    message_limit=options["message_limit"],
+                    overlap=options["overlap"],
+                )
             )
-        )
         messages = fetch_result.messages
         self._update_job(job, items_discovered=len(messages))
         result = process_telegram_messages(

@@ -1,6 +1,7 @@
 from types import SimpleNamespace
 from unittest.mock import Mock
 
+import httpx
 import pytest
 from events.models import Event
 from ingestion.jobs import claim_job, enqueue_sources
@@ -15,11 +16,49 @@ from ingestion.models import (
 )
 from ingestion.pipelines.telegram.pipeline import TelegramTextPipeline
 from ingestion.raw_storage import LocalRawContentStorage
+from openai import APITimeoutError
 from sources.models import RawSourceDocument, Source, SourceType
 
 from .telegram_job_test_support import FakeFetcher, FakeModels, fixture_messages, make_source
 
 pytestmark = pytest.mark.django_db
+
+
+@pytest.mark.parametrize("stage", ["screen", "extract"])
+def test_ingestion_timeout_records_failed_batch_and_continues(tmp_path, stage) -> None:
+    source = make_source()
+    enqueue = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
+    job = claim_job(enqueue.jobs[0].pk, "test-worker")
+    models = FakeModels()
+    original = getattr(models, stage)
+    first_identity = fixture_messages()[0].identity
+
+    def fail_first(messages, **kwargs):
+        if messages[0].identity == first_identity:
+            raise APITimeoutError(request=httpx.Request("POST", "https://api.openai.com"))
+        return original(messages, **kwargs)
+
+    failing_call = Mock(side_effect=fail_first)
+    setattr(models, stage, failing_call)
+    pipeline = TelegramTextPipeline(
+        fetcher=FakeFetcher(fixture_messages()[:2]),
+        models=models,
+        storage=LocalRawContentStorage(tmp_path),
+    )
+    job.options = {"screening_batch_size": 1, "extraction_batch_size": 1}
+
+    pipeline.execute(job)
+
+    job.refresh_from_db()
+    source.refresh_from_db()
+    assert job.status == JobStatus.PARTIAL
+    assert job.failures_count == 1
+    assert failing_call.call_count == 2
+    assert EventCandidate.objects.count() == 1
+    assert source.configuration["pending_message_ids"] == [1]
+    failed = ModelInvocation.objects.get(error_type="APITimeoutError")
+    assert failed.stage == ("SCREENING" if stage == "screen" else "EXTRACTION")
+    assert failed.status == "FAILED"
 
 
 def test_one_request_creates_one_job_per_source_and_skips_active_duplicates() -> None:

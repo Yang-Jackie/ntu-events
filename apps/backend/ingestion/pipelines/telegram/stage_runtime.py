@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+import time
 from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor, wait
 from dataclasses import dataclass
@@ -15,6 +17,7 @@ from ingestion.models import (
     JobStatus,
     ModelInvocation,
 )
+from ingestion.observability import log_context, log_event, logged_phase, usage_fields
 from ingestion.pipelines.telegram.adapter import TelegramMessage
 from ingestion.pipelines.telegram.model_client import (
     batch_input_hash,
@@ -58,10 +61,29 @@ def run_batches[ParsedT: BaseModel](
         return
     next_index = 0
     futures: dict[Future, tuple[int, list[TelegramMessage], Any]] = {}
+
+    def call_batch(index: int, batch: list[TelegramMessage], queued_at: float):
+        with log_context(
+            job_id=job.pk,
+            stage=stage,
+            batch_index=index,
+            job_attempt=job.attempt_count,
+            message_count=len(batch),
+        ):
+            log_event(
+                "ingestion.batch.started", queue_wait_seconds=round(time.monotonic() - queued_at, 3)
+            )
+            with logged_phase("ingestion.batch.model"):
+                return call(batch)
+
     with ThreadPoolExecutor(max_workers=concurrency, thread_name_prefix="openai-ingestion") as pool:
         for batch in initial:
             started_at = timezone.now()
-            futures[pool.submit(call, batch)] = (next_index, batch, started_at)
+            futures[pool.submit(call_batch, next_index, batch, time.monotonic())] = (
+                next_index,
+                batch,
+                started_at,
+            )
             next_index += 1
         while futures:
             completed, _pending = wait(futures, return_when="FIRST_COMPLETED")
@@ -93,15 +115,43 @@ def run_batches[ParsedT: BaseModel](
                     reference_data=reference_data,
                 )
                 if result is not None:
-                    on_success(outcome, invocation)
+                    with logged_phase(
+                        "ingestion.batch.persistence",
+                        job_id=job.pk,
+                        stage=stage,
+                        batch_index=batch_index,
+                    ):
+                        on_success(outcome, invocation)
                 elif len(batch) > 1 and _should_split(error):
+                    log_event(
+                        "ingestion.batch.split_retry",
+                        job_id=job.pk,
+                        stage=stage,
+                        batch_index=batch_index,
+                        message_count=len(batch),
+                        error_type=type(error).__name__,
+                    )
                     midpoint = len(batch) // 2
                     for split in (batch[:midpoint], batch[midpoint:]):
                         split_started = timezone.now()
-                        futures[pool.submit(call, split)] = (next_index, split, split_started)
+                        futures[pool.submit(call_batch, next_index, split, time.monotonic())] = (
+                            next_index,
+                            split,
+                            split_started,
+                        )
                         next_index += 1
                 else:
                     on_final_failure(outcome, invocation)
+                    log_event(
+                        "ingestion.batch.final_failure",
+                        level=logging.WARNING,
+                        job_id=job.pk,
+                        stage=stage,
+                        batch_index=batch_index,
+                        message_count=len(batch),
+                        error_type=type(error).__name__,
+                        continuing=True,
+                    )
                 heartbeat(job)
 
 
@@ -131,7 +181,7 @@ def _record_invocation(
     reference_hash = (
         candidate_reference_data_hash(reference_data_snapshot) if reference_data_snapshot else ""
     )
-    return ModelInvocation.objects.create(
+    invocation = ModelInvocation.objects.create(
         job=job,
         stage=stage,
         model_name=model_name,
@@ -157,6 +207,18 @@ def _record_invocation(
         error_type=(type(outcome.error).__name__ if outcome.error else ""),
         error_message=(str(outcome.error) if outcome.error else ""),
     )
+    log_event(
+        "ingestion.invocation_recorded",
+        job_id=job.pk,
+        stage=stage,
+        batch_index=outcome.batch_index,
+        invocation_id=invocation.pk,
+        status=invocation.status,
+        error_type=invocation.error_type or None,
+        response_id=response_identifier or None,
+        **usage_fields(token_usage),
+    )
+    return invocation
 
 
 def heartbeat(job: IngestionJob) -> None:

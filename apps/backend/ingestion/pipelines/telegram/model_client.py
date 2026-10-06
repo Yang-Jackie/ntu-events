@@ -13,6 +13,7 @@ from ingestion.model_outputs import (
     model_result,
     prompt_cache_key,
 )
+from ingestion.observability import log_model_call
 from ingestion.pipelines.telegram.adapter import TelegramMessage
 from ingestion.pipelines.telegram.contracts import (
     EXTRACTION_SCHEMA_VERSION,
@@ -23,7 +24,7 @@ from ingestion.pipelines.telegram.contracts import (
 from ingestion.reference_data import candidate_reference_data_hash, canonical_json
 
 SCREENING_PROMPT_VERSION = "telegram-screening-v3"
-EXTRACTION_PROMPT_VERSION = "telegram-extraction-v7"
+EXTRACTION_PROMPT_VERSION = "telegram-extraction-v8"
 
 SCREENING_PROMPT = """Classify every supplied public NTU Telegram message.
 Use EVENT when it clearly advertises or materially updates a time-bounded event that NTU students
@@ -41,9 +42,13 @@ facts. Use null, empty lists, UNKNOWN, and ambiguities when the source omits or 
 information. Omitting a stated fact is as wrong as inventing one: capture every
 relevant detail the message states, and route those with no structured home - perks,
 costs, prerequisites, and recurrence or cadence stated in prose - into description.
-Interpret dates and times as Singapore local time and resolve relative dates using
-published_at. Write every time as a plain wall-clock value with no UTC offset or
-timezone suffix. Represent a stated time range with separate start_time and end_time
+All event and registration dates/times MUST use Singapore local time (Asia/Singapore, UTC+08:00).
+Convert explicitly non-Singapore source times and adjust the associated date on rollover;
+otherwise treat source times as Singapore local. Resolve relative dates using published_at.
+Every non-null time MUST be a plain HH:MM:SS wall-clock value. NEVER emit Z, +08:00, +00:00,
+or ANY offset or timezone suffix. No exceptions.
+Examples: 6pm -> 18:00:00; 10:00 UTC -> 18:00:00; 20:00 UTC -> 04:00:00 on the following date;
+18:00+08:00 -> 18:00:00. Represent a stated time range with separate start_time and end_time
 values; never put a range such as 19:00-22:00 in one time field. A continuous
 cross-midnight activity is one occurrence. Treat a lecture, conference, or workshop series as one
 event whose advertised sessions are separate occurrences, including independently titled,
@@ -82,7 +87,7 @@ class OpenAITelegramModels:
         screening_reasoning_effort: str = "low",
         extraction_reasoning_effort: str = "medium",
         max_retries: int = 2,
-        timeout_seconds: float = 90,
+        timeout_seconds: float = 45,
     ):
         self.screening_model = screening_model
         self.extraction_model = extraction_model
@@ -91,7 +96,10 @@ class OpenAITelegramModels:
         self.client = OpenAI(max_retries=max_retries, timeout=timeout_seconds)
 
     def screen(self, messages: list[TelegramMessage]) -> ModelResult[ScreeningBatch]:
-        response = self.client.responses.parse(
+        response = log_model_call(
+            self.client.responses.parse,
+            stage="SCREENING",
+            model_name=self.screening_model,
             model=self.screening_model,
             input=[
                 {"role": "system", "content": SCREENING_PROMPT},
@@ -115,7 +123,10 @@ class OpenAITelegramModels:
         *,
         reference_data: dict[str, Any],
     ) -> ModelResult[ExtractionBatch]:
-        response = self.client.responses.parse(
+        response = log_model_call(
+            self.client.responses.parse,
+            stage="EXTRACTION",
+            model_name=self.extraction_model,
             model=self.extraction_model,
             input=[
                 {"role": "system", "content": EXTRACTION_PROMPT},

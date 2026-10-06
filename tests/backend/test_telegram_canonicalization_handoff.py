@@ -1,5 +1,8 @@
+import json
+import logging
 from unittest.mock import Mock
 
+import httpx
 import pytest
 from events.models import Event
 from ingestion.candidates import update_event_candidate
@@ -17,6 +20,7 @@ from ingestion.models import (
 from ingestion.pipelines.telegram.pipeline import TelegramTextPipeline
 from ingestion.raw_storage import LocalRawContentStorage
 from ingestion.reference_data import build_candidate_reference_data
+from openai import APITimeoutError
 
 from .telegram_job_test_support import (
     BusinessIssueModels,
@@ -150,6 +154,79 @@ def test_structured_output_validation_failure_is_retried_and_can_recover(tmp_pat
     assert [item.attempt_number for item in invocations] == [1, 2, 3]
     assert [item.status for item in invocations] == ["FAILED", "FAILED", "SUCCEEDED"]
     assert [item.error_type for item in invocations] == ["ValidationError", "ValidationError", ""]
+
+
+def test_canonicalization_timeout_creates_review_plan_and_advances_queue(
+    tmp_path, monkeypatch, caplog
+) -> None:
+    monkeypatch.setattr(logging.getLogger("ingestion"), "propagate", True)
+    caplog.set_level(logging.INFO, logger="ingestion")
+    source = make_source()
+    enqueue = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
+    job = claim_job(enqueue.jobs[0].pk, "ingestion-worker")
+    assert job is not None
+    models = FakeModels()
+    storage = LocalRawContentStorage(tmp_path)
+    TelegramTextPipeline(
+        fetcher=FakeFetcher(fixture_messages()[:3]), models=models, storage=storage
+    ).execute(job)
+    runtime = CanonicalizationWorkerRuntime(decision_provider=models, storage=storage)
+    assert runtime.run_next_candidate() is not None  # First candidate needs no model.
+    candidate = EventCandidate.objects.get(
+        extraction_run__raw_source_document__source_representation__external_identifier="2"
+    )
+    original_payload = candidate.effective_payload
+    original_issues = candidate.validation_issues
+    original_decide = models.decide
+    models.decide = Mock(
+        side_effect=APITimeoutError(request=httpx.Request("POST", "https://api.openai.com"))
+    )
+    events_before = Event.objects.count()
+
+    assert runtime.run_next_candidate().pk == candidate.pk
+
+    candidate.refresh_from_db()
+    plan = candidate.canonicalization_plan
+    assert candidate.status == CandidateStatus.PROCESSED
+    assert candidate.effective_payload == original_payload
+    assert candidate.validation_issues == original_issues
+    assert plan.status == "REVIEW_REQUIRED"
+    assert plan.generated_proposal == {}
+    assert "timed out" in plan.application_error
+    assert plan.model_invocation.error_type == "APITimeoutError"
+    assert plan.model_invocation.status == "FAILED"
+    assert (
+        ModelInvocation.objects.filter(stage="CANONICALIZATION", batch_index=candidate.pk).count()
+        == 1
+    )
+    models.decide.assert_called_once()  # SDK retry budget is inside the provider, not this loop.
+    assert Event.objects.count() == events_before
+
+    models.decide = original_decide
+    next_candidate = runtime.run_next_candidate()
+    assert next_candidate is not None
+    assert next_candidate.pk != candidate.pk
+    assert runtime.run_next_candidate() is None
+    assert candidate.canonicalization_plan.pk == plan.pk
+    job.refresh_from_db()
+    assert job.status == JobStatus.SUCCEEDED
+    events = [json.loads(record.message) for record in caplog.records if record.name == "ingestion"]
+    names = {item["event"] for item in events}
+    assert {
+        "canonicalization.matching.started",
+        "canonicalization.context.finished",
+        "canonicalization.model_attempt.failed",
+        "canonicalization.proposal_validation.finished",
+        "canonicalization.application.finished",
+        "canonicalization.plan_finished",
+        "canonicalization.timeout_review",
+    } <= names
+    timeout_log = next(
+        item for item in events if item["event"] == "canonicalization.timeout_review"
+    )
+    assert timeout_log["candidate_id"] == candidate.pk
+    assert timeout_log["plan_id"] == plan.pk
+    assert timeout_log["continuing"] is True
 
 
 def test_exhausted_structured_output_retries_create_review_required_plan(tmp_path) -> None:

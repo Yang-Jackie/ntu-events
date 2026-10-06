@@ -144,3 +144,33 @@ OPENAI_EXTRACTION_REASONING_EFFORT = os.getenv("OPENAI_EXTRACTION_REASONING_EFFO
 OPENAI_CANONICALIZATION_REASONING_EFFORT = os.getenv(
     "OPENAI_CANONICALIZATION_REASONING_EFFORT", "medium"
 )
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "workflow": {
+            "()": "ingestion.observability.UTCFormatter",
+            "format": "%(asctime)sZ %(levelname)s %(message)s",
+            "datefmt": "%Y-%m-%dT%H:%M:%S",
+        },
+    },
+    "filters": {"sdk_retries": {"()": "ingestion.observability.SDKRetryFilter"}},
+    "handlers": {
+        "workflow": {
+            "class": "logging.StreamHandler",
+            "formatter": "workflow",
+            "level": "INFO",
+        },
+        "sdk_retries": {
+            "class": "logging.StreamHandler",
+            "formatter": "workflow",
+            "level": "INFO",
+            "filters": ["sdk_retries"],
+        },
+    },
+    "loggers": {
+        "ingestion": {"handlers": ["workflow"], "level": "INFO", "propagate": False},
+        "openai": {"handlers": ["sdk_retries"], "level": "INFO", "propagate": False},
+    },
+}
