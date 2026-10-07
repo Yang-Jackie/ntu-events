@@ -178,12 +178,15 @@ def test_canonicalization_decision_provider_is_source_neutral(monkeypatch, effor
     )
 
 
-@pytest.mark.parametrize("prompt", [EXTRACTION_PROMPT, CANONICALIZATION_PROMPT])
+@pytest.mark.parametrize(
+    "prompt", [EXTRACTION_PROMPT, CANONICALIZATION_PROMPT], ids=["extraction", "canonicalization"]
+)
 def test_model_prompts_require_singapore_wall_clock_times(prompt) -> None:
-    assert "MUST use Singapore local time (Asia/Singapore, UTC+08:00)" in prompt
-    assert "Convert explicitly non-Singapore source times" in prompt
+    # Line wrapping should not break checks for the shared formatting instructions.
+    prompt = " ".join(prompt.split())
+    assert "Singapore local time (Asia/Singapore, UTC+08:00)" in prompt
+    assert "explicitly non-Singapore source times" in prompt
     assert "adjust the associated date on rollover" in prompt
-    assert "otherwise treat source times as Singapore local" in prompt
     assert "Every non-null time MUST be a plain HH:MM:SS wall-clock value" in prompt
     assert "NEVER emit Z, +08:00, +00:00," in prompt
     assert "or ANY offset or timezone suffix. No exceptions." in prompt
@@ -192,6 +195,28 @@ def test_model_prompts_require_singapore_wall_clock_times(prompt) -> None:
     assert "20:00 UTC -> 04:00:00 on the following date" in prompt
     assert "18:00+08:00 -> 18:00:00" in prompt
     assert "without timezone conversion" not in prompt
+
+
+def test_extraction_prompt_distinguishes_foreign_timezones_from_local_clock_values() -> None:
+    prompt = " ".join(EXTRACTION_PROMPT.split())
+    assert "for explicitly non-Singapore source times, convert it to Singapore local time" in prompt
+    assert (
+        "for all other times (explicitly stated in Singapore local time or with no timezone)"
+        in prompt
+    )
+    assert (
+        "fill the corresponding time field with that exact wall-clock value (NO SUFFIX)" in prompt
+    )
+    assert "Resolve relative dates using published_at" in prompt
+
+
+def test_canonicalization_prompt_preserves_already_normalized_clock_values() -> None:
+    prompt = " ".join(CANONICALIZATION_PROMPT.split())
+    assert "otherwise treat source times as Singapore local" in prompt
+    assert (
+        "Candidate and canonical times are already Singapore local; NEVER convert them again"
+        in prompt
+    )
 
 
 @pytest.mark.parametrize(
@@ -361,7 +386,7 @@ def test_changed_prompt_and_schema_versions_do_not_reuse_previous_cache_routes()
     previous_extraction = prompt_cache_key(
         stage="telegram-extraction",
         model="gpt-5-mini",
-        prompt_version="telegram-extraction-v7",
+        prompt_version="telegram-extraction-v8",
         schema_version=EXTRACTION_SCHEMA_VERSION,
     )
     current_canonicalization = prompt_cache_key(
