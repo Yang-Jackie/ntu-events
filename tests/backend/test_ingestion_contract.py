@@ -1,3 +1,4 @@
+import re
 from datetime import date, time
 
 import pytest
@@ -5,12 +6,14 @@ from ingestion.contracts import (
     AttendanceMode,
     CandidateOccurrence,
     CandidateRegistration,
+    CanonicalizationProposal,
     CanonicalOccurrenceValue,
     CanonicalRegistrationValue,
     EventCandidatePayload,
     TimePrecision,
 )
 from ingestion.pipelines.telegram.contracts import ExtractionBatch
+from openai.lib._parsing._responses import type_to_text_format_param
 from pydantic import ValidationError
 
 
@@ -177,6 +180,56 @@ def test_extraction_schema_exposes_urls_as_plain_strings() -> None:
         return False
 
     assert not contains_uri_format(schema)
+
+
+@pytest.mark.parametrize(
+    ("output_model", "value_model", "fields"),
+    [
+        (ExtractionBatch, CandidateOccurrence, ("start_time", "end_time")),
+        (ExtractionBatch, CandidateRegistration, ("opens_time", "closes_time")),
+        (CanonicalizationProposal, CanonicalOccurrenceValue, ("start_time", "end_time")),
+        (CanonicalizationProposal, CanonicalRegistrationValue, ("opens_time", "closes_time")),
+    ],
+)
+def test_sdk_time_schema_requires_offset_free_wall_clock(output_model, value_model, fields) -> None:
+    # Inspect the schema the SDK sends, including nested ADD/UPDATE proposal types.
+    output_format = type_to_text_format_param(output_model)
+    assert output_format["strict"] is True
+    properties = output_format["schema"]["$defs"][value_model.__name__]["properties"]
+    for field in fields:
+        string_schema, null_schema = properties[field]["anyOf"]
+        assert string_schema["type"] == "string"
+        assert "format" not in string_schema
+        assert null_schema == {"type": "null"}
+        pattern = string_schema["pattern"]
+        for valid in ("00:00:00", "06:45:00", "19:00:00", "23:59:59"):
+            assert re.fullmatch(pattern, valid)
+        for invalid in (
+            "19:00:00Z",
+            "19:00:00.0000000000Z",
+            "19:00:00-08:00",
+            "21:30:00-09:30",
+            "19:00:00+08:00",
+            "19:00:00.5",
+            "24:00:00",
+            "19:60:00",
+            "19:00:60",
+            "19:00",
+            "7:00:00",
+        ):
+            assert not re.fullmatch(pattern, invalid)
+
+
+def test_model_time_schema_change_preserves_stored_plan_version() -> None:
+    from ingestion.contracts import (
+        CANONICALIZATION_OUTPUT_SCHEMA_VERSION,
+        CANONICALIZATION_SCHEMA_VERSION,
+    )
+
+    schema = type_to_text_format_param(CanonicalizationProposal)["schema"]
+    assert schema["properties"]["schema_version"]["const"] == "canonicalization-plan-v3"
+    assert CANONICALIZATION_SCHEMA_VERSION == "canonicalization-plan-v3"
+    assert CANONICALIZATION_OUTPUT_SCHEMA_VERSION != CANONICALIZATION_SCHEMA_VERSION
 
 
 def test_candidate_accepts_valid_http_urls() -> None:

@@ -16,6 +16,16 @@ from .common import (
 )
 
 CANONICALIZATION_SCHEMA_VERSION = "canonicalization-plan-v3"
+# Model-facing constraints can evolve without changing the stored proposal version.
+CANONICALIZATION_OUTPUT_SCHEMA_VERSION = "canonicalization-output-v5"
+
+
+class CanonicalOccurrenceStatus(StrEnum):
+    UNKNOWN = OccurrenceStatus.UNKNOWN.value
+    SCHEDULED = OccurrenceStatus.SCHEDULED.value
+    POSTPONED = OccurrenceStatus.POSTPONED.value
+    CANCELLED = OccurrenceStatus.CANCELLED.value
+    COMPLETED = "COMPLETED"
 
 
 class CanonicalizationAction(StrEnum):
@@ -146,7 +156,7 @@ class CanonicalOccurrenceValue(StrictModel):
     attendance_mode: AttendanceMode | None
     raw_location_text: str | None
     meeting_url: str | None
-    occurrence_status: OccurrenceStatus | None
+    occurrence_status: CanonicalOccurrenceStatus | None
     venue_ids: list[int] | None
 
 

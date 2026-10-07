@@ -7,7 +7,12 @@ import pytest
 from events.models import Event
 from ingestion.candidates import update_event_candidate
 from ingestion.canonicalization.worker import CanonicalizationWorkerRuntime
-from ingestion.contracts import CanonicalRegistrationValue
+from ingestion.contracts import (
+    CanonicalOccurrenceChange,
+    CanonicalRegistrationValue,
+    ObjectOperation,
+    OccurrenceField,
+)
 from ingestion.jobs import claim_job, enqueue_sources
 from ingestion.models import (
     CandidateStatus,
@@ -22,6 +27,7 @@ from ingestion.raw_storage import LocalRawContentStorage
 from ingestion.reference_data import build_candidate_reference_data
 from openai import APITimeoutError
 
+from .canonicalization_test_support import update_description_proposal
 from .telegram_job_test_support import (
     BusinessIssueModels,
     ConcurrentEventEditModels,
@@ -32,6 +38,40 @@ from .telegram_job_test_support import (
 )
 
 pytestmark = pytest.mark.django_db
+
+
+def test_malformed_object_proposal_is_rejected_and_worker_advances(tmp_path):
+    source = make_source()
+    enqueue = enqueue_sources([source], trigger=IngestionTrigger.COMMAND)
+    job = claim_job(enqueue.jobs[0].pk, "ingestion-worker")
+    models = FakeModels()
+    storage = LocalRawContentStorage(tmp_path)
+    TelegramTextPipeline(
+        fetcher=FakeFetcher(fixture_messages()[:3]), models=models, storage=storage
+    ).execute(job)
+    runtime = CanonicalizationWorkerRuntime(decision_provider=models, storage=storage)
+    first = runtime.run_next_candidate()
+    event = first.canonicalization_plan.target_event
+    proposal = update_description_proposal(event.pk, "Should never be applied")
+    proposal.occurrence_changes = [
+        CanonicalOccurrenceChange(
+            operation=ObjectOperation.UPDATE,
+            id=event.occurrences.get().pk,
+            changed_fields=[OccurrenceField.SEQUENCE],
+            value=None,
+        )
+    ]
+    original_decide = models.decide
+    models.decide = Mock(return_value=models._result(proposal))
+    rejected = runtime.run_next_candidate()
+    rejected.refresh_from_db()
+    assert rejected.canonicalization_plan.status == "REJECTED"
+    assert rejected.status == CandidateStatus.PROCESSED
+    assert rejected.canonicalization_plan.model_invocation.status == "SUCCEEDED"
+    models.decide = original_decide
+    following = runtime.run_next_candidate()
+    assert following.canonicalization_plan.status == "APPLIED"
+    assert runtime.run_next_candidate() is None
 
 
 def test_canonicalization_worker_processes_ready_candidates_after_ingestion(tmp_path) -> None:

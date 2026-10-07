@@ -5,7 +5,7 @@ from typing import Any, Protocol
 
 from openai import OpenAI
 
-from ingestion.contracts import CANONICALIZATION_SCHEMA_VERSION, CanonicalizationProposal
+from ingestion.contracts import CANONICALIZATION_OUTPUT_SCHEMA_VERSION, CanonicalizationProposal
 from ingestion.model_outputs import ModelResult, model_output_error, model_result, prompt_cache_key
 from ingestion.observability import log_model_call
 from ingestion.reference_data import candidate_reference_data_hash, canonical_json
@@ -109,7 +109,7 @@ class OpenAICanonicalizationDecisionProvider:
                 stage="event-canonicalization",
                 model=self.model_name,
                 prompt_version=CANONICALIZATION_PROMPT_VERSION,
-                schema_version=CANONICALIZATION_SCHEMA_VERSION,
+                schema_version=CANONICALIZATION_OUTPUT_SCHEMA_VERSION,
                 reference_data_hash=candidate_reference_data_hash(catalog),
             ),
         )

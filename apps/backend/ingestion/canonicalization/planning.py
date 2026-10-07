@@ -5,6 +5,7 @@ from typing import Any
 from django.db import transaction
 from django.utils import timezone
 from events.models import Event
+from pydantic import ValidationError as PydanticValidationError
 
 from ingestion.candidates import CandidateVersionConflict, parse_and_validate_candidate_payload
 from ingestion.canonicalization.application import apply_canonicalization_plan
@@ -81,17 +82,35 @@ def canonicalize_candidate(
             [match_record(match) for match in matches] if match_snapshot is None else match_snapshot
         )
         parsed_decision: CanonicalizationProposal | None
+        invalid_decision_issues = []
+        invalid_decision_payload = {}
         if decision is None and not matches:
             parsed_decision = automatic_add_proposal(payload)
         elif decision is None:
             parsed_decision = None
         else:
-            parsed_decision = CanonicalizationProposal.model_validate(decision)
+            try:
+                parsed_decision = CanonicalizationProposal.model_validate(decision)
+            except PydanticValidationError:
+                parsed_decision = None
+                invalid_decision_issues = validate_proposal(candidate, decision, matches=matches)
+                invalid_decision_payload = (
+                    decision.model_dump(mode="json")
+                    if isinstance(decision, CanonicalizationProposal)
+                    else decision
+                )
 
         if parsed_decision is None:
             plan = CanonicalizationPlan.objects.create(
                 event_candidate=candidate,
-                status=CanonicalizationPlanStatus.REVIEW_REQUIRED,
+                status=(
+                    CanonicalizationPlanStatus.REJECTED
+                    if invalid_decision_issues
+                    else CanonicalizationPlanStatus.REVIEW_REQUIRED
+                ),
+                generated_proposal=invalid_decision_payload,
+                effective_proposal=invalid_decision_payload,
+                validation_issues=invalid_decision_issues,
                 match_snapshot=frozen_match_snapshot,
                 model_invocation_id=model_invocation_id,
                 domain_flags=domain_flags or [],

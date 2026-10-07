@@ -5,7 +5,7 @@ from pydantic import Field
 from ingestion.contracts import EventCandidatePayload, StrictModel
 
 SCREENING_SCHEMA_VERSION = "telegram-screening-v2"
-EXTRACTION_SCHEMA_VERSION = "telegram-extraction-v5"
+EXTRACTION_SCHEMA_VERSION = "telegram-extraction-v6"
 
 
 class ScreeningLabel(StrEnum):

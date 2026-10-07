@@ -406,6 +406,21 @@ detects synthesized descriptions; broader domain and grounding flag generation
 remains pending. A model may synthesize a combined description; unsupported
 factual claims remain grounding concerns rather than schema failures.
 
+Object-operation shape and child ownership are checked before projecting the
+resulting Event graph. Missing ADD/UPDATE values and malformed direct planning
+inputs produce retained REJECTED plans rather than escaping as worker errors.
+Expected Pydantic failures when constructing resulting occurrence or registration
+state are recorded as hard issues; unrelated programming and infrastructure
+errors retain their visible failure behavior. Organizer positions and occurrence
+sequences are checked against the database's positive-small-integer range before
+application. Sequence reordering stages existing occurrences at unused values
+within that range, avoiding fixed-offset overflow and collisions.
+
+Canonicalization supports the Event model's COMPLETED occurrence status so
+unrelated changes can preserve a completed occurrence. Extraction retains its
+separate announcement-status vocabulary; this does not allow it to infer
+completion from an announcement.
+
 Application is transactional, version checked, and idempotent. UPDATE and
 LINK_ONLY plans carry a hash of the complete target graph and become STALE if
 the Event changes before application. Successful actions create or reuse an
@@ -569,7 +584,16 @@ to the occurrence because different sessions of one event may differ.
 Extracted candidate times and canonicalization-proposal times are stored as
 Singapore local wall-clock values without a UTC offset or timezone suffix.
 Both model prompts require non-null event and registration times as `HH:MM:SS`
-with no suffix. They instruct conversion of explicitly non-Singapore source
+with no suffix. Their generated output schemas enforce that form with a bounded
+string pattern and permit null. They deliberately omit JSON Schema `format:
+time`, whose RFC 3339 timezone-bearing representation conflicts with local
+wall-clock generation. Runtime parsing still uses Python time values and the
+offset checks below; the narrower generation schema does not rewrite retained
+payloads. The model-facing canonicalization schema is versioned separately from
+the stored proposal's `canonicalization-plan-v3` marker so generation changes do
+not invalidate existing plans.
+
+The prompts instruct conversion of explicitly non-Singapore source
 times together with any associated date rollover; source times without a
 stated timezone are treated as Singapore local. Canonicalization must not
 convert already-normalized candidate or canonical times again. These are model
@@ -583,6 +607,11 @@ conversion can silently cross a date boundary. Cross-midnight activities
 remain representable through their separate start and end dates. Extraction
 represents a stated time range with separate start and end time fields rather
 than placing the range in one time value.
+
+The corrected extraction output schema uses a new version, which also changes
+the successful-extraction reuse key. Recovery of failed messages should select
+those failures explicitly rather than broadly re-extracting successfully
+processed overlap messages merely because the generation schema changed.
 
 The current model can retain multiple occurrences and registration windows.
 Further edge-case behavior for recurrence, overnight events, and timezone

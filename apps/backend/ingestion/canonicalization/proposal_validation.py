@@ -105,6 +105,13 @@ def _validate_add_event(value: CanonicalEventCreate, issues: list[dict[str, Any]
                 "Only one organizer may be primary.",
             )
         )
+    for index, organizer in enumerate(value.organizers):
+        proposal_objects.validate_small_integer(
+            organizer.position,
+            f"add_event.organizers.{index}.position",
+            "ORGANIZER_POSITION_INVALID",
+            issues,
+        )
     client_refs = [item.client_ref for item in value.occurrences]
     if None in client_refs or len(client_refs) != len(set(client_refs)):
         issues.append(
@@ -192,6 +199,7 @@ def _validate_update(
         issues,
     )
 
+    shape_issue_count = len(issues)
     proposal_objects.validate_object_changes(
         proposal.organizer_changes, "organizer_changes", issues
     )
@@ -201,6 +209,8 @@ def _validate_update(
     proposal_objects.validate_object_changes(
         proposal.registration_changes, "registration_changes", issues
     )
+    if len(issues) != shape_issue_count:
+        return
 
     organizer_ids = [
         item.value.organizer_id
@@ -208,7 +218,10 @@ def _validate_update(
         if item.value is not None and item.operation != ObjectOperation.REMOVE
     ]
     proposal_references.validate_organizer_ids(organizer_ids, issues)
+    ownership_issue_count = len(issues)
     proposal_references.validate_owned_ids(event, proposal, issues)
+    if len(issues) != ownership_issue_count:
+        return
     proposal_references.validate_venue_ids(
         [
             venue_id
@@ -240,10 +253,15 @@ def _validate_update(
         if change.value is not None:
             value = change.value
             if change.operation == ObjectOperation.UPDATE and change.id is not None:
-                value = merged_occurrence_value(
-                    event.occurrences.filter(pk=change.id).first(),
-                    change,
-                )
+                try:
+                    value = merged_occurrence_value(
+                        event.occurrences.filter(pk=change.id).first(), change
+                    )
+                except PydanticValidationError as exc:
+                    issues.extend(
+                        _resulting_schema_issues(exc, f"occurrence_changes.{index}.value")
+                    )
+                    continue
             proposal_objects.validate_occurrence_value(
                 value,
                 f"occurrence_changes.{index}.value",
@@ -254,10 +272,15 @@ def _validate_update(
         if change.value is not None:
             value = change.value
             if change.operation == ObjectOperation.UPDATE and change.id is not None:
-                value = merged_registration_value(
-                    Registration.objects.filter(pk=change.id).first(),
-                    change,
-                )
+                try:
+                    value = merged_registration_value(
+                        Registration.objects.filter(pk=change.id).first(), change
+                    )
+                except PydanticValidationError as exc:
+                    issues.extend(
+                        _resulting_schema_issues(exc, f"registration_changes.{index}.value")
+                    )
+                    continue
             proposal_objects.validate_registration_value(
                 value,
                 f"registration_changes.{index}.value",
@@ -267,3 +290,14 @@ def _validate_update(
             )
     validate_final_occurrence_sequences(event, proposal.occurrence_changes, issues)
     validate_final_organizers(event, proposal.organizer_changes, issues)
+
+
+def _resulting_schema_issues(error: PydanticValidationError, path: str) -> list[dict[str, Any]]:
+    return [
+        _hard_issue(
+            "RESULTING_STATE_SCHEMA_INVALID",
+            ".".join((path, *(str(part) for part in item.get("loc", ())))),
+            item.get("msg", "The resulting state is structurally invalid."),
+        )
+        for item in error.errors(include_url=False)
+    ]

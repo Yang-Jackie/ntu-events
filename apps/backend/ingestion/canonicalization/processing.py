@@ -18,7 +18,7 @@ from ingestion.canonicalization.decision_provider import (
 from ingestion.canonicalization.matching import find_candidate_matches
 from ingestion.canonicalization.planning import canonicalize_candidate
 from ingestion.canonicalization.snapshots import event_snapshot_payload_hash
-from ingestion.contracts import CANONICALIZATION_SCHEMA_VERSION, EventCandidatePayload
+from ingestion.contracts import CANONICALIZATION_OUTPUT_SCHEMA_VERSION, EventCandidatePayload
 from ingestion.model_outputs import ModelOutputError
 from ingestion.models import (
     CandidateStatus,
@@ -127,7 +127,7 @@ def _process_candidate(
             stage=ModelInvocationStage.CANONICALIZATION,
             model_name=decision_provider.model_name,
             prompt_version=CANONICALIZATION_PROMPT_VERSION,
-            schema_version=CANONICALIZATION_SCHEMA_VERSION,
+            schema_version=CANONICALIZATION_OUTPUT_SCHEMA_VERSION,
             batch_index=candidate.pk,
             attempt_number=attempt_number,
             status=ExtractionStatus.SUCCEEDED if result else ExtractionStatus.FAILED,

@@ -11,12 +11,13 @@ from ingestion.contracts import (
 )
 
 from .proposal_issues import hard_issue as _hard_issue
+from .proposal_objects import validate_small_integer
 
 
 def merged_occurrence_value(
     occurrence: EventOccurrence | None,
     change: CanonicalOccurrenceChange,
-) -> CanonicalOccurrenceValue:
+) -> CanonicalOccurrenceValue | None:
     if occurrence is None or change.value is None:
         return change.value
     values = {
@@ -43,7 +44,7 @@ def merged_occurrence_value(
 def merged_registration_value(
     registration: Registration | None,
     change: CanonicalRegistrationChange,
-) -> CanonicalRegistrationValue:
+) -> CanonicalRegistrationValue | None:
     if registration is None or change.value is None:
         return change.value
     values = {
@@ -73,6 +74,9 @@ def validate_final_occurrence_sequences(event, changes, issues) -> None:
     for change in changes:
         if change.operation == ObjectOperation.REMOVE:
             sequences.pop(change.id, None)
+        elif change.value is None:
+            # Operation-shape validation owns the rejection of missing values.
+            continue
         elif change.operation == ObjectOperation.ADD:
             sequences[next_temporary_id] = change.value.sequence
             next_temporary_id -= 1
@@ -103,6 +107,8 @@ def validate_final_organizers(event, changes, issues) -> None:
     for change in changes:
         if change.operation == ObjectOperation.REMOVE:
             values.pop(change.id, None)
+        elif change.value is None:
+            continue
         elif change.operation == ObjectOperation.ADD:
             values[next_temporary_id] = change.value.model_dump()
             next_temporary_id -= 1
@@ -112,6 +118,10 @@ def validate_final_organizers(event, changes, issues) -> None:
                 continue
             for field in change.changed_fields:
                 current[field.value.lower()] = getattr(change.value, field.value.lower())
+    for item in values.values():
+        validate_small_integer(
+            item["position"], "organizer_changes", "ORGANIZER_POSITION_INVALID", issues
+        )
     organizer_ids = [item["organizer_id"] for item in values.values()]
     if len(organizer_ids) != len(set(organizer_ids)):
         issues.append(

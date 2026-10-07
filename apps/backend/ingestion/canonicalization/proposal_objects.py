@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from django.db import connection
+
 from ingestion.canonicalization.proposal_issues import hard_issue
 from ingestion.contracts import ObjectOperation, RegistrationScope
 from ingestion.http_urls import is_valid_http_url
@@ -71,6 +73,10 @@ def validate_occurrence_value(value, path, issues: list[dict[str, Any]], *, addi
             )
         )
         return
+    if value.sequence is not None:
+        validate_small_integer(
+            value.sequence, f"{path}.sequence", "OCCURRENCE_SEQUENCE_INVALID", issues
+        )
     if value.start_date and value.end_date and value.end_date < value.start_date:
         issues.append(hard_issue("OCCURRENCE_TIME_INVALID", path, "Occurrence end precedes start."))
     if value.end_time is not None and (value.end_date is None or value.start_time is None):
@@ -198,3 +204,9 @@ def unique_change_fields(changes, path, issues: list[dict[str, Any]]) -> None:
         issues.append(
             hard_issue("FIELD_CHANGE_DUPLICATE", path, "A field is changed more than once.")
         )
+
+
+def validate_small_integer(value: int, path: str, code: str, issues) -> None:
+    minimum, maximum = connection.ops.integer_field_range("PositiveSmallIntegerField")
+    if not minimum <= value <= maximum:
+        issues.append(hard_issue(code, path, f"Value must be between {minimum} and {maximum}."))

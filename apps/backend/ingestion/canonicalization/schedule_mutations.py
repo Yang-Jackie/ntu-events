@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from django.db.models import F, Q
+from django.db import connection
+from django.db.models import Q
 from events.models import (
     EventOccurrence,
     OccurrenceVenue,
@@ -27,7 +28,21 @@ def apply_occurrence_changes(
         return {}
     existing = {item.pk: item for item in event.occurrences.all()}
     original_sequences = {item.pk: item.sequence for item in existing.values()}
-    EventOccurrence.objects.filter(event=event).update(sequence=F("sequence") + 10000)
+    # Stage at unused values within the actual storage range, avoiding both
+    # overflow and collisions with original or requested final sequences.
+    minimum, maximum = connection.ops.integer_field_range("PositiveSmallIntegerField")
+    reserved = set(original_sequences.values()) | {
+        change.value.sequence
+        for change in changes
+        if change.value is not None
+        and (
+            change.operation == ObjectOperation.ADD
+            or OccurrenceField.SEQUENCE in change.changed_fields
+        )
+    }
+    temporary = (value for value in range(maximum, minimum - 1, -1) if value not in reserved)
+    for occurrence in existing.values():
+        EventOccurrence.objects.filter(pk=occurrence.pk).update(sequence=next(temporary))
     added: dict[str, EventOccurrence] = {}
     for change in changes:
         if change.operation == ObjectOperation.REMOVE:

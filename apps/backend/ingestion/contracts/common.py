@@ -2,7 +2,7 @@ from datetime import time, timedelta
 from enum import StrEnum
 from typing import Annotated
 
-from pydantic import AfterValidator, BaseModel, ConfigDict
+from pydantic import AfterValidator, BaseModel, ConfigDict, WithJsonSchema
 
 
 class StrictModel(BaseModel):
@@ -29,6 +29,21 @@ LocalTime = Annotated[
     time | None,
     AfterValidator(_normalize_singapore_wall_clock),
     AfterValidator(_require_singapore_wall_clock),
+    # RFC 3339 `format: time` describes offset-bearing values, which conflicts
+    # with our model prompts. Narrow generation without changing runtime parsing
+    # of stored payloads (including the supported +08:00 normalization).
+    WithJsonSchema(
+        {
+            "anyOf": [
+                {
+                    "type": "string",
+                    "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$",
+                    "description": "Singapore local wall-clock time HH:MM:SS, without a suffix.",
+                },
+                {"type": "null"},
+            ]
+        }
+    ),
 ]
 
 

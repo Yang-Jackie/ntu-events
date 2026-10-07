@@ -12,7 +12,7 @@ from ingestion.canonicalization.decision_provider import (
 )
 from ingestion.canonicalization.worker import CanonicalizationWorkerRuntime
 from ingestion.contracts import (
-    CANONICALIZATION_SCHEMA_VERSION,
+    CANONICALIZATION_OUTPUT_SCHEMA_VERSION,
     CanonicalizationAction,
     CanonicalizationProposal,
 )
@@ -173,7 +173,7 @@ def test_canonicalization_decision_provider_is_source_neutral(monkeypatch, effor
         stage="event-canonicalization",
         model="gpt-5-mini",
         prompt_version=CANONICALIZATION_PROMPT_VERSION,
-        schema_version=CANONICALIZATION_SCHEMA_VERSION,
+        schema_version=CANONICALIZATION_OUTPUT_SCHEMA_VERSION,
         reference_data_hash=candidate_reference_data_hash(catalog),
     )
 
@@ -393,13 +393,13 @@ def test_changed_prompt_and_schema_versions_do_not_reuse_previous_cache_routes()
         stage="event-canonicalization",
         model="gpt-5-mini",
         prompt_version=CANONICALIZATION_PROMPT_VERSION,
-        schema_version=CANONICALIZATION_SCHEMA_VERSION,
+        schema_version=CANONICALIZATION_OUTPUT_SCHEMA_VERSION,
     )
     previous_canonicalization = prompt_cache_key(
         stage="event-canonicalization",
         model="gpt-5-mini",
         prompt_version="event-canonicalization-v6",
-        schema_version=CANONICALIZATION_SCHEMA_VERSION,
+        schema_version=CANONICALIZATION_OUTPUT_SCHEMA_VERSION,
     )
 
     assert current_extraction != previous_extraction

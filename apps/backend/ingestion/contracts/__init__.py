@@ -8,6 +8,7 @@ from .candidates import (
     EventCandidatePayload,
 )
 from .canonicalization import (
+    CANONICALIZATION_OUTPUT_SCHEMA_VERSION,
     CANONICALIZATION_SCHEMA_VERSION,
     CanonicalClassificationChange,
     CanonicalEventCreate,
@@ -15,6 +16,7 @@ from .canonicalization import (
     CanonicalizationAction,
     CanonicalizationProposal,
     CanonicalOccurrenceChange,
+    CanonicalOccurrenceStatus,
     CanonicalOccurrenceValue,
     CanonicalOrganizerChange,
     CanonicalOrganizerValue,
@@ -42,6 +44,7 @@ from .common import (
 __all__ = (
     "AttendanceMode",
     "CANDIDATE_SCHEMA_VERSION",
+    "CANONICALIZATION_OUTPUT_SCHEMA_VERSION",
     "CANONICALIZATION_SCHEMA_VERSION",
     "CandidateControlledValues",
     "CandidateEvidence",
@@ -54,6 +57,7 @@ __all__ = (
     "CanonicalizationAction",
     "CanonicalizationProposal",
     "CanonicalOccurrenceChange",
+    "CanonicalOccurrenceStatus",
     "CanonicalOccurrenceValue",
     "CanonicalOrganizerChange",
     "CanonicalOrganizerValue",
