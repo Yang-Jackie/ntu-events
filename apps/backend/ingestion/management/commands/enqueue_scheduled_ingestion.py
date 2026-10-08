@@ -1,9 +1,9 @@
 from django.core.management.base import BaseCommand
 from sources.models import Source
 
-from ingestion.jobs import enqueue_sources
+from ingestion.jobs.service import enqueue_sources
 from ingestion.models import IngestionTrigger
-from ingestion.pipelines.catalog import PIPELINES
+from ingestion.pipelines.registry import PIPELINES
 
 
 class Command(BaseCommand):

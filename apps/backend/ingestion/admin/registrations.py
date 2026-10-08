@@ -1,10 +1,9 @@
 from django.contrib import admin, messages
 
-from . import admin_presenters
-from .admin_forms import CanonicalizationPlanAdminForm, EventCandidateAdminForm
-from .candidates import CandidateVersionConflict, update_event_candidate
-from .canonicalization import update_canonicalization_plan
-from .models import (
+from ingestion.candidates.service import update_event_candidate
+from ingestion.canonicalization.workflow import update_canonicalization_plan
+from ingestion.errors import CandidateVersionConflict
+from ingestion.models import (
     CandidateMatch,
     CandidateStatus,
     CanonicalizationPlan,
@@ -15,6 +14,9 @@ from .models import (
     MessageScreening,
     ModelInvocation,
 )
+
+from . import presentation
+from .forms import CanonicalizationPlanAdminForm, EventCandidateAdminForm
 
 
 class IngestionJobInline(admin.TabularInline):
@@ -196,15 +198,15 @@ class EventCandidateAdmin(admin.ModelAdmin):
 
     @admin.display(description="Candidate overview")
     def candidate_summary(self, obj: EventCandidate) -> str:
-        return admin_presenters.payload_summary(obj.effective_payload)
+        return presentation.payload_summary(obj.effective_payload)
 
     @admin.display(description="Validation issues")
     def validation_issue_summary(self, obj: EventCandidate) -> str:
-        return admin_presenters.validation_issue_summary(obj)
+        return presentation.validation_issue_summary(obj)
 
     @admin.display(description="Original extracted payload")
     def raw_payload(self, obj: EventCandidate) -> str:
-        return admin_presenters.raw_payload(obj)
+        return presentation.raw_payload(obj)
 
     def has_add_permission(self, request) -> bool:
         return False

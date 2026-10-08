@@ -4,7 +4,7 @@ from typing import Any
 
 from django.db import connection
 
-from ingestion.canonicalization.proposal_issues import hard_issue
+from ingestion.canonicalization.plans.validation.issues import hard_issue
 from ingestion.contracts import ObjectOperation, RegistrationScope
 from ingestion.http_urls import is_valid_http_url
 

@@ -22,8 +22,8 @@ from ingestion.models import (
     EventCandidate,
 )
 
-from . import proposal_objects, proposal_references
-from .proposal_issues import hard_issue as _hard_issue
+from . import objects, references
+from .issues import hard_issue as _hard_issue
 from .resulting_state import (
     merged_occurrence_value,
     merged_registration_value,
@@ -87,13 +87,11 @@ def validate_proposal(
 
 
 def _validate_add_event(value: CanonicalEventCreate, issues: list[dict[str, Any]]) -> None:
-    proposal_references.validate_catalogs(
+    references.validate_catalogs(
         value.formats, value.topics, value.purposes, value.audiences, issues
     )
-    proposal_references.validate_organizer_ids(
-        [item.organizer_id for item in value.organizers], issues
-    )
-    proposal_references.validate_venue_ids(
+    references.validate_organizer_ids([item.organizer_id for item in value.organizers], issues)
+    references.validate_venue_ids(
         [venue_id for item in value.occurrences for venue_id in (item.venue_ids or [])],
         issues,
     )
@@ -106,7 +104,7 @@ def _validate_add_event(value: CanonicalEventCreate, issues: list[dict[str, Any]
             )
         )
     for index, organizer in enumerate(value.organizers):
-        proposal_objects.validate_small_integer(
+        objects.validate_small_integer(
             organizer.position,
             f"add_event.organizers.{index}.position",
             "ORGANIZER_POSITION_INVALID",
@@ -131,11 +129,11 @@ def _validate_add_event(value: CanonicalEventCreate, issues: list[dict[str, Any]
             )
         )
     for index, occurrence in enumerate(value.occurrences):
-        proposal_objects.validate_occurrence_value(
+        objects.validate_occurrence_value(
             occurrence, f"add_event.occurrences.{index}", issues, adding=True
         )
     for index, registration in enumerate(value.registrations):
-        proposal_objects.validate_registration_value(
+        objects.validate_registration_value(
             registration,
             f"add_event.registrations.{index}",
             issues,
@@ -149,7 +147,7 @@ def _validate_update(
     proposal: CanonicalizationProposal,
     issues: list[dict[str, Any]],
 ) -> None:
-    proposal_objects.unique_change_fields(proposal.event_changes, "event_changes", issues)
+    objects.unique_change_fields(proposal.event_changes, "event_changes", issues)
     title_change = next(
         (item for item in proposal.event_changes if item.field == EventField.TITLE), None
     )
@@ -191,7 +189,7 @@ def _validate_update(
                 )
             )
         classification_values[kind] = codes
-    proposal_references.validate_catalogs(
+    references.validate_catalogs(
         classification_values.get(ClassificationKind.FORMAT, []),
         classification_values.get(ClassificationKind.TOPIC, []),
         classification_values.get(ClassificationKind.PURPOSE, []),
@@ -200,15 +198,9 @@ def _validate_update(
     )
 
     shape_issue_count = len(issues)
-    proposal_objects.validate_object_changes(
-        proposal.organizer_changes, "organizer_changes", issues
-    )
-    proposal_objects.validate_object_changes(
-        proposal.occurrence_changes, "occurrence_changes", issues
-    )
-    proposal_objects.validate_object_changes(
-        proposal.registration_changes, "registration_changes", issues
-    )
+    objects.validate_object_changes(proposal.organizer_changes, "organizer_changes", issues)
+    objects.validate_object_changes(proposal.occurrence_changes, "occurrence_changes", issues)
+    objects.validate_object_changes(proposal.registration_changes, "registration_changes", issues)
     if len(issues) != shape_issue_count:
         return
 
@@ -217,12 +209,12 @@ def _validate_update(
         for item in proposal.organizer_changes
         if item.value is not None and item.operation != ObjectOperation.REMOVE
     ]
-    proposal_references.validate_organizer_ids(organizer_ids, issues)
+    references.validate_organizer_ids(organizer_ids, issues)
     ownership_issue_count = len(issues)
-    proposal_references.validate_owned_ids(event, proposal, issues)
+    references.validate_owned_ids(event, proposal, issues)
     if len(issues) != ownership_issue_count:
         return
-    proposal_references.validate_venue_ids(
+    references.validate_venue_ids(
         [
             venue_id
             for change in proposal.occurrence_changes
@@ -262,7 +254,7 @@ def _validate_update(
                         _resulting_schema_issues(exc, f"occurrence_changes.{index}.value")
                     )
                     continue
-            proposal_objects.validate_occurrence_value(
+            objects.validate_occurrence_value(
                 value,
                 f"occurrence_changes.{index}.value",
                 issues,
@@ -281,7 +273,7 @@ def _validate_update(
                         _resulting_schema_issues(exc, f"registration_changes.{index}.value")
                     )
                     continue
-            proposal_objects.validate_registration_value(
+            objects.validate_registration_value(
                 value,
                 f"registration_changes.{index}.value",
                 issues,

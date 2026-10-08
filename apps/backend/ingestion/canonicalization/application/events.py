@@ -12,13 +12,13 @@ from events.models import (
     VerificationStatus,
 )
 
-from ingestion.canonicalization.matching import normalize_match_text
-from ingestion.canonicalization.schedule_mutations import (
+from ingestion.canonicalization.application.schedules import (
     apply_occurrence_changes,
     apply_registration_changes,
     create_occurrence,
     create_registration,
 )
+from ingestion.canonicalization.normalization import normalize_match_text
 from ingestion.contracts import (
     CanonicalEventCreate,
     CanonicalizationProposal,

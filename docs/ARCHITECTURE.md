@@ -141,21 +141,63 @@ BLOCKED/READY/PROCESSED logical gate; no separate review aggregate exists.
 its source associations, and applied history. The canonicalization workflow is
 the only automated writer across that boundary.
 
-Within the current `ingestion` implementation, source-specific access,
-screening, extraction, document handling, and stage runtime live under
-`pipelines/<source>/`. Their durable
-handoff is a persisted `EventCandidate`; shared candidate creation and repair
-rules remain source-neutral. The `canonicalization` package currently contains
-the workflow from a READY candidate through matching, reconciliation context,
-proposal validation, plan creation, Event application, and provenance. It
-accepts a source-neutral decision-provider interface, so canonicalization model
-calls do not belong to any source pipeline. Source pipelines stop after
-persisting their EventCandidates. A separate source-neutral worker consumes
-unplanned READY candidates, including manually repaired ones. Preserving that
-source-neutral dependency is the default; another package structure would need
-to demonstrate the same isolation rather than being rejected solely for
-organizing files differently. The worker is currently a separate process in
-the same modular Django application, not a separate service or data owner.
+The ingestion app keeps its Django models and migration identity while grouping
+behavior by responsibility:
+
+```text
+ingestion/
+├── admin/                       # Registrations, forms, and presentation
+├── jobs/                        # Source-job lifecycle and ingestion worker
+├── pipelines/<source>/          # Source access, screening, extraction, batching
+├── candidates/                  # Candidate creation, repair, and validation
+├── contracts/                   # Shared payload schemas and vocabulary
+└── canonicalization/
+    ├── workflow.py              # Public orchestration and optional application
+    ├── worker.py                # Candidate polling and exclusive execution
+    ├── decisions/               # Matching, evidence, projection, model decisions
+    ├── plans/                   # Plan persistence, repair, and proposal validation
+    ├── application/             # Transactional Event changes and provenance
+    ├── snapshots.py             # Frozen Event graphs and stale-state hashes
+    └── normalization.py         # Shared comparison normalization
+```
+
+Source pipelines stop at a persisted `EventCandidate`. Shared candidate creation
+and repair live in `candidates/service.py`; their validators live under
+`candidates/validation/`. Pipeline registration lives in `pipelines/registry.py`.
+
+`canonicalization/workflow.py` coordinates decisions, plan creation or repair,
+and optional application. Worker model calls run outside the plan transaction
+and retain the matching snapshots used for reconciliation. Inside one transaction,
+the workflow uses `plans/service.py` to lock and revalidate the candidate,
+prepare its sole plan, and freeze its lifecycle. Automatic application follows
+that transaction rather than running inside the plan service. Plan repairs also
+commit before optional application.
+
+`decisions/service.py` returns the proposal and retained matching/model evidence.
+It accepts the source-neutral decision-provider interface and never writes a
+canonical Event or finalizes a candidate. `plans/service.py` owns plan validation,
+versions, review state, and candidate transitions; it does not import decision or
+application services. `application/service.py` revalidates and applies a plan,
+checks stale state, and records observations and revisions transactionally.
+Proposal validators are shared by plan management and application without
+calling either service. Both stages use the shared snapshot and normalization
+modules rather than importing matching internals.
+
+External callers use the owning modules: candidate operations from
+`candidates/service.py`, enqueue operations from `jobs/service.py`, canonicalization
+use cases from `canonicalization/workflow.py`, and explicit plan application from
+`canonicalization/application/service.py`. Package initialization files do not
+re-export workflow services. The Admin package explicitly loads its registrations
+for Django discovery.
+
+Each worker owns its polling and resource cleanup, including failed startup.
+Releasing a held canonicalization lock is attempted even if provider cleanup fails.
+The ingestion worker also
+owns periodic stale-job recovery. The canonicalization worker owns the global
+PostgreSQL advisory lock and verifies its database session before and after
+candidate processing. Commands configure workers and handle terminal output and
+interrupt reporting. Workers remain processes in the same modular Django app,
+with the same domain data and ownership.
 
 The first implemented pipeline, and the first intended for the retained
 personal-use trial, is Telegram text ingestion. Future pipelines may use

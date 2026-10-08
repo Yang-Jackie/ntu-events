@@ -10,8 +10,8 @@ from ingestion.contracts import (
     RegistrationField,
 )
 
-from .proposal_issues import hard_issue as _hard_issue
-from .proposal_objects import validate_small_integer
+from .issues import hard_issue as _hard_issue
+from .objects import validate_small_integer
 
 
 def merged_occurrence_value(

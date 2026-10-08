@@ -6,15 +6,14 @@ from typing import Any
 from django.db import transaction
 from django.db.models import Max
 from django.utils import timezone
-from events.models import Event, EventRevision
+from events.models import Event, EventObservation, EventRevision, EventSourceLink
 
-from ingestion.candidates import CandidateVersionConflict
-from ingestion.canonicalization.event_mutations import apply_add, apply_update
-from ingestion.canonicalization.proposal_validation import validate_proposal
-from ingestion.canonicalization.provenance import link_observation
+from ingestion.canonicalization.application.events import apply_add, apply_update
+from ingestion.canonicalization.plans.validation.proposal import validate_proposal
 from ingestion.canonicalization.snapshots import event_snapshot, event_snapshot_hash
 from ingestion.contracts import CanonicalizationAction, CanonicalizationProposal
-from ingestion.models import CanonicalizationPlan, CanonicalizationPlanStatus
+from ingestion.errors import CandidateVersionConflict
+from ingestion.models import CanonicalizationPlan, CanonicalizationPlanStatus, EventCandidate
 
 
 @dataclass(frozen=True)
@@ -119,3 +118,20 @@ def _apply_canonicalization_plan(plan_id: int, *, expected_version: int) -> Plan
 
 
 __all__ = ("PlanResult", "apply_canonicalization_plan")
+
+
+def link_observation(candidate: EventCandidate, event: Event) -> None:
+    representation = candidate.source_representation
+    link, _created = EventSourceLink.objects.get_or_create(
+        event=event,
+        source_representation=representation,
+        defaults={"is_primary_source": not event.source_links.exists()},
+    )
+    existing = EventObservation.objects.filter(event_candidate=candidate).first()
+    if existing is not None and existing.source_link_id != link.pk:
+        raise RuntimeError("The EventCandidate is already linked to another canonical Event.")
+    EventObservation.objects.get_or_create(
+        source_link=link,
+        event_candidate=candidate,
+        defaults={"observation_type": candidate.observation_type},
+    )

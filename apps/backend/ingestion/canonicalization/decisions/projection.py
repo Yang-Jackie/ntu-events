@@ -1,6 +1,6 @@
 from organizers.models import Organizer
 
-from ingestion.canonicalization.matching import normalize_match_text
+from ingestion.canonicalization.normalization import normalize_match_text
 from ingestion.contracts import (
     CanonicalEventCreate,
     CanonicalizationAction,

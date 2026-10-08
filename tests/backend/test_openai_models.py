@@ -5,7 +5,7 @@ from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
-from ingestion.canonicalization.decision_provider import (
+from ingestion.canonicalization.decisions.provider import (
     CANONICALIZATION_PROMPT,
     CANONICALIZATION_PROMPT_VERSION,
     OpenAICanonicalizationDecisionProvider,
@@ -143,7 +143,7 @@ def test_canonicalization_decision_provider_is_source_neutral(monkeypatch, effor
     parse = Mock(return_value=response)
     client = SimpleNamespace(responses=SimpleNamespace(parse=parse))
     monkeypatch.setattr(
-        "ingestion.canonicalization.decision_provider.OpenAI", Mock(return_value=client)
+        "ingestion.canonicalization.decisions.provider.OpenAI", Mock(return_value=client)
     )
     provider = OpenAICanonicalizationDecisionProvider(model_name="gpt-5-mini", **efforts)
 
@@ -230,7 +230,7 @@ def test_canonicalization_prompt_preserves_already_normalized_clock_values() -> 
         (
             OpenAICanonicalizationDecisionProvider,
             {"model_name": "canonicalization"},
-            "ingestion.canonicalization.decision_provider.OpenAI",
+            "ingestion.canonicalization.decisions.provider.OpenAI",
         ),
     ],
 )

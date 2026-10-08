@@ -3,8 +3,11 @@ from decimal import Decimal
 
 import pytest
 from events.models import Event
-from ingestion.canonicalization import find_candidate_matches
-from ingestion.canonicalization.matching import _date_similarity, normalize_match_url
+from ingestion.canonicalization.decisions.matching import (
+    _date_similarity,
+    find_candidate_matches,
+    normalize_match_url,
+)
 from ingestion.contracts import (
     CandidateOrganizer,
     CandidateRegistration,

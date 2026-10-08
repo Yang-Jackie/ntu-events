@@ -1,6 +1,6 @@
 import pytest
 from events.models import Event, EventObservation, EventRevision, VerificationStatus
-from ingestion.candidates import CandidateVersionConflict, update_event_candidate
+from ingestion.candidates.service import update_event_candidate
 from ingestion.contracts import (
     AttendanceMode,
     CandidateOccurrence,
@@ -10,6 +10,7 @@ from ingestion.contracts import (
     RegistrationScope,
     TimePrecision,
 )
+from ingestion.errors import CandidateVersionConflict
 from ingestion.models import CandidateStatus, CanonicalizationPlanStatus
 
 from .canonicalization_test_support import (

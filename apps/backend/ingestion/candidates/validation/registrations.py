@@ -1,6 +1,6 @@
 from ingestion.contracts import CandidateRegistration, RegistrationScope
 
-from .validation_issues import IssueSeverity, add_issue, validate_optional_url
+from .issues import IssueSeverity, add_issue, validate_optional_url
 
 
 def validate_registration(

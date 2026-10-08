@@ -3,9 +3,9 @@ from __future__ import annotations
 from django.core.management.base import BaseCommand, CommandError, CommandParser
 from sources.models import Source
 
-from ingestion.jobs import enqueue_sources
+from ingestion.jobs.service import enqueue_sources
+from ingestion.jobs.worker import WorkerRuntime, make_worker_id
 from ingestion.models import IngestionTrigger, JobStatus
-from ingestion.worker import WorkerRuntime, make_worker_id
 
 
 class Command(BaseCommand):

@@ -60,6 +60,12 @@ Current matching weights and threshold are accepted for the owner-operated slice
 revisit them when observed duplicates or false matches justify calibration.
 Venue-data completeness remains the responsibility of Milestone 7.
 
+The ingestion organization and worker responsibility cleanup is verified.
+[Architecture](ARCHITECTURE.md#5-ingestion-boundary) records the resulting module
+boundaries. The full Python suite, Ruff, Django checks, migration-drift checks,
+and OpenAPI verification pass. Milestone 7's remaining venue-resolution and
+fresh-database discovery exit conditions are unchanged.
+
 ## 4. Current milestone: venue registry consolidation
 
 ### Outcome and scope

@@ -2,7 +2,7 @@ from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from ingestion.jobs import claim_job, enqueue_sources, recover_stale_jobs
+from ingestion.jobs.service import claim_job, enqueue_sources, recover_stale_jobs
 from ingestion.models import (
     EventCandidate,
     ExtractionRun,

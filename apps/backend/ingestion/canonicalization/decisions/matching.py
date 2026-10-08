@@ -12,6 +12,7 @@ from events.models import (
     EventSourceLink,
 )
 
+from ingestion.canonicalization.normalization import normalize_match_text
 from ingestion.contracts import (
     EventCandidatePayload,
 )
@@ -302,10 +303,6 @@ def _set_overlap_similarity(left: set[Any], right: set[Any]) -> float:
     if not left or not right:
         return 0.0
     return len(left & right) / min(len(left), len(right))
-
-
-def normalize_match_text(value: str) -> str:
-    return " ".join(value.split()).casefold()
 
 
 def normalize_match_url(value: str) -> str:

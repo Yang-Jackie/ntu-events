@@ -8,3 +8,7 @@ class UnsupportedPipelineError(RuntimeError):
     def __init__(self, pipeline_key: str):
         super().__init__(f"Unsupported ingestion pipeline: {pipeline_key}")
         self.pipeline_key = pipeline_key
+
+
+class CandidateVersionConflict(RuntimeError):
+    """A candidate or plan changed since the caller last read its version."""

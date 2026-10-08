@@ -1,5 +1,5 @@
 from django.contrib import admin, messages
-from ingestion.jobs import enqueue_sources
+from ingestion.jobs.service import enqueue_sources
 from ingestion.models import IngestionTrigger
 
 from .models import RawSourceDocument, Source, SourceRepresentation

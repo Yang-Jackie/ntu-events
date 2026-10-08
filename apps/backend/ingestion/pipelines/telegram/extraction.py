@@ -5,7 +5,7 @@ from functools import partial
 from django.db import transaction
 from sources.models import ProcessingStatus
 
-from ingestion.candidates import create_extracted_candidate
+from ingestion.candidates.service import create_extracted_candidate
 from ingestion.contracts import EventCandidatePayload
 from ingestion.models import (
     ExtractionRun,

@@ -35,7 +35,7 @@ def enqueue_sources(
     pipelines: Mapping[str, IngestionPipeline] | None = None,
 ) -> EnqueueResult:
     if pipelines is None:
-        from ingestion.pipelines.catalog import PIPELINES
+        from ingestion.pipelines.registry import PIPELINES
 
         pipelines = PIPELINES
     if trigger not in IngestionTrigger.values:

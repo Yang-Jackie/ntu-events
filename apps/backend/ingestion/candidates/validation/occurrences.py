@@ -1,6 +1,6 @@
 from ingestion.contracts import AttendanceMode, CandidateOccurrence, TimePrecision
 
-from .validation_issues import IssueSeverity, add_issue, validate_optional_url
+from .issues import IssueSeverity, add_issue, validate_optional_url
 
 
 def validate_occurrence(

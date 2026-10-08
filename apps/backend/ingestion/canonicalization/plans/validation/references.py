@@ -16,7 +16,7 @@ from events.models import (
 from organizers.models import Organizer
 from venues.models import Venue
 
-from ingestion.canonicalization.proposal_issues import hard_issue
+from ingestion.canonicalization.plans.validation.issues import hard_issue
 from ingestion.contracts import CanonicalizationProposal, ObjectOperation
 
 

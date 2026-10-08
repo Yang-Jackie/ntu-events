@@ -1,17 +1,72 @@
 from datetime import timedelta
-from unittest.mock import patch
+from io import StringIO
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 
 import pytest
+from django.core.management import call_command
 from django.utils import timezone
 from ingestion.errors import RetryableIngestionError
-from ingestion.jobs import claim_job, enqueue_sources, recover_stale_jobs
-from ingestion.management.commands.run_ingestion_worker import (
+from ingestion.jobs.service import claim_job, enqueue_sources, recover_stale_jobs
+from ingestion.jobs.worker import (
     STALE_JOB_RECOVERY_INTERVAL_SECONDS,
+    WorkerRuntime,
     _recover_stale_jobs_if_due,
 )
 from ingestion.models import IngestionTrigger, JobStatus
-from ingestion.worker import WorkerRuntime
 from sources.models import Source, SourceType
+
+
+@pytest.mark.parametrize("error", [None, RuntimeError("job failed"), KeyboardInterrupt()])
+def test_polling_worker_closes_pipeline_resources_on_exit(monkeypatch, error) -> None:
+    pipeline = FakePipeline("test")
+    runtime = WorkerRuntime("test-worker", pipelines={pipeline.key: pipeline})
+    monkeypatch.setattr("ingestion.jobs.worker.close_old_connections", Mock())
+    monkeypatch.setattr("ingestion.jobs.worker.recover_stale_jobs", Mock(return_value=0))
+    runtime.run_next_job = Mock(return_value=None, side_effect=error)
+
+    if error is None:
+        runtime.run(once=True)
+    else:
+        with pytest.raises(type(error)):
+            runtime.run(once=True)
+
+    assert pipeline.closed
+
+
+def test_polling_worker_closes_resources_when_initial_recovery_fails(monkeypatch) -> None:
+    pipeline = FakePipeline("test")
+    runtime = WorkerRuntime("test-worker", pipelines={pipeline.key: pipeline})
+    monkeypatch.setattr(
+        "ingestion.jobs.worker.recover_stale_jobs",
+        Mock(side_effect=RuntimeError("database failed")),
+    )
+    runtime.run_next_job = Mock()
+
+    with pytest.raises(RuntimeError, match="database failed"):
+        runtime.run(once=True)
+
+    assert pipeline.closed
+    runtime.run_next_job.assert_not_called()
+
+
+def test_worker_command_preserves_start_and_completion_output(monkeypatch) -> None:
+    output = StringIO()
+    job = SimpleNamespace(pk=42, status="SUCCEEDED", refresh_from_db=Mock())
+    runtime = WorkerRuntime("test-worker", pipelines={})
+    runtime.run_next_job = Mock(return_value=job)
+    monkeypatch.setattr(
+        "ingestion.management.commands.run_ingestion_worker.WorkerRuntime", lambda _id: runtime
+    )
+    monkeypatch.setattr("ingestion.jobs.worker.close_old_connections", Mock())
+    monkeypatch.setattr("ingestion.jobs.worker.recover_stale_jobs", Mock(return_value=2))
+
+    call_command("run_ingestion_worker", "--once", stdout=output)
+
+    assert output.getvalue().splitlines() == [
+        "Ingestion worker test-worker started; recovered 2 stale job(s).",
+        "Job 42 finished with status SUCCEEDED.",
+    ]
 
 
 @pytest.mark.django_db
@@ -52,11 +107,11 @@ def test_recover_stale_jobs_requeues_only_expired_running_jobs() -> None:
 def test_periodic_stale_recovery_runs_again_after_the_interval() -> None:
     with (
         patch(
-            "ingestion.management.commands.run_ingestion_worker.time.monotonic",
+            "ingestion.jobs.worker.time.monotonic",
             side_effect=(100.0, 159.0, 160.0),
         ),
         patch(
-            "ingestion.management.commands.run_ingestion_worker.recover_stale_jobs",
+            "ingestion.jobs.worker.recover_stale_jobs",
             side_effect=(2, 1),
         ) as recover,
     ):

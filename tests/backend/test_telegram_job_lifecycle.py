@@ -4,7 +4,7 @@ from unittest.mock import Mock
 import httpx
 import pytest
 from events.models import Event
-from ingestion.jobs import claim_job, enqueue_sources
+from ingestion.jobs.service import claim_job, enqueue_sources
 from ingestion.models import (
     CandidateStatus,
     EventCandidate,

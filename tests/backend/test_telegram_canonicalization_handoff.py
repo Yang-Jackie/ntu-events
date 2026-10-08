@@ -5,7 +5,7 @@ from unittest.mock import Mock
 import httpx
 import pytest
 from events.models import Event
-from ingestion.candidates import update_event_candidate
+from ingestion.candidates.service import update_event_candidate
 from ingestion.canonicalization.worker import CanonicalizationWorkerRuntime
 from ingestion.contracts import (
     CanonicalOccurrenceChange,
@@ -13,7 +13,7 @@ from ingestion.contracts import (
     ObjectOperation,
     OccurrenceField,
 )
-from ingestion.jobs import claim_job, enqueue_sources
+from ingestion.jobs.service import claim_job, enqueue_sources
 from ingestion.models import (
     CandidateStatus,
     EventCandidate,

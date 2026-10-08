@@ -1,8 +1,8 @@
 import pytest
 from events.models import EventOccurrence, EventOrganizer, EventRevision
-from ingestion.canonicalization import canonicalize_candidate
-from ingestion.canonicalization.proposal_validation import validate_proposal
+from ingestion.canonicalization.plans.validation.proposal import validate_proposal
 from ingestion.canonicalization.snapshots import event_snapshot_hash
+from ingestion.canonicalization.workflow import canonicalize_candidate
 from ingestion.contracts import (
     CandidateOccurrence,
     CanonicalOccurrenceChange,
@@ -173,7 +173,7 @@ def test_out_of_range_occurrence_sequence_is_rejected(operation, sequence):
     adding = operation == ObjectOperation.ADD
     value = empty_occurrence_value(sequence=sequence)
     if adding:
-        from ingestion.canonicalization.projection import automatic_add_proposal
+        from ingestion.canonicalization.decisions.projection import automatic_add_proposal
 
         value = automatic_add_proposal(complete_payload()).add_event.occurrences[0]
         value.sequence = sequence
@@ -235,7 +235,8 @@ def test_resulting_state_schema_errors_are_rejected_but_programming_errors_propa
         raise RuntimeError("Unexpected bug")
 
     monkeypatch.setattr(
-        "ingestion.canonicalization.proposal_validation.merged_occurrence_value", unexpected_error
+        "ingestion.canonicalization.plans.validation.proposal.merged_occurrence_value",
+        unexpected_error,
     )
     with pytest.raises(RuntimeError, match="Unexpected bug"):
         validate_proposal(candidate, proposal)
@@ -273,7 +274,7 @@ def test_occurrence_sequences_can_swap_at_storage_boundary():
 
 @pytest.mark.parametrize("kind", ["occurrence", "organizer"])
 def test_add_event_rejects_out_of_range_ordering_values(kind):
-    from ingestion.canonicalization.projection import automatic_add_proposal
+    from ingestion.canonicalization.decisions.projection import automatic_add_proposal
 
     event, candidate, _proposal = setup_update()
     proposal = automatic_add_proposal(complete_payload())

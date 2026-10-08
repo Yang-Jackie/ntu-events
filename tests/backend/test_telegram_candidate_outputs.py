@@ -1,5 +1,5 @@
 import pytest
-from ingestion.jobs import claim_job, enqueue_sources
+from ingestion.jobs.service import claim_job, enqueue_sources
 from ingestion.models import EventCandidate, ExtractionRun, IngestionTrigger, ModelInvocation
 from ingestion.pipelines.telegram.pipeline import TelegramTextPipeline
 from ingestion.raw_storage import LocalRawContentStorage

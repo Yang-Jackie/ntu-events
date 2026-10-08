@@ -6,9 +6,9 @@ from typing import Any
 from ingestion.contracts import CandidateControlledValues, EventCandidatePayload
 from ingestion.models import ValidationStatus
 
-from .occurrence_validation import validate_occurrence
-from .registration_validation import validate_registration
-from .validation_issues import IssueSeverity, add_issue, validate_optional_url
+from .issues import IssueSeverity, add_issue, validate_optional_url
+from .occurrences import validate_occurrence
+from .registrations import validate_registration
 
 
 @dataclass(frozen=True)

@@ -1,8 +1,10 @@
+"""Prepare canonicalization decisions and retain matching/model evidence."""
+
 from __future__ import annotations
 
 import hashlib
 import json
-import logging
+from dataclasses import dataclass, field
 from typing import Any
 
 from django.db.models import Max
@@ -10,20 +12,25 @@ from django.utils import timezone
 from openai import APITimeoutError
 from pydantic import ValidationError
 
-from ingestion.canonicalization.context import build_canonicalization_context, match_record
-from ingestion.canonicalization.decision_provider import (
+from ingestion.canonicalization.decisions.context import (
+    build_canonicalization_context,
+    match_record,
+)
+from ingestion.canonicalization.decisions.matching import find_candidate_matches
+from ingestion.canonicalization.decisions.projection import automatic_add_proposal
+from ingestion.canonicalization.decisions.provider import (
     CANONICALIZATION_PROMPT_VERSION,
     CanonicalizationDecisionProvider,
 )
-from ingestion.canonicalization.matching import find_candidate_matches
-from ingestion.canonicalization.planning import canonicalize_candidate
 from ingestion.canonicalization.snapshots import event_snapshot_payload_hash
-from ingestion.contracts import CANONICALIZATION_OUTPUT_SCHEMA_VERSION, EventCandidatePayload
+from ingestion.contracts import (
+    CANONICALIZATION_OUTPUT_SCHEMA_VERSION,
+    CanonicalizationProposal,
+    EventCandidatePayload,
+)
 from ingestion.model_outputs import ModelOutputError
 from ingestion.models import (
-    CandidateStatus,
-    CanonicalizationPlan,
-    CanonicalizationPlanStatus,
+    CandidateMatch,
     EventCandidate,
     ExtractionStatus,
     IngestionJob,
@@ -37,45 +44,65 @@ from ingestion.reference_data import candidate_reference_data_hash
 MAX_CANONICALIZATION_MODEL_ATTEMPTS = 3
 
 
-def process_candidate(
-    *,
-    candidate_id: int,
-    decision_provider: CanonicalizationDecisionProvider,
-    storage: RawContentStorage,
-) -> CanonicalizationPlan | None:
-    """Run the complete source-neutral READY-candidate canonicalization workflow."""
-    with log_context(candidate_id=candidate_id), logged_phase("canonicalization.candidate"):
-        return _process_candidate(
-            candidate_id=candidate_id, decision_provider=decision_provider, storage=storage
+@dataclass(frozen=True)
+class DecisionResult:
+    proposal: CanonicalizationProposal | dict[str, Any] | None
+    matches: list[CandidateMatch]
+    match_snapshot: list[dict[str, Any]]
+    model_invocation_id: int | None = None
+    target_snapshot_hashes: dict[int, str] = field(default_factory=dict)
+    error: Exception | None = None
+
+    @property
+    def failure_event(self) -> str:
+        return (
+            "canonicalization.timeout_review"
+            if isinstance(self.error, APITimeoutError)
+            else "canonicalization.output_failure_review"
         )
 
 
-def _process_candidate(
+def prepare_decision(
+    candidate: EventCandidate,
+    payload: EventCandidatePayload,
     *,
-    candidate_id: int,
+    proposal: CanonicalizationProposal | dict[str, Any] | None = None,
+    matches: list[CandidateMatch] | None = None,
+    match_snapshot: list[dict[str, Any]] | None = None,
+    model_invocation_id: int | None = None,
+    target_snapshot_hashes: dict[int, str] | None = None,
+) -> DecisionResult:
+    """Complete deterministic evidence and the no-match ADD under the workflow lock."""
+    matches = find_candidate_matches(candidate, payload) if matches is None else matches
+    snapshot = (
+        [match_record(match) for match in matches] if match_snapshot is None else match_snapshot
+    )
+    if proposal is None and not matches:
+        proposal = automatic_add_proposal(payload)
+    return DecisionResult(
+        proposal=proposal,
+        matches=matches,
+        match_snapshot=snapshot,
+        model_invocation_id=model_invocation_id,
+        target_snapshot_hashes=target_snapshot_hashes or {},
+    )
+
+
+def decide_candidate(
+    candidate: EventCandidate,
+    payload: EventCandidatePayload,
+    *,
     decision_provider: CanonicalizationDecisionProvider,
     storage: RawContentStorage,
-) -> CanonicalizationPlan | None:
-    candidate = EventCandidate.objects.select_related(
-        "source_representation",
-        "extraction_run__model_invocation__job",
-        "extraction_run__raw_source_document__ingestion_job",
-    ).get(pk=candidate_id)
-    if candidate.status != CandidateStatus.READY:
-        return None
-    payload = EventCandidatePayload.model_validate(candidate.effective_payload)
+) -> DecisionResult:
+    """Match and obtain a proposal without creating a plan or changing an Event."""
     with logged_phase("canonicalization.matching"):
         matches = find_candidate_matches(candidate, payload)
         match_snapshot = [match_record(match) for match in matches]
     log_event("canonicalization.matches", match_count=len(matches))
     if not matches:
         log_event("canonicalization.model_bypassed", reason="no_matches")
-        return canonicalize_candidate(
-            candidate.pk,
-            expected_version=candidate.edit_version,
-            precomputed_matches=matches,
-            match_snapshot=match_snapshot,
-        )
+        return DecisionResult(proposal=None, matches=matches, match_snapshot=match_snapshot)
 
     with logged_phase("canonicalization.context"):
         raw_document = _load_raw_document(candidate, storage)
@@ -162,33 +189,17 @@ def _process_candidate(
             break
         log_event("canonicalization.output_retry", next_model_attempt=attempt_number + 1)
 
-    plan = canonicalize_candidate(
-        candidate.pk,
-        expected_version=candidate.edit_version,
-        decision=result.parsed if result else None,
-        model_invocation_id=invocation.pk,
-        precomputed_matches=matches,
+    return DecisionResult(
+        proposal=result.parsed if result else None,
+        matches=matches,
         match_snapshot=match_snapshot,
+        model_invocation_id=invocation.pk,
         target_snapshot_hashes={
             record["event_id"]: event_snapshot_payload_hash(record["event"])
             for record in match_snapshot
         },
+        error=error,
     )
-    if plan is not None and error is not None:
-        plan.application_error = f"Canonicalization model failed: {error}"[:2000]
-        plan.status = CanonicalizationPlanStatus.REVIEW_REQUIRED
-        plan.save(update_fields=("application_error", "status", "updated_at"))
-        log_event(
-            "canonicalization.timeout_review"
-            if isinstance(error, APITimeoutError)
-            else "canonicalization.output_failure_review",
-            level=logging.WARNING,
-            plan_id=plan.pk,
-            status=plan.status,
-            error_type=type(error).__name__,
-            continuing=True,
-        )
-    return plan
 
 
 def _load_raw_document(

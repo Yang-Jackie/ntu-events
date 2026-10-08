@@ -6,7 +6,8 @@ from events.models import (
     EventRevision,
     EventSourceLink,
 )
-from ingestion.canonicalization import apply_canonicalization_plan, canonicalize_candidate
+from ingestion.canonicalization.application.service import apply_canonicalization_plan
+from ingestion.canonicalization.workflow import canonicalize_candidate
 from ingestion.contracts import (
     AttendanceMode,
     CandidateControlledValues,
