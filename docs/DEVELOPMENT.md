@@ -183,6 +183,38 @@ catalog and facilities snapshot. `venues:check` also fetches live directories
 and compares the regenerated result, including its generation date; it is not
 an offline regression check.
 
+## Offline ingestion evaluation summaries
+
+For owner-approved model experiments, keep source evidence, reference answers,
+provider responses, and result rows under ignored `var/`. Freeze the inputs and
+grading rules before paid requests. Replay plan application only in a separate,
+explicitly named disposable database; never reuse the working database as an
+evaluation sandbox. Benchmark-only instructions do not change production policy.
+
+The reusable `scripts/ingestion_model_eval.py` helper grades saved results:
+
+```powershell
+docker compose run --rm --no-deps backend python scripts/ingestion_model_eval.py --results var/model_eval/progress.json --references var/model_eval/reference_answers.json
+```
+
+This command is offline: it does not select evidence, call a model, or write to
+the database. The reference manifest must be APPROVED and linked to the same
+dataset hash as the results. Saved results must also match the frozen reference
+hash. Each reference case must be READY. Reference files
+define expected event counts or allowed canonicalization actions and targets,
+plus checks on selected source-grounded fields in the resulting Event graph.
+The summary keeps model/effort combinations, stages, and sampling groups separate.
+Passing those checks is not proof that every factual detail is correct; review
+ambiguous facts and synthesized prose independently.
+
+The helper also supplies a conservative serial-request budget ledger. A live
+experiment must reserve its maximum output and all possible HTTP attempts before
+generation, record reasoning tokens as part of total output rather than billing
+them twice, and retain an upper-cost allowance for attempts with unknown usage.
+Its price table covers Standard API Luna 6 and Luna 5.6 rates verified on
+8 October 2026. Recheck provider pricing and processing-tier assumptions before
+future paid runs; token-derived costs are estimates, not invoice reconciliation.
+
 ## Optional research harness
 
 The earlier Telegram harness explores source material without canonicalizing or
