@@ -1,7 +1,8 @@
 # NTU Events Architecture
 
-**Document status:** Active repository boundaries
-**Related documents:** `TECHNICAL_SPECIFICATION.md`, `IMPLEMENTATION_PLAN.md`
+Current ownership and dependency direction. See the
+[technical specification](TECHNICAL_SPECIFICATION.md) for behavior and the
+[development guide](DEVELOPMENT.md) for setup and commands.
 
 ## 1. Purpose
 
@@ -26,14 +27,15 @@ ntu-events/
 ├── fixtures/                    # Version-controlled source and regression inputs
 ├── tests/                       # Backend, ingestion, and cross-cutting tests
 ├── src/                         # Host-operated research tooling
-├── docs/
+├── docs/                        # Product, behavior, progress, and development docs
 ├── scripts/
 ├── storage/                     # Ignored research output and source sessions
 ├── var/
 │   └── raw/                     # Ignored application raw-content storage
 ├── compose.yaml
 ├── .env.example
-└── README.md
+├── AGENTS.md                    # Shared coding-agent instructions
+└── CLAUDE.md                    # Imports AGENTS.md for Claude Code
 ```
 
 New top-level directories should be added only when they have a clear owner and
@@ -223,17 +225,9 @@ The current worker uses database-backed jobs. Scheduler, concurrency, provider
 resource lifetime, and future queue infrastructure should be changed only in
 response to measured workflow or operational needs.
 
-## 9. Deliberately open architecture details
+## 9. Open architecture choices
 
-- Internal file-versus-folder layout as domains grow
-- Matching evaluation thresholds and broader source-update policy
-- Search and map-query organization
-- Basemap provider and project-owned layer evolution after the current
-  MapLibre/OpenFreeMap slice
-- Delivery of possible institutional map data as an export, API, SDK, or embed
-- Indoor floor, room, and routing boundaries if representative authorized data
-  brings them into scope
-- Production raw-content storage
-- Scheduler and queue evolution
-- Public deployment topology
-- New application boundaries justified by implemented features
+Internal package layout, provider lifetime, scheduling, production storage, and
+public deployment topology should follow demonstrated needs. Institutional map
+data and indoor features require approved access and scope first. The
+[implementation plan](IMPLEMENTATION_PLAN.md) owns milestone decision checkpoints.

@@ -1,11 +1,10 @@
 # NTU Events Business Requirements
 
-**Document status:** Active product direction
-**Primary audience:** Project owner, contributors, and reviewers
-
 This document defines product outcomes, scope, and approved trust constraints.
 It does not prescribe technical mechanisms; possible implementations belong to
-technical planning and remain open until evaluated in the relevant milestone.
+the [technical specification](TECHNICAL_SPECIFICATION.md) and remain open until
+evaluated in the relevant milestone. Progress and release sequencing belong in
+the [implementation plan](IMPLEMENTATION_PLAN.md).
 
 ## 1. Product purpose
 
@@ -179,11 +178,9 @@ Manual corrections to source-derived event information are immediate edits, not
 durable overrides. Later source updates may replace them. Publication and
 verification decisions remain owner-controlled.
 
-The processing milestones that introduce and harden canonicalization should
-decide how new, changed, conflicting, and duplicate candidates are handled. The
-publication milestone should separately decide what may be shown automatically.
-These behaviors should be based on observed data rather than fixed in advance
-here.
+The technical specification describes implemented handling of new, changed,
+conflicting, and duplicate candidates. Automatic publication remains an open
+later decision and must be based on observed data.
 
 The current owner-operated workflow retains a useful sparse reference when no
 existing Event match is found, rather than hiding an announced event solely

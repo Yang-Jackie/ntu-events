@@ -43,12 +43,11 @@ selective raw-content retention, provenance, candidate persistence, and Admin
 inspection.
 
 Current setup, commands, provider configuration, and operational limits are
-documented in the root `README.md`. Avoid duplicating those values here because
-they may change with the implementation.
+documented in the [development guide](../DEVELOPMENT.md).
 
 The application pipeline creates reviewable candidates. A separate source-neutral
-worker matches and canonicalizes READY candidates; publication remains a later
-milestone.
+worker matches and canonicalizes READY candidates. The owner can publish Events
+through Admin; automatic publication has not been approved.
 
 ## Current limitations
 
@@ -56,5 +55,6 @@ milestone.
 - Detection of edited messages older than the configured retrieval overlap
 - Future treatment of media and poster content
 
-Cross-cutting operational concerns are tracked in `docs/TODO.md`. Resolve each
+Cross-cutting operational concerns are tracked in
+[engineering concerns](../TODO.md). Resolve each
 limitation in its owning milestone and add focused coverage with the behavior.

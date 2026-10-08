@@ -1,32 +1,21 @@
-# NTU Events Technical Direction
+# NTU Events technical specification
 
-**Document status:** Active high-level technical direction
-**Related documents:** `BUSINESS_REQUIREMENTS.md`, `ARCHITECTURE.md`,
-`IMPLEMENTATION_PLAN.md`
+Current behavior and technical guardrails. See the
+[business requirements](BUSINESS_REQUIREMENTS.md) for product scope,
+[architecture](ARCHITECTURE.md) for ownership, and
+[implementation plan](IMPLEMENTATION_PLAN.md) for progress.
 
 ## 1. Purpose and level of detail
 
-This document translates product direction into technical goals, guardrails,
-and a description of the current system. It guides later implementation without
-preselecting field lists, exact schemas, matching algorithms, status machines,
-endpoint parameters, provider settings, or workflow thresholds before the
-relevant feature is investigated.
+Read technical statements according to their purpose:
 
-Technical statements have three different strengths:
+- **Guardrail:** an approved product, safety, security, or data-integrity constraint.
+- **Current behavior:** a description of the implementation that may evolve.
+- **Candidate direction:** an approach to evaluate in its owning milestone.
 
-- **Guardrail:** an approved product, safety, security, or data-integrity
-  constraint that implementations need to preserve.
-- **Current behavior:** a factual description of the repository today. It may
-  change when evidence supports a better design.
-- **Candidate direction:** a preferred or plausible approach to evaluate during
-  the owning milestone, not an implementation decision.
-
-Detailed choices should be made during the owning milestone using real inputs,
-tests, and the existing implementation. Once verified, important current
-behavior may be summarized here without implying that its mechanism is
-permanent. The implementation plan records progress and sequencing; the
-architecture document describes current ownership and preferred dependency
-direction.
+Current-behavior sections describe implemented mechanisms, not permanent design
+requirements. Use code, schemas, and tests for exact contracts; summarize important
+verified changes here.
 
 ## 2. Technical goals
 
@@ -119,8 +108,8 @@ dedicated search engine.
 
 ## 5. System boundaries
 
-`ARCHITECTURE.md` describes current repository ownership and the preferred
-dependency direction. In summary, Django owns domain data, workflows, internal
+[Architecture](ARCHITECTURE.md) describes current repository ownership and the
+preferred dependency direction. In summary, Django owns domain data, workflows, internal
 review, and the API; Next.js owns presentation; the generated client carries
 the API contract; and PostgreSQL/PostGIS owns normalized relational and
 geographic state. Raw content remains behind an application interface rather
@@ -184,10 +173,7 @@ through the owner's authenticated Telethon session. The current pipeline:
   metadata for confirmed non-events
 - Exposes operations through commands, Django Admin, and a polling worker
 
-The root README documents current commands and provider configuration. Details
-such as client lifetime, retry behavior, batching, and cache keys belong to the
-implementation and tests; when they affect durable behavior, document the
-outcome after it is verified.
+The [development guide](DEVELOPMENT.md) documents setup and commands.
 
 Model names and reasoning effort are independently configurable per stage via
 `OPENAI_<STAGE>_MODEL` and `OPENAI_<STAGE>_REASONING_EFFORT`, where `<STAGE>` is
@@ -439,10 +425,12 @@ through canonicalization proposals.
 
 ### Publication
 
-Canonical storage and visibility are separate concerns. The personal product
-should keep automatically processed data reviewable and non-public by default.
-Automatic publication, if ever introduced, requires evidence-based thresholds
-and an explicit later decision.
+Canonical storage and visibility are separate concerns. New canonical Events
+default to DRAFT. The owner can change publication and
+verification state in Django Admin; neither worker publishes Events automatically.
+Automatic publication requires evidence-based thresholds and an explicit later
+decision. Local PUBLISHED status is discovery visibility, not approval for
+public deployment.
 
 ## 10. Current API and web behavior
 
@@ -501,78 +489,22 @@ presentation is list-first with an explicit List/Map switch. Hosted basemaps
 and their usage terms and operational guarantees must be reassessed before any
 approved public deployment.
 
-### Working note: possible map-data evolution
+### Future map integration (open)
 
-The following describes the current intention for evolving the map, not an
-implemented contract or a promise that either provider combination will remain
-the best choice. Re-evaluate it against observed NTU coverage, available data,
-licensing, institutional approval, operational reliability, and the needs of
-the milestone that actually introduces the change.
+A small reviewed NTU overlay is a possible next experiment. Indoor geometry and
+routing remain outside current scope. Institutional NTU/MazeMap integration
+requires approved access and evidence of the actual data shape and usage terms.
 
-The first renderer step is implemented as a MapLibre-based map using the
-OpenFreeMap OSM-derived vector basemap. A deliberately small reviewed overlay
-for Events and NTU-specific information that the basemap does not represent
-well remains a possible later step. Examples include canonical building or
-venue references, entrances, subunits, and eventually room-specific
-information. OSM remains the underlying geographic data source; the public
-tile provider is replaceable infrastructure and is not authoritative product
-data or guaranteed production infrastructure.
-
-A possible later direction is to use institution-authorized NTU/MazeMap data
-for buildings, floors, rooms, POIs, and possibly routing. If NTU and MazeMap
-permit a structured export or read API, the existing MapLibre renderer could be
-retained while adding the authorized campus layers. A OneMap raster basemap
-could be substituted beneath those layers, with masks where its baked-in campus
-content conflicts with the authorized data. OneMap is not intrinsically
-required: if most of its NTU content would be hidden, an OSM-derived or other
-neutral basemap may remain the clearer background.
-
-MazeMap integration depends on what is actually authorized. A licensed data
-export can enter the project's normalized map-data path. A MazeMap iframe or JS
-SDK is instead a separately hosted map experience and should be treated as an
-integration, not as permission to extract or cache its underlying data. Current
-[MazeMap end-user terms](https://www.mazemap.com/terms) prohibit using or
-extracting its map data to produce a separate service without a written
-agreement, and the publicly documented [Data API
-v1](https://github.com/MazeMap/Data-API) is archived and marked deprecated.
-
-Useful seams to preserve during direction one, without assuming the later data
-shape, include:
-
-- Keeping basemap configuration separate from canonical Event and venue data,
-  without spreading provider URLs or OpenFreeMap style-layer identifiers
-  through product behavior.
-- Keeping project-owned stable building, venue, and future space identifiers,
-  with OSM, NTU, MazeMap, OneMap, or other identifiers represented as source
-  cross-references rather than primary product identities.
-- Normalizing provider output before it reaches public API responses or map
-  components, while preserving source-specific payloads and adapters at the
-  boundary instead of making the canonical schema mirror one vendor.
-- Tracking provenance, applicable usage terms, retrieval or verification time,
-  and confidence separately for identity, naming, and geometry. A directory
-  may establish a room name without establishing its polygon or entrance.
-- Using WGS84 GeoJSON at the application boundary unless real integration
-  evidence supports another contract, with coordinate order, geometry type,
-  alignment, and polygon validity validated during import.
-- If floor data becomes in scope, keeping machine ordering, displayed floor
-  label, and provider-specific level or z-value distinct, while allowing room
-  geometry to be absent, a point, or a polygon rather than inventing precision.
-- Keeping visual layers conceptually separable: basemap, optional masks, campus
-  outdoor context, buildings, selected floor, rooms or POIs, and Events, and
-  restoring project-owned layers after a basemap-style change without relying
-  on a provider's internal layer ordering where avoidable.
-- Defining refresh and failure behavior after learning whether an authorized
-  source supplies snapshots, deltas, deletions, versions, or webhooks, and
-  retaining a last-known-good copy only when the applicable agreement permits
-  caching.
-- Preserving required attribution for every displayed source and applying
-  access controls before serving non-public or sensitive indoor information.
-  Hiding a client-side layer is not an authorization boundary.
-
-These considerations do not require building a general map-provider framework
-in advance. A reasonable starting point is the smallest practical separation,
-adapted later when real MazeMap access terms, schemas, update behavior, and NTU
-requirements are known.
+- A permitted structured export or read API could feed normalized campus layers.
+  An iframe or SDK is a hosted integration, not permission to extract its data.
+- MazeMap-only records or geometry cannot enter the registry without written
+  authorization. Manually noticed venues require independent official NTU evidence.
+- Keep basemap configuration separate from canonical locations. Preserve
+  project-owned identities and field-level provenance when adding provider data.
+- Validate geometry and coordinate order at import, retain required attribution,
+  and enforce access controls before serving any non-public indoor information.
+- Decide caching, refresh, failure handling, and any OneMap basemap use from the
+  authorized source and observed need. Avoid a general provider framework in advance.
 
 ## 11. Time and location behavior and direction
 
@@ -708,14 +640,15 @@ preserve or explicitly transform retained personal-use state.
 
 ## 15. Deferred capabilities
 
-`BUSINESS_REQUIREMENTS.md` owns the deferred product scope. Corresponding
-technical infrastructure, including dedicated search, distributed services,
+The [business requirements](BUSINESS_REQUIREMENTS.md) own deferred product scope.
+Corresponding technical infrastructure, including dedicated search, distributed services,
 streaming, and public hosting, remains deferred until an approved capability
 demonstrates the need.
 
 ## 16. Pending decisions
 
-`IMPLEMENTATION_PLAN.md` records milestone sequencing and decision checkpoints.
+The [implementation plan](IMPLEMENTATION_PLAN.md) records milestone sequencing
+and decision checkpoints.
 Important technical outcomes return here only after implementation and
 verification, expressed as current behavior or an explicit guardrail rather
 than as an assumed permanent mechanism.

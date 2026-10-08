@@ -9,4 +9,6 @@ API.
 - `src/create-client.ts` accepts runtime configuration from its caller and does
   not read Next.js environment variables.
 
-Run `pnpm api:generate` from the repository root after changing the API.
+Run `corepack pnpm api:generate` from the repository root after changing the API,
+then verify it with `corepack pnpm api:check`. See the
+[development guide](../../docs/DEVELOPMENT.md) for setup and checks.

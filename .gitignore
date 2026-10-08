@@ -20,3 +20,5 @@ apps/web/public/maplibre/
 coverage/
 *.tsbuildinfo
 .idea/
+CLAUDE.local.md
+.claude/settings.local.json

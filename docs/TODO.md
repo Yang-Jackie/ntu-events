@@ -1,7 +1,8 @@
-# Current Engineering Concerns
+# Engineering concerns
 
 This is a short list of known implementation concerns, not a second roadmap.
-Milestone ownership and completion status belong in `IMPLEMENTATION_PLAN.md`.
+Milestone ownership and completion status belong in the
+[implementation plan](IMPLEMENTATION_PLAN.md).
 
 ## Telegram client and session lifecycle (Milestone 9)
 

@@ -1,14 +1,13 @@
 # NTU Events Implementation Plan
 
-**Document status:** Active implementation plan
 **Current milestone:** 7 — Venue registry consolidation
 **Next delivery goal:** Exercise representative source-location resolution and
 the fresh-database Event-to-reviewed-marker flow
 
-This plan commits to delivery outcomes, sequencing, and completion evidence.
-Candidate directions describe plausible starting points, not approved
-implementation decisions. The active milestone should evaluate them against
-real data and the current project load before selecting a mechanism.
+This plan owns delivery order, progress, and exit conditions. The
+[technical specification](TECHNICAL_SPECIFICATION.md) describes current behavior;
+[architecture](ARCHITECTURE.md) describes ownership. Candidate approaches below
+remain open until evaluated against source evidence.
 
 ## 1. Delivery target
 
@@ -48,46 +47,20 @@ personal-use trial; changes after that point must account for its existing data.
 | 11. Public-readiness gate           | The owner approves evidence, quality, security, privacy, accessibility, and rollout readiness       | Not started |
 | 12. Public deployment               | The approved audience can reliably access the product                                               | Not started |
 
-## 3. Completed milestone: deduplication hardening
+## 3. Completed baseline
 
-The implemented baseline includes a separate, globally serial canonicalization
-worker; bounded candidate matching with stored evidence; structured ADD,
-UPDATE, and LINK_ONLY plans; transactional application; stale-graph detection;
-and immutable observations and Event revisions. Reclaimed ingestion jobs safely
-replace an earlier failed screening result while retaining invocation history.
-The technical specification summarizes this implemented behavior and its trust
-properties.
+Milestones 0–6 established the domain, Telegram ingestion, candidate review,
+serial canonicalization, deduplication, the published Event API, and the local
+map/list/detail interface. The owner accepted the discovery interface. Existing
+coverage includes failures, reruns, stale writes, API filters, URL state, and
+building-level marker grouping. The technical specification owns the implemented
+workflow and contract details.
 
-The current matching weights and threshold are accepted for the owner-operated
-slice using existing focused coverage. Additional fixture calibration is not an
-API milestone prerequisite; revisit it when observed duplicate or false-match
-behavior provides evidence for a change.
+Current matching weights and threshold are accepted for the owner-operated slice;
+revisit them when observed duplicates or false matches justify calibration.
+Venue-data completeness remains the responsibility of Milestone 7.
 
-## 4. Completed milestone: API contract
-
-The read-only API exposes published Event list and detail resources by numeric
-identifier. It includes the occurrence, venue, organizer, classification,
-registration, source-link, verification, and map data required by the discovery
-interface. The list supports bounded search, date, classification, attendance,
-building, map-bounds, ordering, and page-number queries. OpenAPI and the
-TypeScript client are generated and verified from this contract.
-
-Docker Compose publishes Django and PostgreSQL only on host loopback during the
-owner-operated local phase.
-
-## 5. Completed milestone: personal discovery interface
-
-The first web vertical slice now uses the generated client to render a map and
-synchronized event list, URL-backed filters, and an Event detail route.
-Online-only occurrences remain in the list without map markers unless a
-physical-location filter is active.
-
-The owner has accepted the implemented interface. Automated web tests cover
-filter projection, URL state, and building-level marker grouping; lint and type
-checks pass. Real building coordinates and catalog completeness are venue-data
-responsibilities, so they do not block completion of this UI milestone.
-
-## 6. Current milestone: venue registry consolidation
+## 4. Current milestone: venue registry consolidation
 
 ### Outcome and scope
 
@@ -99,47 +72,38 @@ separate from normalized location data and unresolved wording is not guessed.
 
 ### Questions to resolve
 
-1. Which buildings, facilities, outdoor places, and room types belong in the
-   current catalog, and what does completeness mean for each category?
-2. Which coordinate and identity sources are sufficiently authoritative,
-   reviewable, and usable under their access and attribution terms?
-3. Can the existing `Building`, `Venue`, and `VenueAlias` relationships express
-   the observed data cleanly, including building-level fallbacks and rooms?
-4. Which aliases are safe for deterministic matching, and how should ambiguous
-   or unknown location wording reach the owner for review?
-5. What is the simplest reproducible maintenance and resolution workflow that
-   supports a clean rebuild and stays inspectable and safe on reruns?
+1. Does the reviewed inventory cover the locations in representative approved-source
+   evidence, and where are the gaps?
+2. Which names, codes, and reviewed aliases support deterministic matching, and
+   which ambiguous or unknown terms need owner review?
+3. Can the current hierarchy and bounded building fallback express these cases
+   without guessing, and what is the smallest reproducible resolution workflow?
 
-### Implemented registry and building-point slices
+### Implemented
 
-The repository now owns a reviewed catalog of stable NTU/NIE location and
-venue identities. It includes a shallow campus/complex/block hierarchy,
-standardized level and room codes, comprehensive public central and NBS
-teaching/event facilities (including tutorial, seminar, computing and lab
-spaces), selected independently verified specialist spaces, capacities and
-booking flags where published, current/former-name aliases, and per-record
-source provenance. A reviewed manual catalog and generated official-directory
-snapshot merge by physical room code to minimize duplication. Migrations and
-an idempotent management command rebuild the result safely. Verified aliases
-are globally unambiguous, and the catalog validator rejects geographic fields
-so this stage cannot accidentally invent or overwrite coordinates.
+- Reviewed NTU/NIE identities, a shallow location hierarchy, stable codes,
+  room metadata, verified aliases, and per-record provenance.
+- A manual catalog merged with a generated official-facilities snapshot by
+  physical room code. Migrations and idempotent commands rebuild the registry.
+- A separate reviewed WGS84 snapshot for every active anchor, with OSM
+  provenance and explicit positioning methods. Rooms inherit building markers.
+- Model instructions permit a building-level fallback only when source evidence
+  unambiguously identifies the parent of a missing room or subvenue.
 
-Geographic data remains a separate reviewed snapshot. It supplies WGS84 points
-for all 89 active anchors from OpenStreetMap objects, records OSM provenance,
-verification time and positioning method, and synchronizes idempotently without
-placing coordinates on rooms. Exact mapped points and building-geometry centres
-are preferred; indistinguishable North/South Spine sub-blocks use their parent
-complex marker, two multi-block halls use a documented derived centre, and Hall
-1 uses its officially announced temporary 30 Nanyang Link site. OSM attribution
-and ODbL terms are retained with the snapshot.
+The [venue source notes](sources/ntu_campus_locations.md) own coverage counts,
+source details, geographic limitations, and maintenance commands.
 
-This completes the identity, relationship and building-point foundation, not
-Milestone 7. Representative ingestion still needs an explicit location-resolution
-review and a fresh-database real Event-to-marker exercise. As a first bounded
-resolution rule, model-assisted extraction and canonicalization now use a
-building-level venue only when source evidence unambiguously establishes the
-parent of a missing room or subvenue; broader consistency and unresolved-term
-review remain part of the milestone.
+### Remaining work
+
+1. Select representative approved-source evidence and review every distinct
+   location string, including ambiguous and unknown wording.
+2. Verify which locations resolve to reviewed data and which remain visibly
+   unresolved after fresh ingestion. Choose the smallest review workflow needed.
+3. On a fresh database, ingest and publish a real physical Event and verify its
+   reviewed marker and map/list/detail flow.
+
+The registry and map-point foundation is implemented; these remaining checks
+prevent Milestone 7 from being marked complete.
 
 ### Candidate directions to evaluate
 
@@ -150,9 +114,6 @@ review remain part of the milestone.
 - Prefer building points for indoor locations and distinct points for outdoor
   or independently locatable venues, subject to what the reviewed source data
   supports.
-- Keep the reviewed catalog in a reproducible source such as version-controlled
-  data with repeatable synchronization. Admin-only edits may support exploration
-  but cannot be the sole copy of data required after a clean rebuild.
 - Start resolution with canonical names, codes, and unambiguous reviewed
   aliases. Fuzzy matching could rank review suggestions, but should not silently
   assign a location.
@@ -160,28 +121,13 @@ review remain part of the milestone.
   based on representative source evidence and observed review volume rather
   than building all three.
 
-### Map evolution note (not a milestone exit condition)
+### Map experiments outside the exit conditions
 
-The MapLibre map now defaults to an OSM-derived OpenFreeMap vector basemap and
-offers an URL-backed local-development comparison with OpenStreetMap Standard
-raster tiles. This comparison does not approve either public tile service for
-deployment. A small reviewed NTU overlay remains a possible next map experiment before
-pursuing deeper institutional map access. If NTU later authorizes structured
-MazeMap data, the renderer could be retained while adding normalized campus,
-floor, room, or POI layers; OneMap raster could replace the basemap where it
-proves useful. If authorization only permits the MazeMap iframe or JS SDK,
-treat that as a separate integration rather than assuming its underlying data
-can enter the venue registry.
-
-This sequence is a planning note, not additional Milestone 7 scope. The current
-milestone still needs only trustworthy building-level anchors and observed
-venue resolution. While implementing that slice, prefer project-owned stable
-identities, field-level provenance, replaceable basemap configuration, and a
-clear boundary between normalized location data and provider responses. Avoid
-speculative indoor schemas or a general provider framework until actual NTU or
-MazeMap data demonstrates what is needed. Revisit the sequence if coverage,
-licensing, cost, performance, or school guidance makes another path more
-appropriate.
+The implemented MapLibre/OpenFreeMap map includes a local OSM raster comparison.
+A small reviewed NTU overlay is a possible later experiment. Institutional map
+integration depends on approved access and actual data; it adds no Milestone 7
+scope. The technical specification owns map constraints and future integration
+boundaries.
 
 ### Exit conditions
 
@@ -195,7 +141,7 @@ appropriate.
 - On a freshly built database, a real published physical Event appears at its
   reviewed building marker and the map/list/detail flow remains functional.
 
-## 7. Next milestone: organizer registry consolidation
+## 5. Next milestone: organizer registry consolidation
 
 ### Outcome and scope
 
@@ -249,7 +195,7 @@ create trusted organizer records automatically.
 - Future canonicalization attaches known organizers consistently without
   creating unreviewed organizers.
 
-## 8. Later milestones
+## 6. Later milestones
 
 After venue and organizer consolidation, reset the development database and
 establish the clean baseline for Milestone 9. That milestone begins the retained
@@ -258,7 +204,7 @@ migrate existing application data. Work then continues through controlled
 source expansion, the public-readiness gate, and only then an explicitly
 approved public deployment.
 
-## 9. Progress and completion rules
+## 7. Progress and completion rules
 
 - Keep one milestone active at a time.
 - Complete the current vertical path before broadening coverage or polishing
