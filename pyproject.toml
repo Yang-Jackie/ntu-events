@@ -30,18 +30,18 @@ dev = [
 telegram-ingestion = "ntu_events_ingestion.cli:main"
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["tools/telegram-research/src", "tools/ingestion-evaluation/src"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings"
-pythonpath = ["src", "apps/backend"]
+pythonpath = ["tools/telegram-research/src", "tools/ingestion-evaluation/src", "apps/backend"]
 testpaths = ["tests"]
 asyncio_mode = "auto"
 
 [tool.ruff]
 target-version = "py313"
 line-length = 100
-extend-exclude = ["src/*.egg-info"]
+extend-exclude = ["**/*.egg-info"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]

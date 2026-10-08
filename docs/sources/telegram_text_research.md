@@ -17,7 +17,9 @@ by Git.
 
 ## Research harness
 
-The host-operated research harness predates the Django application pipeline. It
+The host-operated research harness lives in
+`tools/telegram-research/src/ntu_events_ingestion/` and predates the Django application
+pipeline. It
 remains useful for isolated source exploration and does not canonicalize or
 publish events.
 

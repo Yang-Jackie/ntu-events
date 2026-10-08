@@ -3,6 +3,6 @@ coverage
 node_modules
 storage
 var
-src/*.egg-info
+**/*.egg-info
 packages/api-client/openapi.json
 packages/api-client/src/generated

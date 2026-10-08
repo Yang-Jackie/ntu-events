@@ -6,7 +6,6 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
 import pytest
-
 from ntu_events_ingestion.extractor import OpenAIEventExtractor, extraction_cache_key
 from ntu_events_ingestion.models import (
     ExtractedEvent,

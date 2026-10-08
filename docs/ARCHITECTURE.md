@@ -25,13 +25,17 @@ ntu-events/
 ├── packages/
 │   └── api-client/              # Generated TypeScript API contract and client
 ├── fixtures/                    # Version-controlled source and regression inputs
-├── tests/                       # Backend, ingestion, and cross-cutting tests
-├── src/                         # Host-operated research tooling
+├── tests/                       # Python tests mirror backend domains and tools
+├── tools/
+│   ├── telegram-research/       # Standalone Telegram research harness
+│   └── ingestion-evaluation/    # Frozen-input model comparison and replay
 ├── docs/                        # Product, behavior, progress, and development docs
-├── scripts/
+├── scripts/                     # Small generation, diagnostics, and log commands
 ├── storage/                     # Ignored research output and source sessions
 ├── var/
-│   └── raw/                     # Ignored application raw-content storage
+│   ├── raw/                     # Database-linked application evidence
+│   ├── evaluations/             # Frozen inputs, references, responses, and results
+│   └── audits/                  # Local diagnostic reports
 ├── compose.yaml
 ├── .env.example
 ├── AGENTS.md                    # Shared coding-agent instructions
@@ -40,6 +44,16 @@ ntu-events/
 
 New top-level directories should be added only when they have a clear owner and
 current use.
+
+Python tools use a package-local `src/` layout and share the root `pyproject.toml`
+and `uv.lock`. They may import backend workflows for evaluation; production
+backend code does not depend on these tools. Keep reusable tool behavior in its
+package and small operational entry points in `scripts/`.
+
+Python tests live under `tests/backend/<domain>/` or `tests/tools/<tool>/`.
+Ingestion tests follow its candidates, canonicalization, and Telegram boundaries.
+Repository-wide configuration tests remain directly under `tests/`; web and
+API-client tests stay beside their packages.
 
 ## 3. Current application boundaries
 
@@ -213,7 +227,13 @@ moving shared candidate or canonicalization policy into the source package.
 tests or source research. A fixture should live near its owning adapter when it
 is not meaningfully shared.
 
-`var/raw/` contains ignored application evidence during local use.
+`var/raw/` contains ignored application evidence during local use. Database rows
+reference its storage keys, so a repository cleanup must preserve referenced
+files. `var/evaluations/ingestion/<run>/` holds frozen experiment artifacts;
+`var/audits/` holds local operational reports. Reusable executable tooling belongs
+in version-controlled `tools/` or `scripts/`, rather than runtime directories.
+Original experiment scripts may be retained with their run as a provenance
+snapshot, separate from the maintained tooling.
 `storage/` contains ignored research-harness output and source authorization
 sessions. Neither directory is canonical product data.
 

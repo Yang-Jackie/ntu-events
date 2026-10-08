@@ -66,6 +66,12 @@ boundaries. The full Python suite, Ruff, Django checks, migration-drift checks,
 and OpenAPI verification pass. Milestone 7's remaining venue-resolution and
 fresh-database discovery exit conditions are unchanged.
 
+Repository cleanup is also verified: research and evaluation packages live under
+`tools/`, Python tests follow their owners, and ignored runtime artifacts are
+separated into raw evidence, evaluation runs, and audits. Database-linked evidence
+and completed experiment artifacts were preserved. The development guide owns
+the updated commands; this cleanup does not close additional milestone gates.
+
 ## 4. Current milestone: venue registry consolidation
 
 ### Outcome and scope

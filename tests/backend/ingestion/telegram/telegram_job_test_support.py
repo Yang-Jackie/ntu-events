@@ -24,7 +24,9 @@ from ingestion.pipelines.telegram.contracts import (
 )
 from sources.models import Source, SourceType
 
-FIXTURE_PATH = Path(__file__).parents[2] / "fixtures" / "sources" / "telegram" / "messages.json"
+FIXTURE_PATH = (
+    Path(__file__).resolve().parents[4] / "fixtures" / "sources" / "telegram" / "messages.json"
+)
 
 
 class FakeFetcher:

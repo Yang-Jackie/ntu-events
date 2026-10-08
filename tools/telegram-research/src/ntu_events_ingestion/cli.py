@@ -14,7 +14,7 @@ from .storage import write_json
 from .telegram_source import ChannelChoice, TelegramSource, parse_selection
 from .workflow import process_messages
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_SESSION = ROOT / "storage" / "telegram" / "sessions" / "ingestion"
 RUNS = ROOT / "storage" / "telegram" / "runs"
 CACHE = ROOT / "storage" / "telegram" / "extraction_cache.json"

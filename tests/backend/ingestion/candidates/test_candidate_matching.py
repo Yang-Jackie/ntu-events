@@ -18,7 +18,7 @@ from ingestion.models import CandidateMatch, CanonicalizationPlanStatus
 from organizers.models import Organizer
 from venues.models import Venue, VenueType
 
-from .canonicalization_test_support import (
+from tests.backend.ingestion.canonicalization.canonicalization_test_support import (
     canonicalize_new_candidate,
     complete_payload,
     make_candidate,

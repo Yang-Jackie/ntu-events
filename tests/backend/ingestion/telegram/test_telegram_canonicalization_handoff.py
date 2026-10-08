@@ -27,7 +27,10 @@ from ingestion.raw_storage import LocalRawContentStorage
 from ingestion.reference_data import build_candidate_reference_data
 from openai import APITimeoutError
 
-from .canonicalization_test_support import update_description_proposal
+from tests.backend.ingestion.canonicalization.canonicalization_test_support import (
+    update_description_proposal,
+)
+
 from .telegram_job_test_support import (
     BusinessIssueModels,
     ConcurrentEventEditModels,

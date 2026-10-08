@@ -35,7 +35,7 @@ def test_stage_model_settings_read_defaults_and_environment_overrides(monkeypatc
     for name, value in overrides.items():
         monkeypatch.setenv(name, value)
 
-    settings_path = Path(__file__).resolve().parents[1] / "apps/backend/config/settings.py"
+    settings_path = Path(__file__).resolve().parents[3] / "apps/backend/config/settings.py"
     configured = runpy.run_path(str(settings_path))
 
     assert {name: configured[name] for name in DEFAULT_MODEL_SETTINGS} == (

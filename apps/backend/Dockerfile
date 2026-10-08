@@ -22,7 +22,7 @@ WORKDIR /workspace
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-install-project
 
-COPY src ./src
+COPY tools ./tools
 COPY apps/backend ./apps/backend
 RUN uv sync --frozen
 

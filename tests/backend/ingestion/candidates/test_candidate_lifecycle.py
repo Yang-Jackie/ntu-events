@@ -13,7 +13,7 @@ from ingestion.contracts import (
 from ingestion.errors import CandidateVersionConflict
 from ingestion.models import CandidateStatus, CanonicalizationPlanStatus
 
-from .canonicalization_test_support import (
+from tests.backend.ingestion.canonicalization.canonicalization_test_support import (
     canonicalize_new_candidate,
     complete_payload,
     make_candidate,

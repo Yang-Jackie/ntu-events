@@ -1,16 +1,7 @@
 """Offline regression coverage for evaluation costs and grading boundaries."""
 
-import importlib.util
-import sys
-from pathlib import Path
-
 import pytest
-
-SUPPORT_PATH = Path(__file__).resolve().parents[2] / "scripts/ingestion_model_eval.py"
-spec = importlib.util.spec_from_file_location("ingestion_model_eval", SUPPORT_PATH)
-evaluation = importlib.util.module_from_spec(spec)
-sys.modules[spec.name] = evaluation
-spec.loader.exec_module(evaluation)
+from ntu_events_evaluation import scoring as evaluation
 
 
 def test_cost_distinguishes_reads_writes_and_counts_reasoning_once():

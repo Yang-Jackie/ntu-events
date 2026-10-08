@@ -160,16 +160,16 @@ authorization sessions are stored under ignored `storage/telegram/sessions/`.
 
 Choose checks that cover the change. `package.json` is the command reference.
 
-| Change                              | Commands                                                                                                                                                          |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Python formatting and lint          | `docker compose run --rm backend ruff format --check apps/backend src scripts tests`; `docker compose run --rm backend ruff check apps/backend src scripts tests` |
-| Focused Python tests                | `docker compose run --rm backend pytest tests/backend/<test_file>.py`                                                                                             |
-| Django configuration and migrations | `corepack pnpm django:check`; `corepack pnpm migrations:check`                                                                                                    |
-| Web lint, types, and tests          | `corepack pnpm --filter @ntu-events/web lint`; `corepack pnpm typecheck`; `corepack pnpm --filter @ntu-events/web test`                                           |
-| Web build                           | `corepack pnpm build`                                                                                                                                             |
-| API changes                         | `corepack pnpm api:generate`, then `corepack pnpm api:check`                                                                                                      |
-| Documentation formatting            | `corepack pnpm exec prettier --check AGENTS.md CLAUDE.md "docs/**/*.md" packages/api-client/README.md`                                                            |
-| Full application checks             | `corepack pnpm check`                                                                                                                                             |
+| Change                              | Commands                                                                                                                                                              |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Python formatting and lint          | `docker compose run --rm backend ruff format --check apps/backend tools scripts tests`; `docker compose run --rm backend ruff check apps/backend tools scripts tests` |
+| Focused Python tests                | `docker compose run --rm backend pytest tests/backend/ingestion/candidates/`                                                                                          |
+| Django configuration and migrations | `corepack pnpm django:check`; `corepack pnpm migrations:check`                                                                                                        |
+| Web lint, types, and tests          | `corepack pnpm --filter @ntu-events/web lint`; `corepack pnpm typecheck`; `corepack pnpm --filter @ntu-events/web test`                                               |
+| Web build                           | `corepack pnpm build`                                                                                                                                                 |
+| API changes                         | `corepack pnpm api:generate`, then `corepack pnpm api:check`                                                                                                          |
+| Documentation formatting            | `corepack pnpm exec prettier --check README.md AGENTS.md CLAUDE.md "docs/**/*.md" "tools/**/*.md" packages/api-client/README.md`                                      |
+| Full application checks             | `corepack pnpm check`                                                                                                                                                 |
 
 Full checks include Python and web formatting, lint, types, Django and migration
 checks, API drift checks, and tests. They require Docker and a test database;
@@ -186,15 +186,15 @@ an offline regression check.
 ## Offline ingestion evaluation summaries
 
 For owner-approved model experiments, keep source evidence, reference answers,
-provider responses, and result rows under ignored `var/`. Freeze the inputs and
-grading rules before paid requests. Replay plan application only in a separate,
+provider responses, and result rows under ignored
+`var/evaluations/ingestion/<run>/`. Freeze the inputs and grading rules before paid requests. Replay plan application only in a separate,
 explicitly named disposable database; never reuse the working database as an
 evaluation sandbox. Benchmark-only instructions do not change production policy.
 
-The reusable `scripts/ingestion_model_eval.py` helper grades saved results:
+The reusable evaluation package in `tools/ingestion-evaluation/` grades saved results:
 
 ```powershell
-docker compose run --rm --no-deps backend python scripts/ingestion_model_eval.py --results var/model_eval/progress.json --references var/model_eval/reference_answers.json
+docker compose run --rm --no-deps backend python -m ntu_events_evaluation.scoring --results var/evaluations/ingestion/<run>/progress.json --references var/evaluations/ingestion/<run>/reference_answers.json
 ```
 
 This command is offline: it does not select evidence, call a model, or write to
@@ -215,14 +215,29 @@ Its price table covers Standard API Luna 6 and Luna 5.6 rates verified on
 8 October 2026. Recheck provider pricing and processing-tier assumptions before
 future paid runs; token-derived costs are estimates, not invoice reconciliation.
 
-## Optional research harness
-
-The earlier Telegram harness explores source material without canonicalizing or
-publishing Events:
+For preparation, replay, and runner options, see the
+[evaluation tool guide](../tools/ingestion-evaluation/README.md). Local audit reports
+belong in ignored `var/audits/`. For a read-only ingestion-session summary, run
+`docker compose run --rm backend python scripts/monitor_ingestion_session.py --request-id <id>`.
+Summarize timestamped worker logs with:
 
 ```powershell
-python -m uv sync
-python -m uv run telegram-ingestion
+docker compose logs --no-color --timestamps ingestion-worker canonicalization-worker | python scripts/summarize_worker_logs.py
+```
+
+`scripts/check_map_markers.cjs` accepts JSON on stdin with
+`all_events_for_markers` and `all_canonical_map_inputs` arrays of API-shaped Events.
+It uses the web marker builder to report coordinate collisions and requires the
+installed web dependencies.
+
+## Optional research harness
+
+The Telegram harness lives in `tools/telegram-research/src/ntu_events_ingestion/`
+and explores source material without canonicalizing or publishing Events:
+
+```powershell
+uv sync --frozen
+uv run telegram-ingestion
 ```
 
 Its outputs go to ignored `storage/telegram/runs/`. See the Telegram source notes
