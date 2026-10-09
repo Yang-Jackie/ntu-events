@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from django.contrib.auth.models import AbstractBaseUser
 from django.db import IntegrityError, transaction
@@ -82,24 +82,7 @@ def claim_next_job(worker_id: str) -> IngestionJob | None:
         )
         if job is None:
             return None
-        job.status = JobStatus.RUNNING
-        job.claimed_at = now
-        job.heartbeat_at = now
-        job.worker_id = worker_id
-        job.attempt_count += 1
-        job.error_type = ""
-        job.error_message = ""
-        job.save(
-            update_fields=(
-                "status",
-                "claimed_at",
-                "heartbeat_at",
-                "worker_id",
-                "attempt_count",
-                "error_type",
-                "error_message",
-            )
-        )
+        _mark_job_claimed(job, worker_id, now)
         return job
 
 
@@ -114,25 +97,78 @@ def claim_job(job_id: int, worker_id: str) -> IngestionJob | None:
         )
         if job is None:
             return None
-        job.status = JobStatus.RUNNING
-        job.claimed_at = now
-        job.heartbeat_at = now
-        job.worker_id = worker_id
-        job.attempt_count += 1
-        job.error_type = ""
-        job.error_message = ""
-        job.save(
-            update_fields=(
-                "status",
-                "claimed_at",
-                "heartbeat_at",
-                "worker_id",
-                "attempt_count",
-                "error_type",
-                "error_message",
-            )
-        )
+        _mark_job_claimed(job, worker_id, now)
         return job
+
+
+def _mark_job_claimed(job: IngestionJob, worker_id: str, now: datetime) -> None:
+    """Apply the claimed-state transition to a job locked by the caller."""
+    job.status = JobStatus.RUNNING
+    job.claimed_at = now
+    job.heartbeat_at = now
+    job.worker_id = worker_id
+    job.attempt_count += 1
+    job.error_type = ""
+    job.error_message = ""
+    job.save(
+        update_fields=(
+            "status",
+            "claimed_at",
+            "heartbeat_at",
+            "worker_id",
+            "attempt_count",
+            "error_type",
+            "error_message",
+        )
+    )
+
+
+def heartbeat(job: IngestionJob) -> None:
+    now = timezone.now()
+    IngestionJob.objects.filter(pk=job.pk, status=JobStatus.RUNNING).update(heartbeat_at=now)
+    job.heartbeat_at = now
+
+
+def record_job_discovery(job: IngestionJob, *, items_discovered: int) -> None:
+    now = timezone.now()
+    IngestionJob.objects.filter(pk=job.pk).update(
+        items_discovered=items_discovered, heartbeat_at=now
+    )
+    job.items_discovered = items_discovered
+    job.heartbeat_at = now
+
+
+def complete_job(
+    job: IngestionJob,
+    *,
+    items_screened: int,
+    items_relevant: int,
+    items_extracted: int,
+    candidates_created: int,
+    failures_count: int,
+) -> None:
+    """Record completion; source-specific cursor changes remain with the pipeline."""
+    now = timezone.now()
+    job.status = JobStatus.PARTIAL if failures_count else JobStatus.SUCCEEDED
+    job.completed_at = now
+    job.heartbeat_at = now
+    job.items_screened = items_screened
+    job.items_relevant = items_relevant
+    job.items_extracted = items_extracted
+    job.candidates_created = candidates_created
+    job.failures_count = failures_count
+    job.save(
+        update_fields=(
+            "status",
+            "completed_at",
+            "heartbeat_at",
+            "items_screened",
+            "items_relevant",
+            "items_extracted",
+            "candidates_created",
+            "failures_count",
+        )
+    )
 
 
 def recover_stale_jobs(*, stale_after: timedelta = timedelta(minutes=10)) -> int:

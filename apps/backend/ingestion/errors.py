@@ -12,3 +12,7 @@ class UnsupportedPipelineError(RuntimeError):
 
 class CandidateVersionConflict(RuntimeError):
     """A candidate or plan changed since the caller last read its version."""
+
+
+class ModelTimeoutError(TimeoutError):
+    """A model provider exhausted its request timeout and retry budget."""

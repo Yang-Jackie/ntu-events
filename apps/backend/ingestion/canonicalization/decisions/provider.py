@@ -3,9 +3,10 @@ from __future__ import annotations
 import json
 from typing import Any, Protocol
 
-from openai import OpenAI
+from openai import APITimeoutError, OpenAI
 
 from ingestion.contracts import CANONICALIZATION_OUTPUT_SCHEMA_VERSION, CanonicalizationProposal
+from ingestion.errors import ModelTimeoutError
 from ingestion.model_outputs import ModelResult, model_output_error, model_result, prompt_cache_key
 from ingestion.observability import log_model_call
 from ingestion.reference_data import candidate_reference_data_hash, canonical_json
@@ -77,42 +78,45 @@ class OpenAICanonicalizationDecisionProvider:
     def decide(self, context: dict[str, Any]) -> ModelResult[CanonicalizationProposal]:
         catalog = context["catalog"]
         dynamic_context = {key: value for key, value in context.items() if key != "catalog"}
-        response = log_model_call(
-            self.client.responses.parse,
-            stage="CANONICALIZATION",
-            model_name=self.model_name,
-            model=self.model_name,
-            input=[
-                {"role": "system", "content": CANONICALIZATION_PROMPT},
-                {
-                    "role": "developer",
-                    "content": [
-                        {
-                            "type": "input_text",
-                            "text": _catalog_json(catalog),
-                            "prompt_cache_breakpoint": {"mode": "explicit"},
-                        }
-                    ],
-                },
-                {
-                    "role": "user",
-                    "content": json.dumps(
-                        dynamic_context, ensure_ascii=False, separators=(",", ":")
-                    ),
-                },
-            ],
-            text_format=CanonicalizationProposal,
-            reasoning={"effort": self.reasoning_effort},
-            text={"verbosity": "low"},
-            prompt_cache_options={"mode": "explicit"},
-            prompt_cache_key=prompt_cache_key(
-                stage="event-canonicalization",
+        try:
+            response = log_model_call(
+                self.client.responses.parse,
+                stage="CANONICALIZATION",
+                model_name=self.model_name,
                 model=self.model_name,
-                prompt_version=CANONICALIZATION_PROMPT_VERSION,
-                schema_version=CANONICALIZATION_OUTPUT_SCHEMA_VERSION,
-                reference_data_hash=candidate_reference_data_hash(catalog),
-            ),
-        )
+                input=[
+                    {"role": "system", "content": CANONICALIZATION_PROMPT},
+                    {
+                        "role": "developer",
+                        "content": [
+                            {
+                                "type": "input_text",
+                                "text": _catalog_json(catalog),
+                                "prompt_cache_breakpoint": {"mode": "explicit"},
+                            }
+                        ],
+                    },
+                    {
+                        "role": "user",
+                        "content": json.dumps(
+                            dynamic_context, ensure_ascii=False, separators=(",", ":")
+                        ),
+                    },
+                ],
+                text_format=CanonicalizationProposal,
+                reasoning={"effort": self.reasoning_effort},
+                text={"verbosity": "low"},
+                prompt_cache_options={"mode": "explicit"},
+                prompt_cache_key=prompt_cache_key(
+                    stage="event-canonicalization",
+                    model=self.model_name,
+                    prompt_version=CANONICALIZATION_PROMPT_VERSION,
+                    schema_version=CANONICALIZATION_OUTPUT_SCHEMA_VERSION,
+                    reference_data_hash=candidate_reference_data_hash(catalog),
+                ),
+            )
+        except APITimeoutError as exc:
+            raise ModelTimeoutError(str(exc)) from exc
         status = getattr(response, "status", None)
         if status is not None and status != "completed":
             details = getattr(response, "incomplete_details", None)

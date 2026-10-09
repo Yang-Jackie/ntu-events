@@ -9,7 +9,7 @@ from ingestion.pipelines.telegram.adapter import TelegramMessage
 from ingestion.pipelines.telegram.documents import upsert_representation
 from ingestion.pipelines.telegram.extraction import extract_messages
 from ingestion.pipelines.telegram.model_client import (
-    OpenAITelegramModels,
+    TelegramModels,
 )
 from ingestion.pipelines.telegram.screening import screen_messages
 from ingestion.raw_storage import RawContentStorage
@@ -28,7 +28,7 @@ def process_telegram_messages(
     *,
     job: IngestionJob,
     messages: list[TelegramMessage],
-    models: OpenAITelegramModels,
+    models: TelegramModels,
     storage: RawContentStorage,
     options: dict[str, int],
 ) -> ProcessingResult:

@@ -7,6 +7,7 @@ from sources.models import ProcessingStatus
 
 from ingestion.candidates.service import create_extracted_candidate
 from ingestion.contracts import EventCandidatePayload
+from ingestion.jobs.service import heartbeat
 from ingestion.models import (
     ExtractionRun,
     ExtractionStatus,
@@ -18,9 +19,9 @@ from ingestion.pipelines.telegram.contracts import EXTRACTION_SCHEMA_VERSION, Ex
 from ingestion.pipelines.telegram.documents import MessageWork
 from ingestion.pipelines.telegram.model_client import (
     EXTRACTION_PROMPT_VERSION,
-    OpenAITelegramModels,
+    TelegramModels,
 )
-from ingestion.pipelines.telegram.stage_runtime import BatchOutcome, heartbeat, run_batches
+from ingestion.pipelines.telegram.stage_runtime import BatchOutcome, run_batches
 from ingestion.raw_storage import RawContentStorage
 from ingestion.reference_data import (
     build_candidate_reference_data,
@@ -34,7 +35,7 @@ def extract_messages(
     *,
     job: IngestionJob,
     relevant: list[MessageWork],
-    models: OpenAITelegramModels,
+    models: TelegramModels,
     storage: RawContentStorage,
     concurrency: int,
     batch_size: int,

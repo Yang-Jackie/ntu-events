@@ -190,7 +190,10 @@ per HTTP attempt, not a total request deadline; three timed-out attempts can
 take about 135 seconds plus SDK retry delays. Screening and extraction record
 an exhausted timeout as a failed batch, continue other batches, and retain
 failed message IDs for a later ingestion rather than retrying the timeout at
-application level.
+application level. Model adapters translate exhausted SDK timeouts to the shared
+`ModelTimeoutError`, which is recorded as the invocation error type; the original
+SDK exception remains chained as its cause. Canonicalization records a review
+plan on timeout and continues with the next candidate.
 
 Workers emit UTC-timestamped JSON workflow logs with job, candidate, batch and
 attempt identifiers, phase starts and durations, sanitized SDK retry notices,

@@ -9,14 +9,13 @@ from typing import Any
 
 from django.db.models import Max
 from django.utils import timezone
-from openai import APITimeoutError
 from pydantic import ValidationError
 
 from ingestion.canonicalization.decisions.context import (
     build_canonicalization_context,
     match_record,
 )
-from ingestion.canonicalization.decisions.matching import find_candidate_matches
+from ingestion.canonicalization.decisions.matching import refresh_candidate_matches
 from ingestion.canonicalization.decisions.projection import automatic_add_proposal
 from ingestion.canonicalization.decisions.provider import (
     CANONICALIZATION_PROMPT_VERSION,
@@ -28,11 +27,12 @@ from ingestion.contracts import (
     CanonicalizationProposal,
     EventCandidatePayload,
 )
+from ingestion.errors import ModelTimeoutError
+from ingestion.model_invocations import record_model_invocation
 from ingestion.model_outputs import ModelOutputError
 from ingestion.models import (
     CandidateMatch,
     EventCandidate,
-    ExtractionStatus,
     IngestionJob,
     ModelInvocation,
     ModelInvocationStage,
@@ -57,7 +57,7 @@ class DecisionResult:
     def failure_event(self) -> str:
         return (
             "canonicalization.timeout_review"
-            if isinstance(self.error, APITimeoutError)
+            if isinstance(self.error, ModelTimeoutError)
             else "canonicalization.output_failure_review"
         )
 
@@ -73,7 +73,7 @@ def prepare_decision(
     target_snapshot_hashes: dict[int, str] | None = None,
 ) -> DecisionResult:
     """Complete deterministic evidence and the no-match ADD under the workflow lock."""
-    matches = find_candidate_matches(candidate, payload) if matches is None else matches
+    matches = refresh_candidate_matches(candidate, payload) if matches is None else matches
     snapshot = (
         [match_record(match) for match in matches] if match_snapshot is None else match_snapshot
     )
@@ -97,7 +97,7 @@ def decide_candidate(
 ) -> DecisionResult:
     """Match and obtain a proposal without creating a plan or changing an Event."""
     with logged_phase("canonicalization.matching"):
-        matches = find_candidate_matches(candidate, payload)
+        matches = refresh_candidate_matches(candidate, payload)
         match_snapshot = [match_record(match) for match in matches]
     log_event("canonicalization.matches", match_count=len(matches))
     if not matches:
@@ -137,19 +137,7 @@ def decide_candidate(
             error = exc
         completed_at = timezone.now()
 
-        raw_output_key = ""
-        response_identifier = ""
-        token_usage: dict[str, Any] = {}
-        if result is not None:
-            raw_output_key = storage.save(result.raw_response, suffix=".json").storage_key
-            response_identifier = result.response_identifier
-            token_usage = result.token_usage
-        elif isinstance(error, ModelOutputError):
-            raw_output_key = storage.save(error.raw_response, suffix=".json").storage_key
-            response_identifier = error.response_identifier
-            token_usage = error.token_usage
-
-        invocation = ModelInvocation.objects.create(
+        invocation = record_model_invocation(
             job=job,
             stage=ModelInvocationStage.CANONICALIZATION,
             model_name=decision_provider.model_name,
@@ -157,17 +145,14 @@ def decide_candidate(
             schema_version=CANONICALIZATION_OUTPUT_SCHEMA_VERSION,
             batch_index=candidate.pk,
             attempt_number=attempt_number,
-            status=ExtractionStatus.SUCCEEDED if result else ExtractionStatus.FAILED,
             started_at=started_at,
             completed_at=completed_at,
-            response_identifier=response_identifier,
             input_hash=hashlib.sha256(serialized_context.encode("utf-8")).hexdigest(),
             reference_data_hash=candidate_reference_data_hash(context["catalog"]),
             reference_data_snapshot=context["catalog"],
-            raw_output_storage_key=raw_output_key,
-            token_usage=token_usage,
-            error_type=type(error).__name__ if error else "",
-            error_message=str(error) if error else "",
+            storage=storage,
+            result=result,
+            error=error,
         )
         log_event(
             "canonicalization.invocation_recorded",
@@ -176,12 +161,12 @@ def decide_candidate(
             invocation_id=invocation.pk,
             status=invocation.status,
             error_type=invocation.error_type or None,
-            response_id=response_identifier or None,
-            **usage_fields(token_usage),
+            response_id=invocation.response_identifier or None,
+            **usage_fields(invocation.token_usage),
         )
         if error is None:
             break
-        if isinstance(error, APITimeoutError):
+        if isinstance(error, ModelTimeoutError):
             break
         if not isinstance(error, (ModelOutputError, ValidationError)):
             raise error

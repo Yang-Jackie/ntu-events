@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from ingestion.jobs.service import heartbeat
 from ingestion.models import (
     IngestionJob,
     MessageScreening,
@@ -15,9 +16,9 @@ from ingestion.pipelines.telegram.contracts import (
 from ingestion.pipelines.telegram.documents import MessageWork, ensure_raw_document
 from ingestion.pipelines.telegram.model_client import (
     SCREENING_PROMPT_VERSION,
-    OpenAITelegramModels,
+    TelegramModels,
 )
-from ingestion.pipelines.telegram.stage_runtime import BatchOutcome, heartbeat, run_batches
+from ingestion.pipelines.telegram.stage_runtime import BatchOutcome, run_batches
 from ingestion.raw_storage import RawContentStorage
 
 
@@ -25,7 +26,7 @@ def screen_messages(
     *,
     job: IngestionJob,
     work: list[MessageWork],
-    models: OpenAITelegramModels,
+    models: TelegramModels,
     storage: RawContentStorage,
     concurrency: int,
     batch_size: int,

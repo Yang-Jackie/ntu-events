@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import Mock
 
+import httpx
 import pytest
 from ingestion.canonicalization.decisions.provider import (
     CANONICALIZATION_PROMPT,
@@ -16,6 +17,7 @@ from ingestion.contracts import (
     CanonicalizationAction,
     CanonicalizationProposal,
 )
+from ingestion.errors import ModelTimeoutError
 from ingestion.model_outputs import ModelOutputError, prompt_cache_key
 from ingestion.pipelines.telegram.adapter import TelegramLink, TelegramMessage
 from ingestion.pipelines.telegram.contracts import (
@@ -35,6 +37,7 @@ from ingestion.pipelines.telegram.model_client import (
 )
 from ingestion.pipelines.telegram.pipeline import TelegramTextPipeline
 from ingestion.reference_data import candidate_reference_data_hash, canonical_json
+from openai import APITimeoutError
 
 
 @pytest.mark.parametrize(
@@ -243,6 +246,34 @@ def test_model_clients_use_45_second_timeout_and_two_sdk_retries(
     factory(**arguments)
 
     sdk.assert_called_once_with(max_retries=2, timeout=45)
+
+
+@pytest.mark.parametrize("stage", ["screening", "extraction", "canonicalization"])
+def test_model_providers_translate_exhausted_sdk_timeouts(monkeypatch, stage) -> None:
+    error = APITimeoutError(request=httpx.Request("POST", "https://api.openai.com"))
+    parse = Mock(side_effect=error)
+    client = SimpleNamespace(responses=SimpleNamespace(parse=parse))
+    if stage == "canonicalization":
+        monkeypatch.setattr(
+            "ingestion.canonicalization.decisions.provider.OpenAI", Mock(return_value=client)
+        )
+        provider = OpenAICanonicalizationDecisionProvider(model_name="canonicalization")
+    else:
+        monkeypatch.setattr(
+            "ingestion.pipelines.telegram.model_client.OpenAI", Mock(return_value=client)
+        )
+        provider = OpenAITelegramModels(screening_model="screening", extraction_model="extraction")
+
+    with pytest.raises(ModelTimeoutError, match="timed out") as captured:
+        if stage == "canonicalization":
+            provider.decide({"catalog": {}})
+        elif stage == "screening":
+            provider.screen([_message(1)])
+        else:
+            provider.extract([_message(1)], reference_data={})
+
+    assert captured.value.__cause__ is error
+    parse.assert_called_once()
 
 
 def test_incomplete_response_raises_error_with_raw_provider_artifact() -> None:

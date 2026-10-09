@@ -179,6 +179,17 @@ Source pipelines stop at a persisted `EventCandidate`. Shared candidate creation
 and repair live in `candidates/service.py`; their validators live under
 `candidates/validation/`. Pipeline registration lives in `pipelines/registry.py`.
 
+`jobs/service.py` owns claiming, discovery counts, heartbeats, completion, retries,
+and stale-job recovery. Source pipelines retain their cursor and pending-item
+updates and coordinate those writes with job completion in one transaction.
+
+Telegram screening and extraction accept the `TelegramModels` protocol;
+canonicalization accepts `CanonicalizationDecisionProvider`. Model adapters
+translate exhausted SDK timeouts into `ModelTimeoutError`, retaining the SDK
+exception as the cause. `model_invocations.py` stores attempt metadata and raw
+response artifacts for both workflows. Batching, retry decisions, input hashing,
+and workflow logs remain with their callers.
+
 `canonicalization/workflow.py` coordinates decisions, plan creation or repair,
 and optional application. Worker model calls run outside the plan transaction
 and retain the matching snapshots used for reconciliation. Inside one transaction,
@@ -189,7 +200,9 @@ commit before optional application.
 
 `decisions/service.py` returns the proposal and retained matching/model evidence.
 It accepts the source-neutral decision-provider interface and never writes a
-canonical Event or finalizes a candidate. `plans/service.py` owns plan validation,
+canonical Event or finalizes a candidate. Matching uses
+`refresh_candidate_matches()` to replace the persisted shortlist against current
+Events. `plans/service.py` owns plan validation,
 versions, review state, and candidate transitions; it does not import decision or
 application services. `application/service.py` revalidates and applies a plan,
 checks stale state, and records observations and revisions transactionally.

@@ -5,8 +5,8 @@ import pytest
 from events.models import Event
 from ingestion.canonicalization.decisions.matching import (
     _date_similarity,
-    find_candidate_matches,
     normalize_match_url,
+    refresh_candidate_matches,
 )
 from ingestion.contracts import (
     CandidateOrganizer,
@@ -90,7 +90,7 @@ def test_match_score_is_a_fixed_sum_without_an_available_field_denominator() -> 
     )
     review = make_candidate(payload, identity="indexed-candidate")
 
-    match = find_candidate_matches(review, payload)[0]
+    match = refresh_candidate_matches(review, payload)[0]
 
     assert Decimal(str(match.score)) == Decimal("0.6500")
     signals = {signal["kind"]: signal for signal in match.signals}
@@ -109,7 +109,7 @@ def test_moderate_title_similarity_plus_same_date_qualifies_without_an_identity_
     reminder.title = "Leather Card Holder workshop — same-day reminder"
     candidate = make_candidate(reminder, identity="message-2")
 
-    matches = find_candidate_matches(candidate, reminder)
+    matches = refresh_candidate_matches(candidate, reminder)
 
     assert matches
     assert matches[0].event == event
@@ -141,7 +141,7 @@ def test_only_the_five_highest_percentage_matches_are_stored() -> None:
     )
     review = make_candidate(payload, identity="top-five")
 
-    matches = find_candidate_matches(review, payload)
+    matches = refresh_candidate_matches(review, payload)
 
     assert len(matches) == 5
     assert [match.rank for match in matches] == [1, 2, 3, 4, 5]
@@ -169,6 +169,6 @@ def test_non_identity_fields_cannot_qualify_a_match() -> None:
     unrelated.occurrences[0].suggested_venue_ids = [venue.pk]
     review = make_candidate(unrelated, identity="garden")
 
-    matches = find_candidate_matches(review, unrelated)
+    matches = refresh_candidate_matches(review, unrelated)
 
     assert matches == []

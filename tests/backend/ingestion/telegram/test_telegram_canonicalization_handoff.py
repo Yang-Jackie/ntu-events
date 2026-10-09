@@ -2,7 +2,6 @@ import json
 import logging
 from unittest.mock import Mock
 
-import httpx
 import pytest
 from events.models import Event
 from ingestion.candidates.service import update_event_candidate
@@ -13,6 +12,7 @@ from ingestion.contracts import (
     ObjectOperation,
     OccurrenceField,
 )
+from ingestion.errors import ModelTimeoutError
 from ingestion.jobs.service import claim_job, enqueue_sources
 from ingestion.models import (
     CandidateStatus,
@@ -25,7 +25,6 @@ from ingestion.models import (
 from ingestion.pipelines.telegram.pipeline import TelegramTextPipeline
 from ingestion.raw_storage import LocalRawContentStorage
 from ingestion.reference_data import build_candidate_reference_data
-from openai import APITimeoutError
 
 from tests.backend.ingestion.canonicalization.canonicalization_test_support import (
     update_description_proposal,
@@ -221,9 +220,7 @@ def test_canonicalization_timeout_creates_review_plan_and_advances_queue(
     original_payload = candidate.effective_payload
     original_issues = candidate.validation_issues
     original_decide = models.decide
-    models.decide = Mock(
-        side_effect=APITimeoutError(request=httpx.Request("POST", "https://api.openai.com"))
-    )
+    models.decide = Mock(side_effect=ModelTimeoutError("Request timed out."))
     events_before = Event.objects.count()
 
     assert runtime.run_next_candidate().pk == candidate.pk
@@ -236,7 +233,7 @@ def test_canonicalization_timeout_creates_review_plan_and_advances_queue(
     assert plan.status == "REVIEW_REQUIRED"
     assert plan.generated_proposal == {}
     assert "timed out" in plan.application_error
-    assert plan.model_invocation.error_type == "APITimeoutError"
+    assert plan.model_invocation.error_type == "ModelTimeoutError"
     assert plan.model_invocation.status == "FAILED"
     assert (
         ModelInvocation.objects.filter(stage="CANONICALIZATION", batch_index=candidate.pk).count()

@@ -7,7 +7,14 @@ import pytest
 from django.core.management import call_command
 from django.utils import timezone
 from ingestion.errors import RetryableIngestionError
-from ingestion.jobs.service import claim_job, enqueue_sources, recover_stale_jobs
+from ingestion.jobs.service import (
+    claim_job,
+    complete_job,
+    enqueue_sources,
+    heartbeat,
+    record_job_discovery,
+    recover_stale_jobs,
+)
 from ingestion.jobs.worker import (
     STALE_JOB_RECOVERY_INTERVAL_SECONDS,
     WorkerRuntime,
@@ -129,7 +136,8 @@ def test_periodic_stale_recovery_runs_again_after_the_interval() -> None:
 
 
 @pytest.mark.django_db
-def test_enqueue_and_worker_dispatch_are_pipeline_agnostic() -> None:
+@pytest.mark.parametrize("specific_job", [False, True])
+def test_enqueue_and_worker_dispatch_are_pipeline_agnostic(specific_job) -> None:
     source = Source.objects.create(
         name="Structured website",
         source_type=SourceType.OFFICIAL_WEBSITE,
@@ -145,7 +153,7 @@ def test_enqueue_and_worker_dispatch_are_pipeline_agnostic() -> None:
         pipelines=pipelines,
     )
     runtime = WorkerRuntime("test-worker", pipelines=pipelines)
-    job = runtime.run_specific_job(result.jobs[0].pk)
+    job = runtime.run_specific_job(result.jobs[0].pk) if specific_job else runtime.run_next_job()
     runtime.close()
 
     assert job is not None
@@ -153,6 +161,13 @@ def test_enqueue_and_worker_dispatch_are_pipeline_agnostic() -> None:
     assert job.pipeline_key == "structured_test"
     assert job.options == {"page_limit": 4}
     assert job.status == JobStatus.SUCCEEDED
+    assert job.worker_id == "test-worker"
+    assert job.attempt_count == 1
+    assert job.items_discovered == 4
+    assert job.items_screened == 3
+    assert job.items_relevant == job.items_extracted == 2
+    assert job.candidates_created == 1
+    assert job.completed_at == job.heartbeat_at
     assert pipeline.executed_job_ids == [job.pk]
     assert pipeline.closed
 
@@ -255,9 +270,16 @@ class FakePipeline:
         self.executed_job_ids.append(job.pk)
         if self.retry:
             raise RetryableIngestionError("try again", retry_after_seconds=30)
-        job.status = JobStatus.SUCCEEDED
-        job.completed_at = timezone.now()
-        job.save(update_fields=("status", "completed_at"))
+        record_job_discovery(job, items_discovered=4)
+        heartbeat(job)
+        complete_job(
+            job,
+            items_screened=3,
+            items_relevant=2,
+            items_extracted=2,
+            candidates_created=1,
+            failures_count=0,
+        )
 
     def close(self) -> None:
         self.closed = True

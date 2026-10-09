@@ -5,12 +5,12 @@ from pathlib import Path
 
 from django.conf import settings
 from django.db import transaction
-from django.utils import timezone
 
+from ingestion.jobs.service import complete_job, record_job_discovery
 from ingestion.models import IngestionJob, JobStatus
 from ingestion.observability import logged_phase
 from ingestion.pipelines.telegram.adapter import TelegramFetcher
-from ingestion.pipelines.telegram.model_client import OpenAITelegramModels
+from ingestion.pipelines.telegram.model_client import OpenAITelegramModels, TelegramModels
 from ingestion.pipelines.telegram.processing import process_telegram_messages
 from ingestion.raw_storage import LocalRawContentStorage, RawContentStorage
 
@@ -39,7 +39,7 @@ class TelegramTextPipeline:
         self,
         *,
         fetcher: TelegramFetcher | None = None,
-        models: OpenAITelegramModels | None = None,
+        models: TelegramModels | None = None,
         storage: RawContentStorage | None = None,
     ):
         # Construction is deliberately side-effect free. Provider resources are
@@ -81,7 +81,7 @@ class TelegramTextPipeline:
                 )
             )
         messages = fetch_result.messages
-        self._update_job(job, items_discovered=len(messages))
+        record_job_discovery(job, items_discovered=len(messages))
         result = process_telegram_messages(
             job=job,
             messages=messages,
@@ -89,7 +89,7 @@ class TelegramTextPipeline:
             storage=storage,
             options=options,
         )
-        self._complete_job(job, fetch_result.latest_message_id, result)
+        self._complete_source_ingestion(job, fetch_result.latest_message_id, result)
 
     def close(self) -> None:
         if self._models is not None:
@@ -109,7 +109,7 @@ class TelegramTextPipeline:
             )
         return self._fetcher
 
-    def _get_models(self) -> OpenAITelegramModels:
+    def _get_models(self) -> TelegramModels:
         if self._models is None:
             if not getattr(settings, "OPENAI_API_KEY", ""):
                 raise RuntimeError("OPENAI_API_KEY is required")
@@ -127,37 +127,16 @@ class TelegramTextPipeline:
         return self._storage
 
     @staticmethod
-    def _update_job(job: IngestionJob, **fields) -> None:
-        fields["heartbeat_at"] = timezone.now()
-        IngestionJob.objects.filter(pk=job.pk).update(**fields)
-        for key, value in fields.items():
-            setattr(job, key, value)
-
-    @staticmethod
-    def _complete_job(job, latest_message_id, result) -> None:
+    def _complete_source_ingestion(job, latest_message_id, result) -> None:
         failures = len(result.failure_ids)
-        final_status = JobStatus.PARTIAL if failures else JobStatus.SUCCEEDED
-        now = timezone.now()
         with transaction.atomic():
-            job.status = final_status
-            job.completed_at = now
-            job.heartbeat_at = now
-            job.items_screened = result.items_screened
-            job.items_relevant = result.items_relevant
-            job.items_extracted = result.items_extracted
-            job.candidates_created = result.candidates_created
-            job.failures_count = failures
-            job.save(
-                update_fields=(
-                    "status",
-                    "completed_at",
-                    "heartbeat_at",
-                    "items_screened",
-                    "items_relevant",
-                    "items_extracted",
-                    "candidates_created",
-                    "failures_count",
-                )
+            complete_job(
+                job,
+                items_screened=result.items_screened,
+                items_relevant=result.items_relevant,
+                items_extracted=result.items_extracted,
+                candidates_created=result.candidates_created,
+                failures_count=failures,
             )
             configuration = dict(job.source.configuration)
             if latest_message_id is not None:
@@ -173,12 +152,12 @@ class TelegramTextPipeline:
                 configuration.pop("pending_message_ids", None)
             job.source.configuration = configuration
             if failures:
-                job.source.last_failed_crawl_at = now
+                job.source.last_failed_crawl_at = job.completed_at
                 job.source.save(
                     update_fields=("configuration", "last_failed_crawl_at", "updated_at")
                 )
             else:
-                job.source.last_successful_crawl_at = now
+                job.source.last_successful_crawl_at = job.completed_at
                 job.source.save(
                     update_fields=("configuration", "last_successful_crawl_at", "updated_at")
                 )

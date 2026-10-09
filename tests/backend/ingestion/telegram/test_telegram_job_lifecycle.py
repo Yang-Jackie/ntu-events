@@ -1,9 +1,9 @@
 from types import SimpleNamespace
 from unittest.mock import Mock
 
-import httpx
 import pytest
 from events.models import Event
+from ingestion.errors import ModelTimeoutError
 from ingestion.jobs.service import claim_job, enqueue_sources
 from ingestion.models import (
     CandidateStatus,
@@ -16,7 +16,6 @@ from ingestion.models import (
 )
 from ingestion.pipelines.telegram.pipeline import TelegramTextPipeline
 from ingestion.raw_storage import LocalRawContentStorage
-from openai import APITimeoutError
 from sources.models import RawSourceDocument, Source, SourceType
 
 from .telegram_job_test_support import FakeFetcher, FakeModels, fixture_messages, make_source
@@ -35,7 +34,7 @@ def test_ingestion_timeout_records_failed_batch_and_continues(tmp_path, stage) -
 
     def fail_first(messages, **kwargs):
         if messages[0].identity == first_identity:
-            raise APITimeoutError(request=httpx.Request("POST", "https://api.openai.com"))
+            raise ModelTimeoutError("Request timed out.")
         return original(messages, **kwargs)
 
     failing_call = Mock(side_effect=fail_first)
@@ -56,7 +55,7 @@ def test_ingestion_timeout_records_failed_batch_and_continues(tmp_path, stage) -
     assert failing_call.call_count == 2
     assert EventCandidate.objects.count() == 1
     assert source.configuration["pending_message_ids"] == [1]
-    failed = ModelInvocation.objects.get(error_type="APITimeoutError")
+    failed = ModelInvocation.objects.get(error_type="ModelTimeoutError")
     assert failed.stage == ("SCREENING" if stage == "screen" else "EXTRACTION")
     assert failed.status == "FAILED"
 

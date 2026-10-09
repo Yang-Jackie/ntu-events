@@ -5,16 +5,17 @@ import time
 from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor, wait
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 
 from django.utils import timezone
 from pydantic import BaseModel, ValidationError
 
-from ingestion.model_outputs import ModelOutputError, ModelResult
+from ingestion.jobs.service import heartbeat
+from ingestion.model_invocations import record_model_invocation
+from ingestion.model_outputs import ModelResult
 from ingestion.models import (
-    ExtractionStatus,
     IngestionJob,
-    JobStatus,
     ModelInvocation,
 )
 from ingestion.observability import log_context, log_event, logged_phase, usage_fields
@@ -32,8 +33,8 @@ from ingestion.reference_data import (
 class BatchOutcome[ParsedT: BaseModel]:
     batch_index: int
     messages: list[TelegramMessage]
-    started_at: Any
-    completed_at: Any
+    started_at: datetime
+    completed_at: datetime
     result: ModelResult[ParsedT] | None
     error: Exception | None
 
@@ -60,7 +61,7 @@ def run_batches[ParsedT: BaseModel](
     if not initial:
         return
     next_index = 0
-    futures: dict[Future, tuple[int, list[TelegramMessage], Any]] = {}
+    futures: dict[Future, tuple[int, list[TelegramMessage], datetime]] = {}
 
     def call_batch(index: int, batch: list[TelegramMessage], queued_at: float):
         with log_context(
@@ -166,22 +167,11 @@ def _record_invocation(
     storage: RawContentStorage,
     reference_data: dict[str, Any] | None,
 ) -> ModelInvocation:
-    raw_output_key = ""
-    response_identifier = ""
-    token_usage: dict = {}
-    if outcome.result is not None:
-        raw_output_key = storage.save(outcome.result.raw_response, suffix=".json").storage_key
-        response_identifier = outcome.result.response_identifier
-        token_usage = outcome.result.token_usage
-    elif isinstance(outcome.error, ModelOutputError):
-        raw_output_key = storage.save(outcome.error.raw_response, suffix=".json").storage_key
-        response_identifier = outcome.error.response_identifier
-        token_usage = outcome.error.token_usage
     reference_data_snapshot = reference_data or {}
     reference_hash = (
         candidate_reference_data_hash(reference_data_snapshot) if reference_data_snapshot else ""
     )
-    invocation = ModelInvocation.objects.create(
+    invocation = record_model_invocation(
         job=job,
         stage=stage,
         model_name=model_name,
@@ -189,10 +179,8 @@ def _record_invocation(
         schema_version=schema_version,
         batch_index=outcome.batch_index,
         attempt_number=job.attempt_count,
-        status=(ExtractionStatus.SUCCEEDED if outcome.result else ExtractionStatus.FAILED),
         started_at=outcome.started_at,
         completed_at=outcome.completed_at,
-        response_identifier=response_identifier,
         input_hash=batch_input_hash(
             outcome.messages,
             model=model_name,
@@ -202,10 +190,9 @@ def _record_invocation(
         ),
         reference_data_hash=reference_hash,
         reference_data_snapshot=reference_data_snapshot,
-        raw_output_storage_key=raw_output_key,
-        token_usage=token_usage,
-        error_type=(type(outcome.error).__name__ if outcome.error else ""),
-        error_message=(str(outcome.error) if outcome.error else ""),
+        storage=storage,
+        result=outcome.result,
+        error=outcome.error,
     )
     log_event(
         "ingestion.invocation_recorded",
@@ -215,16 +202,10 @@ def _record_invocation(
         invocation_id=invocation.pk,
         status=invocation.status,
         error_type=invocation.error_type or None,
-        response_id=response_identifier or None,
-        **usage_fields(token_usage),
+        response_id=invocation.response_identifier or None,
+        **usage_fields(invocation.token_usage),
     )
     return invocation
-
-
-def heartbeat(job: IngestionJob) -> None:
-    now = timezone.now()
-    IngestionJob.objects.filter(pk=job.pk, status=JobStatus.RUNNING).update(heartbeat_at=now)
-    job.heartbeat_at = now
 
 
 def _should_split(error: Exception | None) -> bool:

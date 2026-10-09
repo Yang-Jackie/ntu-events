@@ -36,10 +36,11 @@ MATCH_WEIGHTS = {
 }
 
 
-def find_candidate_matches(
+def refresh_candidate_matches(
     candidate: EventCandidate,
     payload: EventCandidatePayload,
 ) -> list[CandidateMatch]:
+    """Replace the candidate's persisted shortlist with matches against current Events."""
     CandidateMatch.objects.filter(event_candidate=candidate).delete()
     candidate_dates = {item.start_date for item in payload.occurrences if item.start_date}
     candidate_raw_urls = {
