@@ -493,6 +493,10 @@ the generated client. Discovery filters, pagination, the selected mobile view,
 and map bounds are URL-backed so navigation and detail-page returns preserve the
 current context. The default list begins with the current Singapore date and
 orders the next occurrence first; past Events remain available explicitly.
+Filter choices currently come from the first unfiltered API page, and map
+markers from the displayed filtered page. Neither represents all matching data
+across pages; the [engineering concerns](TODO.md#discovery-result-coverage-milestone-8)
+record this limitation for frontend consolidation.
 
 The interactive map uses MapLibre GL JS in a client-only boundary. OpenFreeMap
 Liberty remains the default OSM-derived vector basemap for the local

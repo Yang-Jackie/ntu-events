@@ -1,8 +1,8 @@
 # NTU Events Implementation Plan
 
-**Current milestone:** 8 — UI/UX and frontend consolidation (planning)
-**Next delivery goal:** Explore discovery layouts and build a working desktop and
-mobile prototype for owner review
+**Current milestone:** 8 — UI/UX and frontend consolidation (design exploration)
+**Next delivery goal:** Compare desktop and mobile design concepts, then build
+a small working prototype for owner feedback
 
 This plan owns delivery order, progress, and exit conditions. The
 [technical specification](TECHNICAL_SPECIFICATION.md) describes current behavior;
@@ -41,7 +41,7 @@ personal-use trial; changes after that point must account for its existing data.
 | 5. API contract                     | The web application can retrieve typed event data through the generated client                      | Complete    |
 | 6. Personal discovery interface     | The owner can find ingested Events through a local map, list, and detail view                       | Complete    |
 | 7. Venue registry consolidation     | Buildings and observed venues have reviewed identities, aliases, relationships, and map points      | Complete    |
-| 8. UI/UX and frontend consolidation | An approved fresh design works well on desktop and mobile, with clear frontend code                 | Planning    |
+| 8. UI/UX and frontend consolidation | An approved fresh design works well on desktop and mobile, with clear frontend code                 | In progress |
 | 9. Organizer registry consolidation | Known organizers resolve consistently and new organizer mentions enter an owner-reviewed flow       | Not started |
 | 10. Retained personal-use hardening | A clean retained trial handles corrections, reruns, failures, source changes, and upgrades reliably | Not started |
 | 11. Controlled source expansion     | Additional approved sources reuse the shared workflow                                               | Not started |
@@ -160,60 +160,63 @@ boundaries.
 
 ## 5. Current milestone: UI/UX and frontend consolidation
 
-### Outcome and scope
+### Focus
 
-Design the discovery experience from scratch for NTU students broadly, with
-desktop and mobile equally important. The current interface is a functional
-reference prototype. Its layout, visual style, and component structure do not
-constrain the new design. The
-[business requirements](BUSINESS_REQUIREMENTS.md#5-discovery-experience) own the
-product direction; the following steps own delivery and approval.
+Build a useful, natural discovery experience around the
+[business requirements](BUSINESS_REQUIREMENTS.md#5-discovery-experience).
+Keep desktop and mobile equally important. Start fresh on the experience and
+reuse tested behavior or code where it fits the developing design.
 
-### Design and delivery steps
+Treat student scenarios and reference patterns as ways to assess concepts.
+Let layouts, view choices, information density, and interactions evolve through
+feedback. A prominent map can work alongside other presentations; its role does
+not prescribe the same arrangement on every screen.
 
-1. Define the main student tasks, such as finding nearby events, planning by
-   date, comparing options, and checking location, source, and registration
-   details. Explore layouts and visual directions before choosing one. Keep the
-   map as the main hook while considering calendar, list, and other ways to
-   discover events; the exact views and how they work together remain open.
-2. Propose any additional features with their user benefit, implementation
-   needs, and ongoing work. Agree implementation scope with the owner during
-   prototype review. Considering a feature does not approve it.
-3. Build a working responsive prototype with realistic event data and the main
-   navigation flows. Include physical, online, hybrid, and incomplete events,
-   plus loading, empty, and error states. Clearly identify any simulated data or
-   behavior. The owner reviews the prototype's flows, visual direction, selected
-   views, and feature scope before full implementation begins.
-4. Implement the approved design against the real API and consolidate the
-   frontend code as needed. Keep components, presentation state, and styles
-   understandable using ordinary Next.js conventions. Extract shared pieces
-   where actual repetition warrants it; add dependencies only for a demonstrated
-   need. Backend behavior stays with its existing owner, and contract changes
-   use the documented API generation workflow.
+### Working approach
 
-The visual style, selected discovery views, navigation, and additional features
-are open design choices. Prototype approval establishes the implementation
-scope. Material changes to that agreed scope require a new owner decision.
-Organizer registry work remains in Milestone 9.
+1. Explore a few desktop and mobile concepts using representative event content.
+   Compare ease of finding an event, understanding it, and continuing discovery.
+   Consider additional features where they help, explaining their benefit and
+   ongoing work before agreeing implementation scope.
+2. Build a small working prototype of the most promising direction. Use clearly
+   identified simulated data or behavior where needed. Include enough variation
+   to assess real use, such as sparse facts, different attendance modes, and
+   loading, empty, or error states.
+3. Review the prototype with the owner and iterate. Agree the direction and
+   feature scope before full implementation. Routine refinements can continue
+   within that agreement; revisit material changes to scope or direction.
+4. Implement the agreed flows against the real API and consolidate frontend code
+   where useful. Prefer existing framework conventions and shared pieces that
+   solve actual repetition. Let product needs justify API changes or dependencies;
+   retain the ownership and generation workflow in the architecture and
+   development guide.
+
+The initial task and reference review is done; no final design is approved and
+prototype implementation has not begun. Reference ideas include area/result
+connections from [Google Maps](https://support.google.com/maps/answer/4610185),
+date-grouped browsing from [Luma](https://luma.com/singapore), and agenda/week
+views from [Google Calendar](https://support.google.com/calendar/answer/6110849).
+They are optional inspiration, not templates to reproduce or evidence of student
+preferences. The next deliverable is a comparison of design concepts for feedback.
+
+The [technical specification](TECHNICAL_SPECIFICATION.md#10-current-api-and-web-behavior)
+records the current API and prototype behavior; it does not restrict future
+presentation choices. [Engineering concerns](TODO.md) records known result-coverage
+and data-support issues to consider as the selected flows are implemented.
 
 ### Exit conditions
 
-- The owner has approved a working desktop and mobile prototype and the agreed
-  feature scope, and the implemented interface follows that approval.
-- The main discovery and event-detail flows work with real published API data,
-  including sparse and online-only events. Navigation preserves useful search,
-  filter, and view context. Source links and uncertain information remain clear,
-  following the existing product trust constraints.
-- The approved flows are usable on desktop and mobile with touch and keyboard.
-  Check labels, focus, contrast, and small-screen reflow against applicable
-  [WCAG 2.2 guidance](https://www.w3.org/WAI/WCAG22/quickref/).
-- Frontend responsibilities and shared styles are clear; obsolete prototype
-  code is removed as its replacement is verified.
-- Prettier, ESLint, TypeScript, relevant Vitest checks, and a production build
-  pass. Browser checks cover the approved flows, screen sizes, and loading,
-  empty, and error states. API or backend changes receive their applicable checks.
-- The technical specification and architecture describe the verified result.
-  A mockup, prototype, or component scaffold alone does not complete the milestone.
+- The owner has reviewed a working desktop and mobile prototype, and the agreed
+  design and scope are implemented with real published API data.
+- The main discovery flows are clear, responsive, and usable with touch and
+  keyboard. Relevant sparse-data and failure states remain understandable;
+  source information and uncertainty follow the existing trust constraints.
+  Check applicable [WCAG 2.2 guidance](https://www.w3.org/WAI/WCAG22/quickref/).
+- Frontend responsibilities and shared styles are understandable. Obsolete code
+  is removed as replacements are verified, and owning docs match the result.
+- Relevant browser checks, Prettier, ESLint, TypeScript, Vitest, and a production
+  build pass. API or backend changes receive their applicable checks. A prototype
+  or scaffold alone does not complete the milestone.
 
 ## 6. Next milestone: organizer registry consolidation
 

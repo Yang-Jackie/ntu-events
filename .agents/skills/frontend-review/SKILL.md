@@ -17,6 +17,8 @@ named session, such as `-s=frontend-review`, and close that session afterward.
 
 Review the flows and screens affected by the task:
 
+- Assess how naturally users discover an event, understand it, and continue
+  browsing. Use the product scenarios as guides, allowing the design to evolve.
 - Exercise discovery, event details, and return navigation. Check that useful
   filter and view context survives, including movement between approved views.
 - Inspect desktop and mobile screenshots, not just the page snapshot. Check

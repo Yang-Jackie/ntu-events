@@ -4,6 +4,23 @@ This is a short list of known implementation concerns, not a second roadmap.
 Milestone ownership and completion status belong in the
 [implementation plan](IMPLEMENTATION_PLAN.md).
 
+## Discovery result coverage (Milestone 8)
+
+`apps/web/app/page.tsx` builds filter choices from the first unfiltered API page
+and map markers from the displayed filtered page. The API returns 50 Events per
+page, so available filter values and map coverage can be incomplete. Decide how
+results, markers, counts, and filters represent the agreed search scope; verify
+that behavior across page boundaries rather than implying complete coverage.
+
+## Time and registration discovery (Milestone 8, if selected)
+
+The list API filters by date, not minute/hour windows or registration status.
+Detail provides registration timing and status where supplied; capacity status
+is retained source information, not a live availability feed. If the design uses
+these capabilities, agree handling of unknown or stale facts and any needed API
+changes. Avoid inferring that an event is ongoing or registration is open solely
+from a partial schedule or the presence of a link.
+
 ## Telegram client and session lifecycle (Milestone 10)
 
 The worker currently rebuilds the underlying Telethon client for each job, and

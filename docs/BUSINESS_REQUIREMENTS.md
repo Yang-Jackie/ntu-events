@@ -84,9 +84,9 @@ The personal product should provide:
 - Source provenance and retained evidence sufficient for review
 - An internal review and correction workflow
 - Building-level display on an interactive campus map
-- A synchronized event list
-- Date, time, location, interest, format, audience, and attendance-mode
-  filtering
+- Event results connected to the campus map
+- Useful ways to narrow results by time, location, interest, and other event
+  attributes; choose which controls to expose as the design develops
 - Keyword search
 - Event details with precise source-provided venue information where available
 - Links to the original source and external registration page
@@ -101,36 +101,35 @@ research, remain expected source types for later controlled expansion.
 
 ## 5. Discovery experience
 
-Design the next interface from scratch. The current UI is a reference prototype,
-not an approved visual design or layout to carry forward. Desktop and mobile
-are equally important.
+Design a fresh experience for NTU students, with desktop and mobile equally
+important. The current UI is a functional reference; its appearance and layout
+do not define the next design. A natural, smooth experience is the main criterion
+for design choices.
 
-The map remains the main hook, and the product may offer several ways to
-interact with events. Explore map, calendar, list, and other discovery layouts
-and how users move between them and event details. The exact views, navigation,
-and visual style are open choices for the
+Help students find relevant events, understand whether they can attend, and
+reach the original source or registration page. Finding something ongoing or
+starting soon, exploring a campus place, and planning or registering for a later
+event are useful scenarios to guide evaluation. They are not a prescribed
+interface structure.
+
+Keep the map a prominent part of discovery. Explore list, calendar, and other
+presentations where they help; placement, size, navigation, filters, and visual
+style can evolve through the
 [UI/UX milestone](IMPLEMENTATION_PLAN.md#5-current-milestone-uiux-and-frontend-consolidation).
+Aim for clear active filters, understandable connections between places and
+results, and easy movement between discovery and details. How map movement
+changes results is a design choice to test.
 
-Map bounds and filters should update the relevant results, and selecting a
-location should reveal its events. Non-map views must also support discovery
-of online-only and unresolved-location events. Those events receive no guessed
-map marker and remain discoverable unless a physical-location or map-area
-filter excludes them.
+Make title, schedule, place or online access, and the next useful action easy
+to understand. Reveal organizer, audience, classifications, and other details
+where helpful, without giving every field equal visual weight. Event timing and
+registration deadlines answer different questions. Missing or uncertain facts
+stay explicit, and registration remains external.
 
-An event detail should communicate the useful facts without pretending that
-missing or inferred information is confirmed. Typical information includes:
-
-- Title and description
-- Date and time
-- Building and precise room or venue text
-- In-person, online, or hybrid attendance mode and public meeting access when
-  supplied
-- Organizer
-- Format, topic, purpose, and intended audience
-- Registration and source links
-- Verification or update information
-
-Registration remains external.
+Online and unresolved-location events still need a useful discovery path.
+Physical-location filters may exclude them, with that effect made clear.
+The location and trust constraints below remain in force; layouts and controls
+are open to iteration.
 
 ## 6. Location direction
 
