@@ -22,3 +22,7 @@ coverage/
 .idea/
 CLAUDE.local.md
 .claude/settings.local.json
+.claude/skills/
+.playwright-cli/
+playwright-report/
+test-results/

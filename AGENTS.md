@@ -41,6 +41,12 @@ Minor wording or style differences are not material conflicts.
 
 ## Make the smallest coherent change
 
+For frontend design and browser review, use the shared `frontend-design`,
+`playwright-cli`, and `frontend-review` skills in `.agents/skills/` when relevant.
+The [development guide](docs/DEVELOPMENT.md#frontend-agent-tools) owns setup and
+invocation. Product requirements and prototype approval in the implementation
+plan take precedence over generic design advice in a skill.
+
 - Stay within the active milestone unless the task explicitly changes it.
 - Follow existing framework conventions and avoid speculative abstractions,
   infrastructure, features, or dependencies.

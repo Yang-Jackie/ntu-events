@@ -33,8 +33,57 @@ the active milestone, applicable constraints, and verification commands.
 
 Keep machine-specific preferences in user-level configuration or ignored
 `CLAUDE.local.md` and `.claude/settings.local.json` files. Project decisions and
-progress belong in the shared docs so both tools can find them. No repository
-hooks, custom skills, or agent-specific permissions are required for this setup.
+progress belong in the shared docs so both tools can find them. Shared frontend
+skills and browser tooling are described below; agent-specific permission
+overrides are not needed.
+
+### Frontend agent tools
+
+The repository includes these shared skills:
+
+| Skill             | Use it for                                                     |
+| ----------------- | -------------------------------------------------------------- |
+| `frontend-design` | Exploring visual direction and building intentional interfaces |
+| `playwright-cli`  | Browser interactions, screenshots, and debugging               |
+| `frontend-review` | Reviewing this product's flows on desktop and mobile           |
+
+Codex discovers the maintained files in `.agents/skills/`. Dependency installation
+copies them into ignored `.claude/skills/` for Claude Code. Edit only the maintained
+files; `corepack pnpm agents:setup` refreshes the copies and installs Chromium.
+No global package, symlink, MCP server, or special agent permissions are required.
+
+After the normal dependency installation, run once:
+
+```powershell
+corepack pnpm agents:setup
+```
+
+The skills are available on the next turn; start a new session if they do not
+appear. Invoke them with `$frontend-design` or `$frontend-review` in Codex, and
+`/frontend-design` or `/frontend-review` in Claude Code. Both agents can use the
+same browser commands from the repository root:
+
+```powershell
+corepack pnpm exec playwright-cli -s=frontend-review open http://127.0.0.1:3000
+corepack pnpm exec playwright-cli -s=frontend-review snapshot
+corepack pnpm exec playwright-cli -s=frontend-review screenshot
+corepack pnpm exec playwright-cli -s=frontend-review close
+```
+
+Start the backend and web app with the commands below before reviewing real data.
+The standard `.playwright/cli.config.json` selects headless bundled Chromium and
+writes browser artifacts under ignored `var/audits/frontend/`. Add `--headed` to
+`open` for a visible browser, or `--mobile` for touch and mobile emulation. Use
+separate named sessions when agents work concurrently. The repo review skill owns
+the review workflow; the implementation plan owns scope and prototype approval.
+
+The upstream skills retain their licenses. `frontend-design` comes from
+[Anthropic's skills](https://github.com/anthropics/skills/tree/dbd4588f9e1033efb41dad4bef2f7947c8993d44/skills/frontend-design).
+`playwright-cli` comes from
+[Microsoft's CLI skills](https://github.com/microsoft/playwright-cli/tree/b85c7a736bb473bf55b584e54a09ffa698d6d871/skills/playwright-cli),
+with local invocation guidance and the Claude-specific tool permissions removed.
+Keep the CLI dependency pinned in `package.json`; review upstream skill changes
+alongside version updates rather than fetching them during setup.
 
 ## Prerequisites
 

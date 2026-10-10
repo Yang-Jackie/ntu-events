@@ -11,6 +11,8 @@
     }
   },
   "scripts": {
+    "postinstall": "node scripts/sync_agent_skills.mjs",
+    "agents:setup": "node scripts/sync_agent_skills.mjs && playwright-cli install-browser chromium",
     "backend:build": "docker compose build backend",
     "dev:backend": "docker compose up backend",
     "dev:worker": "docker compose up ingestion-worker",
@@ -42,6 +44,7 @@
     "check": "corepack pnpm format:check && corepack pnpm lint && corepack pnpm typecheck && corepack pnpm django:check && corepack pnpm migrations:check && corepack pnpm api:check && corepack pnpm test"
   },
   "devDependencies": {
+    "@playwright/cli": "0.1.22",
     "prettier": "^3.6.2"
   }
 }

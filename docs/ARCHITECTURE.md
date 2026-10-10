@@ -30,6 +30,9 @@ ntu-events/
 │   ├── telegram-research/       # Standalone Telegram research harness
 │   └── ingestion-evaluation/    # Frozen-input model comparison and replay
 ├── docs/                        # Product, behavior, progress, and development docs
+├── .agents/skills/              # Maintained skills shared by Codex and Claude Code
+├── .claude/skills/              # Ignored copies generated during dependency installation
+├── .playwright/cli.config.json  # Shared browser defaults for frontend reviews
 ├── scripts/                     # Small generation, diagnostics, and log commands
 ├── storage/                     # Ignored research output and source sessions
 ├── var/
