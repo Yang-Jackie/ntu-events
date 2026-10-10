@@ -50,6 +50,10 @@ export function occurrenceLocation(occurrence: EventOccurrence): string {
     occurrence.venues.find((venue) => venue.is_primary) ?? occurrence.venues[0];
   if (primary) {
     const building = primary.building?.name;
+    // Show precise source wording when only the building has been mapped.
+    if (building === primary.name && occurrence.raw_location_text?.trim()) {
+      return occurrence.raw_location_text.trim();
+    }
     return building && building !== primary.name
       ? `${primary.name}, ${building}`
       : primary.name;

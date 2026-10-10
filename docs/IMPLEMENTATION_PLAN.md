@@ -1,13 +1,13 @@
 # NTU Events Implementation Plan
 
-**Current milestone:** 7 — Venue registry consolidation
-**Next delivery goal:** Exercise representative source-location resolution and
-the fresh-database Event-to-reviewed-marker flow
+**Current milestone:** 8 — UI/UX and frontend consolidation (planning)
+**Next delivery goal:** Explore discovery layouts and build a working desktop and
+mobile prototype for owner review
 
 This plan owns delivery order, progress, and exit conditions. The
 [technical specification](TECHNICAL_SPECIFICATION.md) describes current behavior;
 [architecture](ARCHITECTURE.md) describes ownership. Candidate approaches below
-remain open until evaluated against source evidence.
+remain open until evaluated against source evidence or user needs.
 
 ## 1. Delivery target
 
@@ -21,10 +21,10 @@ Event graph. Manual corrections to source-derived fields may be replaced by a
 later automatic update that considers the current graph and new evidence.
 Public deployment remains a separate later gate.
 
-Local application data through Milestone 8 is disposable development state.
+Local application data through Milestone 9 is disposable development state.
 Changes in those milestones may use a clean database instead of migrating or
 backfilling rows created by an older implementation. Fresh-database setup and
-current-version workflow guarantees remain required. Milestone 9 begins with a
+current-version workflow guarantees remain required. Milestone 10 begins with a
 clean baseline and is the durability boundary for the retained owner-operated
 personal-use trial; changes after that point must account for its existing data.
 
@@ -40,20 +40,22 @@ personal-use trial; changes after that point must account for its existing data.
 | 4A. Deduplication hardening         | Likely duplicates and revisions are identified and resolved using reviewable evidence               | Complete    |
 | 5. API contract                     | The web application can retrieve typed event data through the generated client                      | Complete    |
 | 6. Personal discovery interface     | The owner can find ingested Events through a local map, list, and detail view                       | Complete    |
-| 7. Venue registry consolidation     | Buildings and observed venues have reviewed identities, aliases, relationships, and map points      | In progress |
-| 8. Organizer registry consolidation | Known organizers resolve consistently and new organizer mentions enter an owner-reviewed flow       | Not started |
-| 9. Retained personal-use hardening  | A clean retained trial handles corrections, reruns, failures, source changes, and upgrades reliably | Not started |
-| 10. Controlled source expansion     | Additional approved sources reuse the shared workflow                                               | Not started |
-| 11. Public-readiness gate           | The owner approves evidence, quality, security, privacy, accessibility, and rollout readiness       | Not started |
-| 12. Public deployment               | The approved audience can reliably access the product                                               | Not started |
+| 7. Venue registry consolidation     | Buildings and observed venues have reviewed identities, aliases, relationships, and map points      | Complete    |
+| 8. UI/UX and frontend consolidation | An approved fresh design works well on desktop and mobile, with clear frontend code                 | Planning    |
+| 9. Organizer registry consolidation | Known organizers resolve consistently and new organizer mentions enter an owner-reviewed flow       | Not started |
+| 10. Retained personal-use hardening | A clean retained trial handles corrections, reruns, failures, source changes, and upgrades reliably | Not started |
+| 11. Controlled source expansion     | Additional approved sources reuse the shared workflow                                               | Not started |
+| 12. Public-readiness gate           | The owner approves evidence, quality, security, privacy, accessibility, and rollout readiness       | Not started |
+| 13. Public deployment               | The approved audience can reliably access the product                                               | Not started |
 
 ## 3. Completed baseline
 
 Milestones 0–6 established the domain, Telegram ingestion, candidate review,
 serial canonicalization, deduplication, the published Event API, and the local
-map/list/detail interface. The owner accepted the discovery interface. Existing
-coverage includes failures, reruns, stale writes, API filters, URL state, and
-building-level marker grouping. The technical specification owns the implemented
+map/list/detail interface. The owner accepted the working discovery flow as a
+reference prototype; its visual design and layout are not the direction for the
+next version. Existing coverage includes failures, reruns, stale writes, API
+filters, URL state, and building-level marker grouping. The technical specification owns the implemented
 workflow and contract details.
 
 Current matching weights and threshold are accepted for the owner-operated slice;
@@ -63,8 +65,8 @@ Venue-data completeness remains the responsibility of Milestone 7.
 The ingestion organization and worker responsibility cleanup is verified.
 [Architecture](ARCHITECTURE.md#5-ingestion-boundary) records the resulting module
 boundaries. The full Python suite, Ruff, Django checks, migration-drift checks,
-and OpenAPI verification pass. Milestone 7's remaining venue-resolution and
-fresh-database discovery exit conditions are unchanged.
+and OpenAPI verification pass. Venue-resolution and fresh-database discovery
+acceptance are recorded in the completed Milestone 7 section below.
 
 Repository cleanup is also verified: research and evaluation packages live under
 `tools/`, Python tests follow their owners, and ignored runtime artifacts are
@@ -72,7 +74,7 @@ separated into raw evidence, evaluation runs, and audits. Database-linked eviden
 and completed experiment artifacts were preserved. The development guide owns
 the updated commands; this cleanup does not close additional milestone gates.
 
-## 4. Current milestone: venue registry consolidation
+## 4. Completed milestone: venue registry consolidation
 
 ### Outcome and scope
 
@@ -105,33 +107,36 @@ separate from normalized location data and unresolved wording is not guessed.
 The [venue source notes](sources/ntu_campus_locations.md) own coverage counts,
 source details, geographic limitations, and maintenance commands.
 
-### Remaining work
+### Verified acceptance
 
-1. Select representative approved-source evidence and review every distinct
-   location string, including ambiguous and unknown wording.
-2. Verify which locations resolve to reviewed data and which remain visibly
-   unresolved after fresh ingestion. Choose the smallest review workflow needed.
-3. On a fresh database, ingest and publish a real physical Event and verify its
-   reviewed marker and map/list/detail flow.
+- A refreshed read-only inventory covers retained approved-source location
+  wording. Seventy distinct spellings, including missing wording, have reviewed
+  regression expectations. Known places resolve to reviewed data; unsupported,
+  off-campus, ambiguous, and unannounced places remain explicitly unresolved.
+- Automatic plan creation checks venue suggestions against the reviewed
+  registry, preserves original evidence, and records adjustments. Plan
+  application rejects missing, unverified, or inactive references. Owner repairs
+  remain explicit; unrelated updates preserve existing locations.
+- One read-only location-review command lists wording, proposed matches, and
+  affected records. The venue source notes own the review and repair procedure.
+- Coincident reviewed points share one map marker containing every distinct
+  Event. Building fallbacks retain precise source wording in list/detail labels.
+- A separate database was built from all migrations. A retained real public
+  workshop announcement passed through ingestion, canonicalization, local
+  publication, API list/detail reads, and browser map-to-detail navigation. Its
+  room, schedule, source link, and reviewed point were checked; a rerun created
+  no duplicate. This was a saved-response replay, with no new Telegram fetch or
+  paid provider call. The working database was not reset or republished.
+- Full Python and web tests, Ruff, web lint and types, production compilation,
+  Django checks, migration-drift checks, and API drift checks pass. The web build
+  used a fresh temporary cache because the existing local cache had a Windows
+  delete-permission error; repository build settings were restored afterward.
 
-The registry and map-point foundation is implemented; these remaining checks
-prevent Milestone 7 from being marked complete.
-
-### Candidate directions to evaluate
-
-- Continue treating a Building as the ordinary map anchor and its Venues as
-  attendable places. The existing representation of rooms as Venues under a
-  Building is the simplest starting point, but should be validated against the
-  observed location inventory before being made a durable rule.
-- Prefer building points for indoor locations and distinct points for outdoor
-  or independently locatable venues, subject to what the reviewed source data
-  supports.
-- Start resolution with canonical names, codes, and unambiguous reviewed
-  aliases. Fuzzy matching could rank review suggestions, but should not silently
-  assign a location.
-- Evaluate a report, management command, or Admin workflow for unresolved terms
-  based on representative source evidence and observed review volume rather
-  than building all three.
+These checks satisfy the milestone's documented exit conditions. The completed
+scope does not imply that every source fact is verified or every existing Event
+has been repaired. Existing ambiguous assignments remain available for owner
+review, and new source wording can extend the reviewed cases. Organizer
+consolidation and retained-use hardening remain separate milestones.
 
 ### Map experiments outside the exit conditions
 
@@ -153,7 +158,64 @@ boundaries.
 - On a freshly built database, a real published physical Event appears at its
   reviewed building marker and the map/list/detail flow remains functional.
 
-## 5. Next milestone: organizer registry consolidation
+## 5. Current milestone: UI/UX and frontend consolidation
+
+### Outcome and scope
+
+Design the discovery experience from scratch for NTU students broadly, with
+desktop and mobile equally important. The current interface is a functional
+reference prototype. Its layout, visual style, and component structure do not
+constrain the new design. The
+[business requirements](BUSINESS_REQUIREMENTS.md#5-discovery-experience) own the
+product direction; the following steps own delivery and approval.
+
+### Design and delivery steps
+
+1. Define the main student tasks, such as finding nearby events, planning by
+   date, comparing options, and checking location, source, and registration
+   details. Explore layouts and visual directions before choosing one. Keep the
+   map as the main hook while considering calendar, list, and other ways to
+   discover events; the exact views and how they work together remain open.
+2. Propose any additional features with their user benefit, implementation
+   needs, and ongoing work. Agree implementation scope with the owner during
+   prototype review. Considering a feature does not approve it.
+3. Build a working responsive prototype with realistic event data and the main
+   navigation flows. Include physical, online, hybrid, and incomplete events,
+   plus loading, empty, and error states. Clearly identify any simulated data or
+   behavior. The owner reviews the prototype's flows, visual direction, selected
+   views, and feature scope before full implementation begins.
+4. Implement the approved design against the real API and consolidate the
+   frontend code as needed. Keep components, presentation state, and styles
+   understandable using ordinary Next.js conventions. Extract shared pieces
+   where actual repetition warrants it; add dependencies only for a demonstrated
+   need. Backend behavior stays with its existing owner, and contract changes
+   use the documented API generation workflow.
+
+The visual style, selected discovery views, navigation, and additional features
+are open design choices. Prototype approval establishes the implementation
+scope. Material changes to that agreed scope require a new owner decision.
+Organizer registry work remains in Milestone 9.
+
+### Exit conditions
+
+- The owner has approved a working desktop and mobile prototype and the agreed
+  feature scope, and the implemented interface follows that approval.
+- The main discovery and event-detail flows work with real published API data,
+  including sparse and online-only events. Navigation preserves useful search,
+  filter, and view context. Source links and uncertain information remain clear,
+  following the existing product trust constraints.
+- The approved flows are usable on desktop and mobile with touch and keyboard.
+  Check labels, focus, contrast, and small-screen reflow against applicable
+  [WCAG 2.2 guidance](https://www.w3.org/WAI/WCAG22/quickref/).
+- Frontend responsibilities and shared styles are clear; obsolete prototype
+  code is removed as its replacement is verified.
+- Prettier, ESLint, TypeScript, relevant Vitest checks, and a production build
+  pass. Browser checks cover the approved flows, screen sizes, and loading,
+  empty, and error states. API or backend changes receive their applicable checks.
+- The technical specification and architecture describe the verified result.
+  A mockup, prototype, or component scaffold alone does not complete the milestone.
+
+## 6. Next milestone: organizer registry consolidation
 
 ### Outcome and scope
 
@@ -207,16 +269,16 @@ create trusted organizer records automatically.
 - Future canonicalization attaches known organizers consistently without
   creating unreviewed organizers.
 
-## 6. Later milestones
+## 7. Later milestones
 
-After venue and organizer consolidation, reset the development database and
-establish the clean baseline for Milestone 9. That milestone begins the retained
-owner-operated personal-use trial and the obligation to preserve or explicitly
-migrate existing application data. Work then continues through controlled
+After UI/UX and organizer consolidation, establish a clean baseline for
+Milestone 10, with owner authorization before resetting the development
+database. That milestone begins the retained owner-operated personal-use trial
+and the obligation to preserve or explicitly migrate existing application data. Work then continues through controlled
 source expansion, the public-readiness gate, and only then an explicitly
 approved public deployment.
 
-## 7. Progress and completion rules
+## 8. Progress and completion rules
 
 - Keep one milestone active at a time.
 - Complete the current vertical path before broadening coverage or polishing
@@ -225,10 +287,10 @@ approved public deployment.
   them.
 - Add migrations, tests, and representative fixtures with the behavior they
   support.
-- Through Milestone 8, do not add compatibility migrations or backfills solely
+- Through Milestone 9, do not add compatibility migrations or backfills solely
   for disposable development rows; verify changes against a fresh database and
   current-version workflows instead.
-- From Milestone 9 onward, treat retained personal-use data as durable and
+- From Milestone 10 onward, treat retained personal-use data as durable and
   verify compatible schema changes, data migrations, or explicit reviewed
   backfills when existing state is affected.
 - Update this plan only when milestone scope or status changes; record important

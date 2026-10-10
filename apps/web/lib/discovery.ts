@@ -122,13 +122,15 @@ export function buildFacets(events: EventListItem[]): DiscoveryFacets {
 
 export function buildMapMarkers(events: EventListItem[]): MapMarker[] {
   const markers = new Map<string, MapMarker>();
+  const labels = new Map<string, Set<string>>();
   for (const event of events) {
     for (const occurrence of event.occurrences) {
       for (const venue of occurrence.venues) {
         if (!venue.map_point) continue;
-        const key = venue.building
-          ? `building-${venue.building.id}`
-          : `venue-${venue.id}`;
+        const key = `point-${venue.map_point.longitude},${venue.map_point.latitude}`;
+        const names = labels.get(key) ?? new Set<string>();
+        names.add(venue.building?.name ?? venue.name);
+        labels.set(key, names);
         const marker = markers.get(key) ?? {
           key,
           label: venue.building?.name ?? venue.name,
@@ -139,6 +141,7 @@ export function buildMapMarkers(events: EventListItem[]): MapMarker[] {
         if (!marker.events.some((item) => item.id === event.id)) {
           marker.events.push({ id: event.id, title: event.title });
         }
+        marker.label = [...names].sort().join(" / ");
         markers.set(key, marker);
       }
     }

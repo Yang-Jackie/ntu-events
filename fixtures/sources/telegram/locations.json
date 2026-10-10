@@ -1,0 +1,428 @@
+{
+  "scope": "Reviewed non-online location wording from retained approved public channels, 9 October 2026. Minimal regression fixtures; no message bodies.",
+  "cases": [
+    {
+      "location": "",
+      "source_url": "https://t.me/hallxi/1527",
+      "expected_codes": [],
+      "review": "No location supplied."
+    },
+    {
+      "location": "2 Central Boulevard, East Tower, Level 5, S(018916)",
+      "source_url": "https://t.me/MLDA_EEE/149",
+      "expected_codes": [],
+      "review": "Outside the current NTU/NIE registry."
+    },
+    {
+      "location": "201 Henderson Road, #03-28",
+      "source_url": "https://t.me/ntucybersecurityclub/174",
+      "expected_codes": [],
+      "review": "Outside the current NTU/NIE registry."
+    },
+    {
+      "location": "ABS-SR1 (Gaia)",
+      "source_url": "https://t.me/MLDA_EEE/118",
+      "expected_codes": ["FBS_NBS_ABS_ABS_SR1"],
+      "review": "Reviewed venue within the stated building context."
+    },
+    {
+      "location": "AMD Chai Chee",
+      "source_url": "https://t.me/SCDSAnnouncements/938",
+      "expected_codes": [],
+      "review": "Outside the current NTU/NIE registry."
+    },
+    {
+      "location": "Ballroom 1&2, Level 3, Singapore Marriott Tang Plaza Hotel",
+      "source_url": "https://t.me/ntucybersecurityclub/126",
+      "expected_codes": [],
+      "review": "Outside the current NTU/NIE registry."
+    },
+    {
+      "location": "booth",
+      "source_url": "https://t.me/SCDSAnnouncements/902",
+      "expected_codes": [],
+      "review": "Too broad to identify a reviewed place."
+    },
+    {
+      "location": "CCDS Foyer, Levels 2 & 3",
+      "source_url": "https://t.me/SCDSAnnouncements/897",
+      "expected_codes": ["N4"],
+      "review": "Reviewed building or explicit building fallback."
+    },
+    {
+      "location": "CCDS L2",
+      "source_url": "https://t.me/SCDSAnnouncements/857",
+      "expected_codes": ["N4"],
+      "review": "Reviewed building or explicit building fallback."
+    },
+    {
+      "location": "Changi Garden Chalet H",
+      "source_url": "https://t.me/ntucybersecurityclub/203",
+      "expected_codes": [],
+      "review": "Outside the current NTU/NIE registry."
+    },
+    {
+      "location": "CyberSG R&D Programme Office (CRPO), NTU",
+      "source_url": "https://t.me/ntucybersecurityclub/179",
+      "expected_codes": [],
+      "review": "The office has no reviewed location in this catalog."
+    },
+    {
+      "location": "Fate Club (One-way transport from NTU)",
+      "source_url": "https://t.me/SCDSAnnouncements/953",
+      "expected_codes": [],
+      "review": "Outside the current NTU/NIE registry."
+    },
+    {
+      "location": "Gaia Innovation Port",
+      "source_url": "https://t.me/MLDA_EEE/117",
+      "expected_codes": ["WCYP_INNOVATION_PORT"],
+      "review": "Reviewed venue within the stated building context."
+    },
+    {
+      "location": "H11 Amphitheatre",
+      "source_url": "https://t.me/hallxi/1606",
+      "expected_codes": [],
+      "review": "The abbreviation is not a reviewed alias."
+    },
+    {
+      "location": "Hall 10 Function Hall",
+      "source_url": "https://t.me/hallxi/1592",
+      "expected_codes": ["HALL10"],
+      "review": "Reviewed building or explicit building fallback."
+    },
+    {
+      "location": "HALL 10 FUNCTION HALL",
+      "source_url": "https://t.me/hallxi/1548",
+      "expected_codes": ["HALL10"],
+      "review": "Reviewed building or explicit building fallback."
+    },
+    {
+      "location": "Hall 11",
+      "source_url": "https://t.me/hallxi/1608",
+      "expected_codes": ["HALL11"],
+      "review": "Reviewed building or explicit building fallback."
+    },
+    {
+      "location": "Hall 11 BBQ Pit",
+      "source_url": "https://t.me/hallxi/1556",
+      "expected_codes": ["HALL11"],
+      "review": "Reviewed building or explicit building fallback."
+    },
+    {
+      "location": "Hall 11 Dance Room",
+      "source_url": "https://t.me/hallxi/1586",
+      "expected_codes": ["HALL11"],
+      "review": "Reviewed building or explicit building fallback."
+    },
+    {
+      "location": "Hall 11 Reading Room",
+      "source_url": "https://t.me/hallxi/1545",
+      "expected_codes": ["HALL11"],
+      "review": "Reviewed building or explicit building fallback."
+    },
+    {
+      "location": "Hall 11 Study Room",
+      "source_url": "https://t.me/hallxi/1538",
+      "expected_codes": ["HALL11"],
+      "review": "Reviewed building or explicit building fallback."
+    },
+    {
+      "location": "Innovation Port @ The Arc",
+      "source_url": "https://t.me/ntucybersecurityclub/224",
+      "expected_codes": ["LHN_INNOVATION_PORT"],
+      "review": "Reviewed venue within the stated building context."
+    },
+    {
+      "location": "Innovation Port @ The ARC",
+      "source_url": "https://t.me/ntucybersecurityclub/132",
+      "expected_codes": ["LHN_INNOVATION_PORT"],
+      "review": "Reviewed venue within the stated building context."
+    },
+    {
+      "location": "Jane Street's Hong Kong office",
+      "source_url": "https://t.me/MLDA_EEE/85",
+      "expected_codes": [],
+      "review": "Outside the current NTU/NIE registry."
+    },
+    {
+      "location": "JPMorgan @ Changi Business Park",
+      "source_url": "https://t.me/ntucybersecurityclub/134",
+      "expected_codes": [],
+      "review": "Outside the current NTU/NIE registry."
+    },
+    {
+      "location": "JPMorgan tower at CapitaSpring",
+      "source_url": "https://t.me/ntucybersecurityclub/134",
+      "expected_codes": [],
+      "review": "Outside the current NTU/NIE registry."
+    },
+    {
+      "location": "Las Vegas",
+      "source_url": "https://t.me/ntucybersecurityclub/208",
+      "expected_codes": [],
+      "review": "Outside the current NTU/NIE registry."
+    },
+    {
+      "location": "Lecture Theatre 17 (North Spine)",
+      "source_url": "https://t.me/MLDA_EEE/110",
+      "expected_codes": ["FBS_CENTRAL_NORTH_SPINE_LT17"],
+      "review": "Reviewed venue within the stated building context."
+    },
+    {
+      "location": "Level 3, Nanyang Auditorium",
+      "source_url": "https://t.me/hallxi/1513",
+      "expected_codes": ["NYA"],
+      "review": "Reviewed building or explicit building fallback."
+    },
+    {
+      "location": "LHN-TR+31",
+      "source_url": "https://t.me/SCDSAnnouncements/957",
+      "expected_codes": ["FBS_CENTRAL_THE_ARC_LHN_TR_31"],
+      "review": "Reviewed venue within the stated building context."
+    },
+    {
+      "location": "LHN-TR+37, The Arc, NTU",
+      "source_url": "https://t.me/SCDSAnnouncements/950",
+      "expected_codes": ["FBS_CENTRAL_THE_ARC_LHN_TR_37"],
+      "review": "Reviewed venue within the stated building context."
+    },
+    {
+      "location": "LHN-TR12 (Arc)",
+      "source_url": "https://t.me/ntucybersecurityclub/191",
+      "expected_codes": ["FBS_CENTRAL_THE_ARC_LHN_TR_12"],
+      "review": "Reviewed venue within the stated building context."
+    },
+    {
+      "location": "LKC Lecture Theatre, South Spine @ NTU",
+      "source_url": "https://t.me/MLDA_EEE/127",
+      "expected_codes": ["SS_LKC_LT"],
+      "review": "Reviewed venue within the stated building context."
+    },
+    {
+      "location": "Lounge@JEN, Level 10, JEN Singapore Orchardgateway",
+      "source_url": "https://t.me/ntucybersecurityclub/232",
+      "expected_codes": [],
+      "review": "Outside the current NTU/NIE registry."
+    },
+    {
+      "location": "LT-17, North Spine",
+      "source_url": "https://t.me/MLDA_EEE/113",
+      "expected_codes": ["FBS_CENTRAL_NORTH_SPINE_LT17"],
+      "review": "Reviewed venue within the stated building context."
+    },
+    {
+      "location": "LT17 (North Spine)",
+      "source_url": "https://t.me/MLDA_EEE/115",
+      "expected_codes": ["FBS_CENTRAL_NORTH_SPINE_LT17"],
+      "review": "Reviewed venue within the stated building context."
+    },
+    {
+      "location": "LT18",
+      "source_url": "https://t.me/MLDA_EEE/130",
+      "expected_codes": ["FBS_CENTRAL_NORTH_SPINE_LT18"],
+      "review": "Reviewed venue within the stated building context."
+    },
+    {
+      "location": "LT22 (South Spine)",
+      "source_url": "https://t.me/MLDA_EEE/81",
+      "expected_codes": ["SS_LT22"],
+      "review": "Reviewed venue within the stated building context."
+    },
+    {
+      "location": "LT23 (South Spine)",
+      "source_url": "https://t.me/MLDA_EEE/119",
+      "expected_codes": ["SS_LT23"],
+      "review": "Reviewed venue within the stated building context."
+    },
+    {
+      "location": "LT28 (South Spine)",
+      "source_url": "https://t.me/MLDA_EEE/88",
+      "expected_codes": ["SS_LT28"],
+      "review": "Reviewed venue within the stated building context."
+    },
+    {
+      "location": "LT2A",
+      "source_url": "https://t.me/ntucybersecurityclub/221",
+      "expected_codes": ["NS_LT2A"],
+      "review": "Reviewed venue within the stated building context."
+    },
+    {
+      "location": "LT2A (NS)",
+      "source_url": "https://t.me/MLDA_EEE/129",
+      "expected_codes": ["NS_LT2A"],
+      "review": "Reviewed venue within the stated building context."
+    },
+    {
+      "location": "LT2A, NS Sky Seck, NS Green Space (Near Prime Supermarket); buffet at the LT2A foyer",
+      "source_url": "https://t.me/ntucybersecurityclub/231",
+      "expected_codes": ["NS_LT2A"],
+      "review": "Reviewed venue within the stated building context."
+    },
+    {
+      "location": "Marina Bay Sands",
+      "source_url": "https://t.me/ntucybersecurityclub/201",
+      "expected_codes": [],
+      "review": "Outside the current NTU/NIE registry."
+    },
+    {
+      "location": "MBS Sands Expo & Convention Centre",
+      "source_url": "https://t.me/MLDA_EEE/96",
+      "expected_codes": [],
+      "review": "Outside the current NTU/NIE registry."
+    },
+    {
+      "location": "MLCPs Hangout Space @ Gaia",
+      "source_url": "https://t.me/ntucybersecurityclub/153",
+      "expected_codes": ["WCYP"],
+      "review": "Reviewed building or explicit building fallback."
+    },
+    {
+      "location": "MLCPs Hangout Space @ Gaia; Gaia, Level 4",
+      "source_url": "https://t.me/ntucybersecurityclub/161",
+      "expected_codes": ["WCYP"],
+      "review": "Reviewed building or explicit building fallback."
+    },
+    {
+      "location": "MLDA@EEE (S2.1-B4-01)",
+      "source_url": "https://t.me/MLDA_EEE/80",
+      "expected_codes": [],
+      "review": "Affiliation is not a venue; the room code is absent from the catalog."
+    },
+    {
+      "location": "Nanyang Technological University (NTU)",
+      "source_url": "https://t.me/MLDA_EEE/61",
+      "expected_codes": [],
+      "review": "Too broad to identify a reviewed place."
+    },
+    {
+      "location": "NiCE 3, Research Techno Plaza, Level 4",
+      "source_url": "https://t.me/ntucybersecurityclub/158",
+      "expected_codes": ["RTP"],
+      "review": "Reviewed building or explicit building fallback."
+    },
+    {
+      "location": "NTU",
+      "source_url": "https://t.me/MLDA_EEE/90",
+      "expected_codes": [],
+      "review": "Too broad to identify a reviewed place."
+    },
+    {
+      "location": "NTU Hall 10 Function Hall",
+      "source_url": "https://t.me/hallxi/1531",
+      "expected_codes": ["HALL10"],
+      "review": "Reviewed building or explicit building fallback."
+    },
+    {
+      "location": "NTU LHN-TR 36, The Arc",
+      "source_url": "https://t.me/ntucybersecurityclub/227",
+      "expected_codes": ["FBS_CENTRAL_THE_ARC_LHN_TR_36"],
+      "review": "Reviewed venue within the stated building context."
+    },
+    {
+      "location": "NTU TR102",
+      "source_url": "https://t.me/ntucybersecurityclub/233",
+      "expected_codes": ["FBS_CENTRAL_SOUTH_SPINE_TR102"],
+      "review": "Reviewed venue within the stated building context."
+    },
+    {
+      "location": "OGP Offices, Lazada One, #04-08, 189554",
+      "source_url": "https://t.me/SCDSAnnouncements/943",
+      "expected_codes": [],
+      "review": "Outside the current NTU/NIE registry."
+    },
+    {
+      "location": "On campus (Details in Form)",
+      "source_url": "https://t.me/MLDA_EEE/108",
+      "expected_codes": [],
+      "review": "Too broad to identify a reviewed place."
+    },
+    {
+      "location": "Reading Room (RR)",
+      "source_url": "https://t.me/hallxi/1584",
+      "expected_codes": [],
+      "review": "No building is identified; do not infer it from the channel."
+    },
+    {
+      "location": "REfresh (Tanjong Hall)",
+      "source_url": "https://t.me/hallxi/1528",
+      "expected_codes": ["TANJONG"],
+      "review": "Reviewed building or explicit building fallback."
+    },
+    {
+      "location": "RR",
+      "source_url": "https://t.me/hallxi/1553",
+      "expected_codes": [],
+      "review": "No building is identified; do not infer it from the channel."
+    },
+    {
+      "location": "RTP Plaza, Level 4",
+      "source_url": "https://t.me/ntucybersecurityclub/162",
+      "expected_codes": ["RTP"],
+      "review": "Reviewed building or explicit building fallback."
+    },
+    {
+      "location": "SAFRA Toa Payoh",
+      "source_url": "https://t.me/ntucybersecurityclub/188",
+      "expected_codes": [],
+      "review": "Outside the current NTU/NIE registry."
+    },
+    {
+      "location": "Seminar Room 1, Floor 1, Wee Cho Yaw Plaza (ABS-01-SR1)",
+      "source_url": "https://t.me/MLDA_EEE/158",
+      "expected_codes": ["FBS_NBS_ABS_ABS_SR1"],
+      "review": "Reviewed venue within the stated building context."
+    },
+    {
+      "location": "Shopee Singapore Office",
+      "source_url": "https://t.me/SCDSAnnouncements/944",
+      "expected_codes": [],
+      "review": "Outside the current NTU/NIE registry."
+    },
+    {
+      "location": "Singapore",
+      "source_url": "https://t.me/ntucybersecurityclub/185",
+      "expected_codes": [],
+      "review": "Too broad to identify a reviewed place."
+    },
+    {
+      "location": "TBA",
+      "source_url": "https://t.me/ntucybersecurityclub/183",
+      "expected_codes": [],
+      "review": "The location is unannounced."
+    },
+    {
+      "location": "the Pavilion near TCT LT",
+      "source_url": "https://t.me/hallxi/1510",
+      "expected_codes": [],
+      "review": "The nearby landmark is not the attendance venue."
+    },
+    {
+      "location": "TR+61 & TR+62 (SS)",
+      "source_url": "https://t.me/MLDA_EEE/133",
+      "expected_codes": [
+        "FBS_CENTRAL_SOUTH_SPINE_TR_61",
+        "FBS_CENTRAL_SOUTH_SPINE_TR_62"
+      ],
+      "review": "Reviewed venue within the stated building context."
+    },
+    {
+      "location": "WCY Plaza LT2",
+      "source_url": "https://t.me/SCDSAnnouncements/946",
+      "expected_codes": [],
+      "review": "The abbreviation is not a reviewed alias."
+    },
+    {
+      "location": "Wee Cho Yaw Plaza",
+      "source_url": "https://t.me/MLDA_EEE/160",
+      "expected_codes": ["WCYP"],
+      "review": "Reviewed building or explicit building fallback."
+    },
+    {
+      "location": "Wee Cho Yaw Plaza, LT2",
+      "source_url": "https://t.me/SCDSAnnouncements/942",
+      "expected_codes": ["FBS_NBS_ABS_ABS_LT2"],
+      "review": "Reviewed venue within the stated building context."
+    }
+  ]
+}

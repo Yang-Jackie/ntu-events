@@ -1,7 +1,8 @@
 # Repository instructions
 
 These instructions apply to the entire repository and are shared by Codex and
-Claude Code. NTU Events is an owner-operated, map-first event discovery product.
+Claude Code. NTU Events is an owner-operated event discovery product with the
+map as its main hook.
 
 ## Read the context that governs the task
 
@@ -67,7 +68,7 @@ contracts are affected. Commands are in the development guide.
 - Ingestion: representative fixtures, failures, reruns, stale writes, and
   preservation of owner decisions.
 - Schema: include migrations and verify fresh-database setup. Data through
-  Milestone 8 is disposable; Milestone 9 begins the retained trial and requires
+  Milestone 9 is disposable; Milestone 10 begins the retained trial and requires
   preservation or deliberate migration of retained state. Disposable data is
   not permission to reset the owner's database without authorization.
 - Docs only: check links, referenced paths and commands, formatting, and factual

@@ -10,6 +10,7 @@ from events.models import Event
 from pydantic import ValidationError as PydanticValidationError
 
 from ingestion.candidates.service import parse_and_validate_candidate_payload
+from ingestion.canonicalization.decisions.locations import resolve_proposal_locations
 from ingestion.canonicalization.plans.validation.proposal import validate_proposal
 from ingestion.canonicalization.snapshots import event_snapshot_hash
 from ingestion.contracts import (
@@ -113,6 +114,10 @@ def create_plan(
     else:
         with logged_phase("canonicalization.proposal_validation"):
             hard_issues = validate_proposal(candidate, parsed_decision, matches=matches)
+            effective_decision, location_flags = resolve_proposal_locations(parsed_decision)
+            for issue in validate_proposal(candidate, effective_decision, matches=matches):
+                if issue not in hard_issues:
+                    hard_issues.append(issue)
         log_event("canonicalization.proposal_validated", issue_count=len(hard_issues))
         generated = parsed_decision.model_dump(mode="json")
         target = (
@@ -139,10 +144,12 @@ def create_plan(
             model_invocation_id=model_invocation_id,
             match_snapshot=frozen_match_snapshot,
             generated_proposal=generated,
-            effective_proposal=generated,
+            effective_proposal=effective_decision.model_dump(mode="json"),
             validation_issues=hard_issues,
             domain_flags=domain_flags or [],
-            grounding_flags=(grounding_flags or []) + synthesis_flags(payload, parsed_decision),
+            grounding_flags=(grounding_flags or [])
+            + location_flags
+            + synthesis_flags(payload, parsed_decision),
         )
 
     candidate.status = CandidateStatus.PROCESSED

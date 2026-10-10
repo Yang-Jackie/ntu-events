@@ -76,11 +76,16 @@ services. They invoke backend-owned workflows and use the same domain data.
 The Next.js application owns:
 
 - Page rendering and discovery navigation
-- Map, list, filter, and detail interactions
+- Discovery views, filtering, and event-detail interactions
 - URL and browser presentation state
 
 It consumes the backend contract and must not recreate ingestion,
 canonicalization, venue, duplicate, or publication rules.
+
+The current map/list layout is a reference prototype. The
+[UI/UX milestone](IMPLEMENTATION_PLAN.md#5-current-milestone-uiux-and-frontend-consolidation)
+will establish the next presentation structure. Reorganize frontend code around
+the approved flows and actual shared needs, using existing framework conventions.
 
 ### API client
 
@@ -100,7 +105,7 @@ The current Django applications are organized by domain or capability:
 - `venues`: hierarchical location anchors, attendable venues, aliases, the
   reviewed non-geographic catalog, its generated official-facility snapshot,
   the separate reviewed building-point snapshot and map provenance, repeatable
-  synchronization, and future resolution behavior
+  synchronization, and conservative location lookup against reviewed records
 - `organizers`: organizer data
 - `sources`: registered sources, source representations, and raw-document
   metadata
@@ -234,6 +239,13 @@ Each source may split its adapter, documents, model client, screening,
 extraction, and orchestration as its implemented complexity requires without
 moving shared candidate or canonicalization policy into the source package.
 
+The venue domain owns `venues/resolution.py`. Automatic plan creation uses it
+through `canonicalization/decisions/locations.py`; extraction evidence remains
+unchanged. The read-only location inventory lives in
+`ingestion/candidates/location_review.py`, with a thin management command.
+The web groups coincident reviewed points for display without changing registry
+identities or coordinates.
+
 ## 6. Data and fixtures
 
 `fixtures/` contains small version-controlled inputs needed for repeatable
@@ -253,12 +265,12 @@ sessions. Neither directory is canonical product data.
 PostgreSQL/PostGIS owns normalized product state and metadata that links it to
 raw evidence.
 
-Through Milestone 8, the local database and `var/raw/` are disposable
+Through Milestone 9, the local database and `var/raw/` are disposable
 development state and may be rebuilt instead of migrated or backfilled across
 implementation changes. Required catalogs and setup cannot rely on those stores
 as their only copy; they must be reconstructible through repository-owned
 migrations, catalogs or fixtures plus documented configuration and repeatable
-source setup. Milestone 9 establishes a clean retained personal-use state. From
+source setup. Milestone 10 establishes a clean retained personal-use state. From
 that boundary onward, PostgreSQL and its linked evidence are durable product
 state that later changes must preserve or deliberately transform.
 

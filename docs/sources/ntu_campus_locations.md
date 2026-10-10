@@ -106,6 +106,37 @@ geographic fields. Each building, venue, and verified alias stores its source
 URL and verification time. Raw extracted wording never creates a trusted
 catalog record or verified alias.
 
+## Review event locations
+
+List location wording and the candidates, Events, and occurrences that use it:
+
+```powershell
+corepack pnpm locations:review --needs-review
+corepack pnpm locations:review --source <database-id> --json
+```
+
+The command is read-only. It shows the reviewed match, if any, and disagreements
+with existing suggestions or assignments. Use the public source URL and linked
+record IDs to inspect the evidence in Django Admin. Unannounced places,
+off-campus places outside this registry, and ambiguous abbreviations may
+legitimately remain unresolved.
+
+For a confirmed spelling or missing place, update the reviewed catalog with
+supporting source evidence, then run `venues:sync`. New canonicalization uses the
+updated registry. Existing successful extraction is cached, and already applied
+Events are not automatically rewritten: repair an unapplied plan, or edit the
+canonical occurrence in Admin after reviewing its source. Mark a place verified
+before using it in a canonicalization plan. Do not change publication or
+verification state merely to repair a location.
+
+[Location regression fixtures](../../fixtures/sources/telegram/locations.json)
+record reviewed expectations for 70 distinct source spellings, including empty
+wording, from the approved public-channel sample. They exercise known rooms,
+building fallbacks, unknown campus terms, ambiguous wording, and off-campus
+locations. Original message bodies remain in ignored raw storage. The
+[technical specification](../TECHNICAL_SPECIFICATION.md#venue-resolution) owns
+the lookup rules and limits.
+
 ## Geographic coverage and limitations
 
 The identity catalog deliberately contains no geographic fields, and catalog

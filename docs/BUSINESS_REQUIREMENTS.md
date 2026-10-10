@@ -8,8 +8,8 @@ the [implementation plan](IMPLEMENTATION_PLAN.md).
 
 ## 1. Product purpose
 
-NTU Events is a map-first discovery product for publicly advertised activities
-relevant to Nanyang Technological University students. Events may be attended
+NTU Events helps Nanyang Technological University students discover publicly
+advertised activities, with the map as its main hook. Events may be attended
 in person, online, or in a hybrid format.
 
 Event information is currently scattered across university sites, student
@@ -27,9 +27,9 @@ The project first runs as an owner-operated personal product using the complete
 ingestion and discovery workflow. This phase is intended to prove usefulness,
 coverage, data quality, and maintainability before public exposure.
 
-Development through Milestone 8 uses disposable local application data. Those
+Development through Milestone 9 uses disposable local application data. Those
 milestones may reset and rebuild the database instead of preserving or
-backfilling rows created by an earlier implementation. Milestone 9 starts the
+backfilling rows created by an earlier implementation. Milestone 10 starts the
 retained owner-operated personal-use trial. From that boundary onward, changes
 must preserve or deliberately migrate the trial's canonical data, provenance,
 review decisions, and history.
@@ -41,9 +41,9 @@ repository, documented configuration, and approved source setup. Data that is
 only useful for development may be replaced by representative fixtures or
 fresh ingestion.
 
-The intended audience for a later public release is NTU undergraduate students.
-Postgraduate students, staff, visitors, and events outside NTU may be considered
-later, but they do not drive the initial product.
+Design the experience for NTU students broadly, including undergraduate and
+postgraduate students, while the owner initially tests the product in personal
+use. Staff, visitors, and events outside NTU do not drive the initial design.
 
 Public deployment requires a separate owner decision based on sustained
 personal use. Building the local product does not itself authorize public
@@ -101,13 +101,21 @@ research, remain expected source types for later controlled expansion.
 
 ## 5. Discovery experience
 
-The map is the primary organizing view, supported by a list or card view.
-Changing map bounds or filters should update the visible results, and selecting
-a location should reveal the events associated with it.
+Design the next interface from scratch. The current UI is a reference prototype,
+not an approved visual design or layout to carry forward. Desktop and mobile
+are equally important.
 
-Online-only occurrences appear in the synchronized list without a map marker.
-They remain visible unless the user explicitly applies a physical-location or
-map-area filter.
+The map remains the main hook, and the product may offer several ways to
+interact with events. Explore map, calendar, list, and other discovery layouts
+and how users move between them and event details. The exact views, navigation,
+and visual style are open choices for the
+[UI/UX milestone](IMPLEMENTATION_PLAN.md#5-current-milestone-uiux-and-frontend-consolidation).
+
+Map bounds and filters should update the relevant results, and selecting a
+location should reveal its events. Non-map views must also support discovery
+of online-only and unresolved-location events. Those events receive no guessed
+map marker and remain discoverable unless a physical-location or map-area
+filter excludes them.
 
 An event detail should communicate the useful facts without pretending that
 missing or inferred information is confirmed. Typical information includes:
@@ -190,7 +198,7 @@ Event.
 
 ## 9. Success and public-release gate
 
-The retained personal-use trial that starts at Milestone 9 succeeds when
+The retained personal-use trial that starts at Milestone 10 succeeds when
 repeated use demonstrates:
 
 - Useful event coverage
@@ -210,7 +218,11 @@ source or registration pages. Raw event count alone is not a success measure.
 
 ## 10. Deferred product scope
 
-The following do not belong to the personal-use MVP:
+The following remain outside the approved personal-use scope. Additional
+features may be proposed during the UI/UX milestone, but considering them does
+not approve implementation. Any agreed addition must update this scope. A
+calendar view of discovered events is separate from external calendar or
+timetable integration.
 
 - Public user accounts, bookmarks, notifications, or personalization
 - Timetable or calendar integration
@@ -230,5 +242,5 @@ The following do not belong to the personal-use MVP:
 - What evidence is sufficient for public release
 - Whether public rollout is invited, staged, or open
 - Which additional source types are needed for useful coverage
-- Which optional user features are worth introducing after the discovery
-  experience is proven
+- Which additional user features justify their implementation and ongoing
+  work, including proposals considered during the UI/UX milestone

@@ -177,6 +177,12 @@ ordinary tests use saved or mocked provider inputs. Documentation formatting and
 the web build are separate checks. Format only intended files when making a
 small change. Do not edit generated API files by hand.
 
+Review unknown or inconsistent event locations with
+`corepack pnpm locations:review --needs-review`. Add `--json` for structured output
+or repeated `--source <id>` options to limit the report. The command never changes
+records; the [venue source notes](sources/ntu_campus_locations.md#review-event-locations)
+describe how to review and repair them.
+
 For venue catalog or geography updates, use the maintenance commands in the
 venue source notes. `venues:update` fetches live NTU directories and writes the
 catalog and facilities snapshot. `venues:check` also fetches live directories

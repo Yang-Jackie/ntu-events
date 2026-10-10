@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { EventListItem } from "./api";
+import { occurrenceLocation } from "./event-formatting";
 import {
   buildFacets,
   buildMapMarkers,
@@ -99,7 +100,7 @@ describe("discovery projections", () => {
     ]);
     expect(buildMapMarkers(events)).toEqual([
       expect.objectContaining({
-        key: "building-7",
+        key: "point-103.6831,1.3483",
         label: "North Spine",
         events: [
           { id: 1, title: "First event" },
@@ -107,6 +108,36 @@ describe("discovery projections", () => {
         ],
       }),
     ]);
+  });
+
+  it("shows every event when different buildings share a reviewed point", () => {
+    const first = event(1, "North Spine event", 7);
+    const second = event(2, "Block event", 8);
+    second.occurrences[0]!.venues[0]!.building!.name = "Block NS1";
+    const markers = buildMapMarkers([first, second, first]);
+    expect(markers).toHaveLength(1);
+    expect(markers[0]).toMatchObject({
+      label: "Block NS1 / North Spine",
+      events: [
+        { id: 1, title: "North Spine event" },
+        { id: 2, title: "Block event" },
+      ],
+    });
+  });
+
+  it("keeps distinct points in one building separate", () => {
+    const first = event(1, "First place", 7);
+    const second = event(2, "Second place", 7);
+    second.occurrences[0]!.venues[0]!.map_point!.latitude = 1.35;
+    expect(buildMapMarkers([first, second])).toHaveLength(2);
+  });
+
+  it("keeps the reading-room detail when only its building is mapped", () => {
+    const occurrence = event(1, "Reading room event", 7).occurrences[0]!;
+    occurrence.venues[0]!.name = "Hall 11";
+    occurrence.venues[0]!.building!.name = "Hall 11";
+    occurrence.raw_location_text = "Hall 11 Reading Room";
+    expect(occurrenceLocation(occurrence)).toBe("Hall 11 Reading Room");
   });
 
   it("updates and removes URL-backed discovery state", () => {

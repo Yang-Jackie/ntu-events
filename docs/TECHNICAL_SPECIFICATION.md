@@ -77,7 +77,7 @@ decide that policy with each source integration.
 
 ### Development data lifecycle
 
-Through Milestone 8, local database rows and application raw storage are
+Through Milestone 9, local database rows and application raw storage are
 disposable development state. A change may require a clean rebuild rather than
 a data migration or backfill for rows produced by an older implementation.
 Schema migrations must still build and validate a fresh database, and all
@@ -88,7 +88,7 @@ State required to enter the retained personal-use trial must be reproducible
 from version-controlled migrations, catalogs or fixtures, documented
 configuration, and repeatable source registration or ingestion. Manually
 curated database-only state cannot be the sole copy of required catalog or
-configuration data. Milestone 9 is the durability boundary: after its clean
+configuration data. Milestone 10 is the durability boundary: after its clean
 starting state is established, later changes must account for existing retained
 data through compatible changes, migrations, or explicit reviewed backfills.
 
@@ -303,12 +303,28 @@ Keep raw location text even when a canonical venue is found. Prefer reviewed
 authoritative location data and never create trusted venue records solely from
 model output.
 
-The initial path accepts supported venue identifiers supplied during extraction.
-Unknown or unresolved locations with no proposed catalog relationship remain
-in the effective payload and are flagged; they do not prevent creation of the
-event. A canonicalization proposal that does supply a nonexistent venue ID is
-rejected atomically. Broader location matching remains later work and should be
-based on observed source wording.
+Automatic canonicalization checks location wording against reviewed names,
+codes, and verified aliases. Room labels use bounded spelling normalization
+and an explicit building context when the room name is ambiguous. A known room
+is preferred to its building fallback. Nearby landmarks, alternatives,
+unannounced places, and unsupported wording remain unresolved. Affiliation text
+such as `MLDA@EEE` does not identify an attendance venue.
+
+The check changes only the effective automatic proposal. The candidate payload
+and generated proposal retain the original model suggestions; grounding flags
+record corrected or removed venue IDs. Unknown locations remain visible in raw
+wording and do not prevent a useful Event from being created. Missing, unverified,
+or inactive venue references reject a plan atomically, including at application.
+This lookup checks catalog relationships; it does not independently prove that
+all extracted wording faithfully represents the complete source announcement.
+
+Location changes in UPDATE plans are checked; unrelated updates preserve existing
+locations. Owner repairs to unapplied plans remain explicit and are not
+remapped automatically. Existing applied Events are not rewritten when the
+catalog or lookup rules change. The read-only `review_locations` command groups
+location wording, current assignments, and affected records for owner review.
+It includes physical occurrences and nonempty locations with unknown attendance,
+while excluding online-only occurrences.
 
 ### Canonicalization and duplicates
 
@@ -486,11 +502,25 @@ preserving the current bounds and discovery filters. Direct OSM tiles are
 limited to normal interactive local use: the application does not prefetch
 them, support offline download, or proxy them. Basemap configuration remains
 presentation state rather than canonical location data. Occurrences at the
-same reviewed building share one count marker, while standalone venue points
-remain separate. Settled map movement updates the API `bbox` filter, and mobile
+same reviewed map coordinates share one count marker, including different
+registry anchors at a documented shared point. The marker lists every distinct
+Event and names the represented buildings or places. Distinct coordinates remain
+separate, including a venue with its own point inside a building. When only a
+building fallback is mapped, list and detail labels retain the more precise raw
+location wording, such as a reading room, instead of showing only the building. Settled map movement updates the API `bbox` filter, and mobile
 presentation is list-first with an explicit List/Map switch. Hosted basemaps
 and their usage terms and operational guarantees must be reassessed before any
 approved public deployment.
+
+### Planned UI/UX redesign
+
+The interface described above is the implemented reference prototype. Its
+layout and mobile List/Map switch do not prescribe the next design. The
+[business requirements](BUSINESS_REQUIREMENTS.md#5-discovery-experience) own the
+approved product direction, and the
+[UI/UX milestone](IMPLEMENTATION_PLAN.md#5-current-milestone-uiux-and-frontend-consolidation)
+owns design exploration, prototype approval, and frontend consolidation.
+Calendar and other discovery views are not currently implemented.
 
 ### Future map integration (open)
 
@@ -635,10 +665,10 @@ the source material can be retained appropriately.
 
 Schema changes require migrations. Public API changes require regenerated
 OpenAPI and client artifacts. Repository checks should remain runnable through
-the documented root commands. Before the Milestone 9 durability boundary,
+the documented root commands. Before the Milestone 10 durability boundary,
 migrations need not preserve disposable rows from older development versions,
 but they must produce the intended schema and required reproducible setup from
-a clean database. From Milestone 9 onward, migrations and data changes must also
+a clean database. From Milestone 10 onward, migrations and data changes must also
 preserve or explicitly transform retained personal-use state.
 
 ## 15. Deferred capabilities

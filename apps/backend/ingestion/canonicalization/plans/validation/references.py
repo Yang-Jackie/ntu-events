@@ -65,6 +65,20 @@ def validate_venue_ids(ids: list[int], issues: list[dict[str, Any]]) -> None:
             )
         )
 
+    reviewed = set(
+        Venue.objects.filter(pk__in=supplied, is_verified=True)
+        .filter(Q(building__isnull=True) | Q(building__is_active=True))
+        .values_list("pk", flat=True)
+    )
+    if existing - reviewed:
+        issues.append(
+            hard_issue(
+                "VENUE_NOT_REVIEWED",
+                "occurrences.venue_ids",
+                f"Unverified or inactive venue IDs: {sorted(existing - reviewed)}.",
+            )
+        )
+
 
 def validate_owned_ids(
     event: Event,
